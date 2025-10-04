@@ -135,3 +135,5 @@ Now double check ALL documentation - HISTORY.md, ARCHITECTURE.md, FUNCTIONAL.md,
 They must each be VERY well-written and explained. Professional grade documentation - but readable and understandable by a junior member of staff.
 
 Make sure that all of the DOCUMENTATION is CONSISTENT, CONCISE and ACCURATE. All content must be RELEVANT and relate directly to the application implementation.
+
+Finally, ensure that the README.md is the best possible README - PROFESSIONAL, INFORMATIVE, RELEVANT. 
