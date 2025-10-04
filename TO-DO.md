@@ -11,7 +11,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 1: Create Neo4j MCP Client
+## Task 1: Create Neo4j MCP Client ✅
 
 **Description:** Implement `Neo4jMCPClient` class for connecting to Neo4j MCP server via SSE transport.
 
