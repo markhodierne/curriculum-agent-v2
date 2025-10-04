@@ -86,7 +86,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 4: Create Oak Curriculum Agent API Route
+## Task 4: Create Oak Curriculum Agent API Route ✅
 
 **Description:** Implement `/api/oak-curriculum-agent` endpoint with schema pre-fetching.
 
@@ -111,7 +111,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
   9. Returns `result.toUIMessageStreamResponse()`
 - Error handling with try-catch
 - Console logging for debugging
-- Optional: Tool call logging wrapper
+- Tool call logging wrapper
 
 **Definition of Done:**
 - ✅ API route file created
