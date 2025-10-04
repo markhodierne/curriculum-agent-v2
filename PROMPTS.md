@@ -64,7 +64,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 4.
+We are working through `TO-DO.md` and are on task 5.
 
 **Before implementing anything:**
 
@@ -80,43 +80,24 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## Task 4: Create Oak Curriculum Agent API Route
+## Task 5: Update Main Page Interface
 
-**Description:** Implement `/api/oak-curriculum-agent` endpoint with schema pre-fetching.
+**Description:** Update homepage to use Oak Curriculum Agent.
 
-**File:** `app/api/oak-curriculum-agent/route.ts`
+**File:** `app/page.tsx`
 
-**Dependencies:** Tasks 1, 2, 3
+**Dependencies:** Task 4
 
 **Deliverables:**
-- `POST` handler that:
-  1. Parses `messages` from request
-  2. Connects to Neo4j MCP client
-  3. Retrieves all tools via `getTools()`
-  4. Pre-fetches schema using `get_neo4j_schema` tool
-  5. Parses schema from result (`JSON.parse(schemaResult.content[0].text)`)
-  6. Builds system prompt with schema
-  7. Converts UI messages to model messages
-  8. Calls `streamText()` with:
-     - Model: `openai("gpt-5")`
-     - System message with schema
-     - Only `read_neo4j_cypher` tool exposed (NOT `get_neo4j_schema` or `write_neo4j_cypher`)
-     - `stopWhen: stepCountIs(10)`
-  9. Returns `result.toUIMessageStreamResponse()`
-- Error handling with try-catch
-- Console logging for debugging
-- Optional: Tool call logging wrapper
+- Update `<h1>` text to "Oak Curriculum Agent"
+- Update `<ChatAssistant>` API prop to `/api/oak-curriculum-agent`
+- Maintain existing styling and layout
 
 **Definition of Done:**
-- ✅ API route file created
-- ✅ Neo4j MCP client connected properly
-- ✅ Schema pre-fetched before streaming
-- ✅ System prompt includes schema
-- ✅ Only `read_neo4j_cypher` exposed to GPT-5
-- ✅ `streamText()` configured correctly
-- ✅ No premature MCP client disconnection
-- ✅ Error handling implemented
+- ✅ Page title changed to "Oak Curriculum Agent"
+- ✅ ChatAssistant points to correct API route
 - ✅ No TypeScript errors
+- ✅ UI displays correctly
 
 ```
 

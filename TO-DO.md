@@ -57,7 +57,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 3: Create Oak Curriculum System Prompt Builder
+## Task 3: Create Oak Curriculum System Prompt Builder ✅
 
 **Description:** Implement function that builds GPT-5 system prompt with Neo4j schema.
 

@@ -32,6 +32,21 @@
 
 **Type Check:** ✅ Passed `pnpm tsc --noEmit`
 
+### Task 3: Oak Curriculum System Prompt Builder ✅
+
+**File:** `components/agent/oak-curriculum-prompt.ts`
+
+**Implementation:**
+- `buildOakCurriculumPrompt(schema: any): string` function
+- Dynamic schema injection via `JSON.stringify(schema, null, 2)`
+- Comprehensive Text2Cypher instructions with common query patterns
+- Read-only constraints (forbids CREATE/SET/DELETE/MERGE)
+- Educator-focused response formatting guidelines
+- Curriculum graph structure overview (Phase → Lesson hierarchy)
+- Error handling guidance and example interactions
+
+**Type Check:** ✅ Passed `pnpm tsc --noEmit`
+
 ### Key Decisions
 
 1. **URL Construction:** Placed API key in URL path (not headers) per project pattern
@@ -40,7 +55,6 @@
 
 ### Next Steps
 
-- Task 3: Create `components/agent/oak-curriculum-prompt.ts`
 - Task 4: Create API route `app/api/oak-curriculum-agent/route.ts`
 - Task 5: Update main page to use Oak Curriculum Agent
 - Tasks 6-9: Environment setup, type checking, testing
