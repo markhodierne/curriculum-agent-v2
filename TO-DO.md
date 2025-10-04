@@ -39,7 +39,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 2: Update MCP Index Exports
+## Task 2: Update MCP Index Exports ✅
 
 **Description:** Export Neo4j MCP client from main MCP module.
 

@@ -9,6 +9,12 @@ export {
   resetFirecrawlMCPClient,
 } from "./client/firecrawl-client";
 
+export {
+  Neo4jMCPClient,
+  getNeo4jMCPClient,
+  resetNeo4jMCPClient,
+} from "./client/neo4j-client";
+
 export type {
   FirecrawlScrapeParams,
   FirecrawlBatchScrapeParams,

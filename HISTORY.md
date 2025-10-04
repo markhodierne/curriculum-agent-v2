@@ -21,6 +21,17 @@
 
 **Type Check:** ✅ Passed `pnpm tsc --noEmit`
 
+### Task 2: MCP Index Exports ✅
+
+**File:** `lib/mcp/index.ts`
+
+**Implementation:**
+- Exported `Neo4jMCPClient`, `getNeo4jMCPClient`, `resetNeo4jMCPClient`
+- Followed Firecrawl export pattern
+- Enables `import { getNeo4jMCPClient } from "@/lib/mcp"`
+
+**Type Check:** ✅ Passed `pnpm tsc --noEmit`
+
 ### Key Decisions
 
 1. **URL Construction:** Placed API key in URL path (not headers) per project pattern
@@ -29,7 +40,6 @@
 
 ### Next Steps
 
-- Task 2: Update `lib/mcp/index.ts` exports
 - Task 3: Create `components/agent/oak-curriculum-prompt.ts`
 - Task 4: Create API route `app/api/oak-curriculum-agent/route.ts`
 - Task 5: Update main page to use Oak Curriculum Agent
