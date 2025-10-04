@@ -126,7 +126,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 5: Update Main Page Interface
+## Task 5: Update Main Page Interface ✅
 
 **Description:** Update homepage to use Oak Curriculum Agent.
 
@@ -147,7 +147,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 6: Configure Environment Variables
+## Task 6: Configure Environment Variables ✅
 
 **Description:** Set up required environment variables for Neo4j MCP server.
 

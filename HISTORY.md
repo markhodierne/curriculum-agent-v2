@@ -66,14 +66,36 @@
 
 **Type Check:** ✅ Passed `pnpm tsc --noEmit`
 
+### Task 5: Main Page Interface ✅
+
+**File:** `app/page.tsx`
+
+**Implementation:**
+- Updated `<h1>` text: "MCP Tools Agent" → "Oak Curriculum Agent"
+- Updated `<ChatAssistant>` API prop: `/api/agent-with-mcp-tools` → `/api/oak-curriculum-agent`
+- Preserved all existing styling and layout
+
+**Type Check:** ✅ Passed `pnpm tsc --noEmit`
+
+### Task 6: Configure Environment Variables ✅
+
+**File:** `.env.local`
+
+**Implementation:**
+- Three environment variables configured:
+  - `OPENAI_API_KEY` (existing, preserved)
+  - `NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app`
+  - `NEO4J_MCP_API_KEY=your_secret_key_here` (placeholder)
+- Verified `.env.local` excluded from git via `.gitignore` (lines 34, 42)
+- Variables accessible via `process.env` in API routes
+
 ### Key Decisions
 
-1. **URL Construction:** Placed API key in URL path (not headers) per project pattern
+1. **URL Construction:** API key in URL path (not headers) per project pattern
 2. **Singleton Reuse:** Connection persists across requests for performance
 3. **No Premature Disconnect:** Client stays connected during streaming (prevents errors)
 4. **Schema Pre-fetching:** Fetched once per conversation, injected into system prompt (not exposed as GPT-5 tool)
 
 ### Next Steps
 
-- Task 5: Update main page to use Oak Curriculum Agent
-- Tasks 6-9: Environment setup, type checking, testing
+- Tasks 7-9: Type checking, testing, validation

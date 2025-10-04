@@ -64,7 +64,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 5.
+We are working through `TO-DO.md` and are on task 6.
 
 **Before implementing anything:**
 
@@ -80,24 +80,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## Task 5: Update Main Page Interface
+## Task 6: Configure Environment Variables
 
-**Description:** Update homepage to use Oak Curriculum Agent.
+**Description:** Set up required environment variables for Neo4j MCP server.
 
-**File:** `app/page.tsx`
+**File:** `.env.local`
 
-**Dependencies:** Task 4
+**Dependencies:** None (can be done in parallel)
 
 **Deliverables:**
-- Update `<h1>` text to "Oak Curriculum Agent"
-- Update `<ChatAssistant>` API prop to `/api/oak-curriculum-agent`
-- Maintain existing styling and layout
+- Add to `.env.local`:
+  ```bash
+  OPENAI_API_KEY=sk-...
+  NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
+  NEO4J_MCP_API_KEY=your_secret_key_here
+  ```
+- Verify `.env.local` is in `.gitignore`
 
 **Definition of Done:**
-- ✅ Page title changed to "Oak Curriculum Agent"
-- ✅ ChatAssistant points to correct API route
-- ✅ No TypeScript errors
-- ✅ UI displays correctly
+- ✅ `.env.local` file exists
+- ✅ All three environment variables set
+- ✅ File is NOT committed to git
+- ✅ Variables accessible via `process.env` in API routes
 
 ```
 
