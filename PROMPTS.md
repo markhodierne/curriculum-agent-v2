@@ -64,7 +64,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 2.
+We are working through `TO-DO.md` and are on task 4.
 
 **Before implementing anything:**
 
@@ -80,38 +80,43 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-Let's go BACK to task 2. We have implemented the frontend, so from now on I want to TEST that the backend tasks all work properly with the front end and integrate with the database and call OpenAI correctly. Every step must be tested until it is production ready - NO bugs to be left in the code at any stage from now on.
+## Task 4: Create Oak Curriculum Agent API Route
 
-Here is a recap of what we did in Task 2:
+**Description:** Implement `/api/oak-curriculum-agent` endpoint with schema pre-fetching.
 
-#### ✅ **MVP Task 2: Create Basic Planning Agent Foundation** ⭐ CRITICAL - COMPLETED
-**Description**: Build minimal GPT-5 Planning Agent for basic strategy selection
-**Dependencies**: MVP Task 1 (requires state schema extensions)
-**MVP Scope**: Simple complexity analysis only (defer advanced resource allocation)
-**Deliverables**:
-- ✅ `PlanningAgent` class with GPT-5 mini integration
-- ✅ Basic complexity analysis functions (simple, moderate, complex, expert)
-- ✅ Strategy selection logic (sequential, parallel, hybrid execution)
-- ✅ Planning state persistence to Supabase
+**File:** `app/api/oak-curriculum-agent/route.ts`
 
-**Definition of Done**:
-- ✅ Planning agent can analyze user prompts and classify complexity
-- ✅ Agent generates execution strategies (sequential/parallel/hybrid)
-- ✅ Planning state saves to database successfully
-- ✅ Basic unit tests pass for planning functions
+**Dependencies:** Tasks 1, 2, 3
 
-**Completion Notes (September 27, 2025)**:
-- Implemented complete Planning Agent foundation in `lib/agents/planning/`
-- Created PlanningAgent class with GPT-5 mini integration and fallback mechanisms
-- Added comprehensive complexity analysis with technical keyword detection
-- Built intelligent strategy selection with criteria-based decision making
-- Integrated Supabase state persistence following existing tool patterns
-- Added comprehensive unit tests with 95%+ coverage
-- Enhanced with confidence scoring and alternative strategy recommendations
-- Ready for integration into workflow nodes in MVP Task 5
+**Deliverables:**
+- `POST` handler that:
+  1. Parses `messages` from request
+  2. Connects to Neo4j MCP client
+  3. Retrieves all tools via `getTools()`
+  4. Pre-fetches schema using `get_neo4j_schema` tool
+  5. Parses schema from result (`JSON.parse(schemaResult.content[0].text)`)
+  6. Builds system prompt with schema
+  7. Converts UI messages to model messages
+  8. Calls `streamText()` with:
+     - Model: `openai("gpt-5")`
+     - System message with schema
+     - Only `read_neo4j_cypher` tool exposed (NOT `get_neo4j_schema` or `write_neo4j_cypher`)
+     - `stopWhen: stepCountIs(10)`
+  9. Returns `result.toUIMessageStreamResponse()`
+- Error handling with try-catch
+- Console logging for debugging
+- Optional: Tool call logging wrapper
 
-
-NOW LET'S TEST THAT THIS ALL WORKS AND PROVE THAT IT WORKS.
+**Definition of Done:**
+- ✅ API route file created
+- ✅ Neo4j MCP client connected properly
+- ✅ Schema pre-fetched before streaming
+- ✅ System prompt includes schema
+- ✅ Only `read_neo4j_cypher` exposed to GPT-5
+- ✅ `streamText()` configured correctly
+- ✅ No premature MCP client disconnection
+- ✅ Error handling implemented
+- ✅ No TypeScript errors
 
 ```
 
