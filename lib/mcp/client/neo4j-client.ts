@@ -6,26 +6,25 @@
 
 import { experimental_createMCPClient } from "ai";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-import type { MCPClientConfig } from "./types";
+import type { Neo4jMCPClientConfig } from "./types";
 
 export class Neo4jMCPClient {
   private client: Awaited<
     ReturnType<typeof experimental_createMCPClient>
   > | null = null;
-  private apiKey: string;
   private serverUrl: string;
   private isConnected: boolean = false;
 
-  constructor(config: MCPClientConfig) {
-    this.apiKey = config.apiKey;
-
-    // URL construction: ${NEO4J_MCP_URL}/${apiKey}/api/mcp/
-    const baseUrl = config.serverUrl || process.env.NEO4J_MCP_URL;
+  constructor(config?: Neo4jMCPClientConfig) {
+    // URL construction: ${NEO4J_MCP_URL}/sse
+    // Note: Service is currently publicly accessible (development mode)
+    // TODO: Add IAM authentication for production
+    const baseUrl = config?.serverUrl || process.env.NEO4J_MCP_URL;
     if (!baseUrl) {
       throw new Error("NEO4J_MCP_URL not found in environment variables");
     }
 
-    this.serverUrl = `${baseUrl}/${this.apiKey}/api/mcp/`;
+    this.serverUrl = `${baseUrl}/sse`;
   }
 
   /**
@@ -127,17 +126,11 @@ let neo4jClientInstance: Neo4jMCPClient | null = null;
 /**
  * Get or create a Neo4j MCP client instance
  */
-export function getNeo4jMCPClient(apiKey?: string): Neo4jMCPClient {
+export function getNeo4jMCPClient(serverUrl?: string): Neo4jMCPClient {
   if (!neo4jClientInstance) {
-    const key = apiKey || process.env.NEO4J_MCP_API_KEY;
-
-    if (!key) {
-      throw new Error(
-        "NEO4J_MCP_API_KEY not found. Please set it in .env.local or pass it to getNeo4jMCPClient()"
-      );
-    }
-
-    neo4jClientInstance = new Neo4jMCPClient({ apiKey: key });
+    neo4jClientInstance = new Neo4jMCPClient(
+      serverUrl ? { serverUrl } : undefined
+    );
   }
 
   return neo4jClientInstance;

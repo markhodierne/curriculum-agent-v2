@@ -147,8 +147,7 @@ curriculum-agent/
 
 **Properties:**
 - `client: MCPClient | null` - MCP client instance
-- `apiKey: string` - API key for authentication
-- `serverUrl: string` - Full MCP server URL with API key
+- `serverUrl: string` - Full MCP server SSE endpoint URL
 - `isConnected: boolean` - Connection state
 
 **Methods:**
@@ -161,9 +160,11 @@ curriculum-agent/
 ```typescript
 let neo4jClientInstance: Neo4jMCPClient | null = null;
 
-export function getNeo4jMCPClient(apiKey?: string): Neo4jMCPClient {
+export function getNeo4jMCPClient(serverUrl?: string): Neo4jMCPClient {
   if (!neo4jClientInstance) {
-    neo4jClientInstance = new Neo4jMCPClient({ apiKey: ... });
+    neo4jClientInstance = new Neo4jMCPClient(
+      serverUrl ? { serverUrl } : undefined
+    );
   }
   return neo4jClientInstance;
 }
@@ -171,8 +172,8 @@ export function getNeo4jMCPClient(apiKey?: string): Neo4jMCPClient {
 
 **URL Construction:**
 ```typescript
-serverUrl = `${process.env.NEO4J_MCP_URL}/${apiKey}/api/mcp/`
-// Example: https://neo4j-mcp-server-xxx.run.app/secret_key/api/mcp/
+serverUrl = `${process.env.NEO4J_MCP_URL}/sse`
+// Example: https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app/sse
 ```
 
 ### 5.2 System Prompt Builder (`components/agent/oak-curriculum-prompt.ts`)
@@ -395,31 +396,52 @@ const schema = JSON.parse(schemaResult.content[0].text);
 # OpenAI
 OPENAI_API_KEY=sk-...
 
-# Neo4j MCP Server
-NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
-NEO4J_MCP_API_KEY=your_secret_key_here
+# Neo4j MCP Server (SSE endpoint)
+NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app
 ```
 
 ### 8.2 URL Construction
 
 **Base URL:** `process.env.NEO4J_MCP_URL`
-**API Key:** `process.env.NEO4J_MCP_API_KEY`
-**Full URL:** `${NEO4J_MCP_URL}/${NEO4J_MCP_API_KEY}/api/mcp/`
+**SSE Endpoint:** `${NEO4J_MCP_URL}/sse`
+**Example:** `https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app/sse`
 
 ## 9. Security Considerations
 
-### 9.1 API Key Management
-- ✅ Store in `.env.local` (never commit)
-- ✅ Load via `process.env` at runtime
-- ✅ Pass in URL path (not headers for simplicity)
-- ✅ Validate on MCP server side
+### 9.1 Current State (Development Mode)
 
-### 9.2 Access Control
-- ✅ Read-only database access (only `read_neo4j_cypher` exposed)
-- ✅ No write operations permitted
-- ✅ MCP server enforces Cypher query validation
+⚠️ **WARNING:** Cloud Run service is publicly accessible
 
-### 9.3 Error Handling
+**Authentication:** None (Cloud Run allows `allUsers`)
+**Database Security:** Neo4j credentials stored as Cloud Run environment variables
+**Risk:** Anyone with MCP server URL can execute Cypher queries
+**Mitigation:** Only expose `read_neo4j_cypher` tool (prevents write operations at AI layer)
+
+### 9.2 Production Security Recommendations
+
+**Option 1: Cloud Run IAM Authentication (Recommended)**
+- Remove public access: `gcloud run services remove-iam-policy-binding ...`
+- Use service account with `roles/run.invoker` permission
+- Next.js authenticates via service account key JSON
+- Requires admin permissions: `roles/iam.serviceAccountCreator`
+
+**Option 2: Read-Only Neo4j User**
+- Create read-only Neo4j database user
+- Update Cloud Run environment variables with read-only credentials
+- Prevents write operations at database level
+- Still requires securing Cloud Run endpoint
+
+**Option 3: API Gateway with API Keys**
+- Deploy Cloud Endpoints or API Gateway in front of Cloud Run
+- Enforce API key validation at gateway level
+- More complex setup, additional infrastructure
+
+### 9.3 Access Control
+- ✅ Read-only AI access (only `read_neo4j_cypher` exposed to GPT-5)
+- ✅ No write tools exposed (`write_neo4j_cypher`, `get_neo4j_schema` excluded)
+- ⚠️ MCP server has write access to Neo4j (not used by AI)
+
+### 9.4 Error Handling
 - ✅ Try-catch blocks in API routes
 - ✅ Graceful degradation on MCP connection failures
 - ✅ User-friendly error messages

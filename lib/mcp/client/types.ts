@@ -125,3 +125,7 @@ export interface MCPClientConfig {
   apiKey: string;
   serverUrl?: string;
 }
+
+export interface Neo4jMCPClientConfig {
+  serverUrl?: string;
+}

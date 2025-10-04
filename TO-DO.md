@@ -159,14 +159,13 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 - Add to `.env.local`:
   ```bash
   OPENAI_API_KEY=sk-...
-  NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
-  NEO4J_MCP_API_KEY=your_secret_key_here
+  NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app
   ```
 - Verify `.env.local` is in `.gitignore`
 
 **Definition of Done:**
 - ✅ `.env.local` file exists
-- ✅ All three environment variables set
+- ✅ Environment variables set (corrected URL from Cloud Run)
 - ✅ File is NOT committed to git
 - ✅ Variables accessible via `process.env` in API routes
 
@@ -268,6 +267,49 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
+## Task 10: Implement Production Security (Deferred)
+
+**Description:** Add Cloud Run IAM authentication to secure MCP server endpoint.
+
+**Status:** ⏸️ Blocked (requires admin permissions)
+
+**Dependencies:** Admin with `roles/iam.serviceAccountCreator` permission
+
+**Current State:**
+- Cloud Run service: Publicly accessible (development mode)
+- Service account exists: `run-neo4j@oak-ai-playground.iam.gserviceaccount.com`
+- Service account has invoker permission on Cloud Run service
+- Missing: Service account key JSON for Next.js authentication
+
+**Implementation Steps:**
+1. Admin creates service account key:
+   ```bash
+   gcloud iam service-accounts keys create neo4j-mcp-sa-key.json \
+     --iam-account=run-neo4j@oak-ai-playground.iam.gserviceaccount.com
+   ```
+2. Add key to `.env.local`:
+   ```bash
+   GOOGLE_APPLICATION_CREDENTIALS=/path/to/neo4j-mcp-sa-key.json
+   ```
+3. Update `neo4j-client.ts` to use IAM authentication with SSE transport
+4. Test authenticated connection
+5. Remove public access from Cloud Run
+
+**Alternative Options:**
+- Create read-only Neo4j user and redeploy MCP server with those credentials
+- Deploy API Gateway with API key validation
+
+**Definition of Done:**
+- ⏸️ Service account key obtained from admin
+- ⏸️ Next.js authenticates to Cloud Run via service account
+- ⏸️ Public access removed from Cloud Run
+- ⏸️ MCP connection works with authentication
+- ⏸️ TypeScript errors resolved
+
+**Reference:** See `ARCHITECTURE.md` section 9.2 for detailed security options
+
+---
+
 ## Implementation Order
 
 Execute tasks in this sequence:
@@ -302,17 +344,25 @@ Task 9 (Final Type Check)
 
 ## Success Criteria
 
-Project is complete when:
+**Development Phase (Current):**
 
-- ✅ All 9 tasks marked done
+- ✅ Tasks 1-6 complete
 - ✅ Agent successfully connects to Neo4j MCP server
 - ✅ Agent pre-fetches schema at conversation start
 - ✅ Agent translates natural language to Cypher queries
 - ✅ Agent executes queries and returns relevant results
 - ✅ Agent formats responses for educators
-- ✅ Agent refuses write operations
-- ✅ Cypher queries are valid
+- ✅ Agent refuses write operations (AI layer only exposes read tool)
 - ✅ Streaming responses work smoothly
 - ✅ Tool calls visible in chat interface
 - ✅ No TypeScript errors
 - ✅ All environment variables configured
+- ⏸️ Tasks 7-9: Testing, validation (in progress)
+- ⏸️ Task 10: Production security (deferred, requires admin)
+
+**Production Readiness:**
+
+- ⏸️ Cloud Run IAM authentication implemented
+- ⏸️ Service account key configured
+- ⏸️ Public access removed from MCP server
+- ⏸️ End-to-end testing with authentication

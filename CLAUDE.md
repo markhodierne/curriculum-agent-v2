@@ -212,15 +212,16 @@ return result.toUIMessageStreamResponse();
 Required in `.env.local`:
 
 ```bash
-OPENAI_API_KEY=sk-...                           # OpenAI GPT-5 access
-NEO4J_MCP_URL=https://your-server.run.app       # MCP server base URL
-NEO4J_MCP_API_KEY=your_key                      # MCP server auth key
+OPENAI_API_KEY=sk-...                                          # OpenAI GPT-5 access
+NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app # MCP server base URL
 ```
 
-**URL Construction (for URL-based auth):**
+**SSE Endpoint Construction:**
 ```typescript
-const fullUrl = `${process.env.NEO4J_MCP_URL}/${process.env.NEO4J_MCP_API_KEY}/api/mcp/`
+const sseUrl = `${process.env.NEO4J_MCP_URL}/sse`
 ```
+
+**Security Note:** Cloud Run service is currently publicly accessible (development mode). For production, implement Cloud Run IAM authentication or use read-only Neo4j credentials. See `ARCHITECTURE.md` section 9.2 for options.
 
 ## Common Mistakes to Avoid
 
@@ -233,6 +234,7 @@ const fullUrl = `${process.env.NEO4J_MCP_URL}/${process.env.NEO4J_MCP_API_KEY}/a
 ❌ Forgetting `pnpm tsc --noEmit` before commit
 ❌ Using deprecated `maxSteps` instead of `stopWhen: stepCountIs(n)`
 ❌ Hardcoding schema instead of fetching dynamically
+❌ Using `/api/mcp/` endpoint for SSE transport (use `/sse` instead)
 
 ## Quick Reference
 
