@@ -1,161 +1,134 @@
-# Implementation History - Oak Curriculum Agent
+# Implementation History
 
-## Session 1: Neo4j MCP Client Foundation
+This document tracks the implementation of the Oak Curriculum Agent, an AI-powered interface for querying the UK National Curriculum knowledge graph stored in Neo4j.
 
-### Task 1: Neo4j MCP Client ✅
+## Overview
 
-**File:** `lib/mcp/client/neo4j-client.ts`
+**What was built:** A Next.js chat application that connects to a Neo4j knowledge graph via MCP (Model Context Protocol), allowing educators to ask questions in natural language.
 
-**Implementation:**
-- `Neo4jMCPClient` class with SSE transport for Neo4j MCP server
-- Methods: `connect()`, `disconnect()`, `getTools()`, `isClientConnected()`
-- Singleton pattern: `getNeo4jMCPClient(apiKey?)`
-- Test reset: `resetNeo4jMCPClient()`
-- URL construction: `${NEO4J_MCP_URL}/${apiKey}/api/mcp/`
-- Returns `Record<string, any>` for tool types (AI SDK compatibility)
-
-**Pattern Used:**
-- Followed `firecrawl-client.ts` pattern exactly
-- Console logging with emoji prefixes (🚀, ✅, 💥, 🔧, 🔗, 🔌)
-- Environment variables: `NEO4J_MCP_URL`, `NEO4J_MCP_API_KEY`
-
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
-
-### Task 2: MCP Index Exports ✅
-
-**File:** `lib/mcp/index.ts`
-
-**Implementation:**
-- Exported `Neo4jMCPClient`, `getNeo4jMCPClient`, `resetNeo4jMCPClient`
-- Followed Firecrawl export pattern
-- Enables `import { getNeo4jMCPClient } from "@/lib/mcp"`
-
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
-
-### Task 3: Oak Curriculum System Prompt Builder ✅
-
-**File:** `components/agent/oak-curriculum-prompt.ts`
-
-**Implementation:**
-- `buildOakCurriculumPrompt(schema: any): string` function
-- Dynamic schema injection via `JSON.stringify(schema, null, 2)`
-- Comprehensive Text2Cypher instructions with common query patterns
-- Read-only constraints (forbids CREATE/SET/DELETE/MERGE)
-- Educator-focused response formatting guidelines
-- Curriculum graph structure overview (Phase → Lesson hierarchy)
-- Error handling guidance and example interactions
-
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
-
-### Task 4: Oak Curriculum Agent API Route ✅
-
-**File:** `app/api/oak-curriculum-agent/route.ts`
-
-**Implementation:**
-- Schema pre-fetching: `get_neo4j_schema` executed before streaming
-- Dynamic system prompt with injected schema via `buildOakCurriculumPrompt(schema)`
-- Selective tool exposure: Only `read_neo4j_cypher` exposed to GPT-5
-- Tool logging wrapper for debugging (logs input only, not full output)
-- Provider options: `reasoning_effort: "low"`, `textVerbosity: "low"`, `reasoningSummary: "detailed"`
-- Error handling with try-catch, returns 500 on failure
-
-**Pattern Used:**
-- Follows `agent-with-mcp-tools/route.ts` pattern with schema pre-fetch step
-- No premature MCP client disconnection during streaming
-- Uses `stopWhen: stepCountIs(10)` (not deprecated `maxSteps`)
-
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
-
-### Task 5: Main Page Interface ✅
-
-**File:** `app/page.tsx`
-
-**Implementation:**
-- Updated `<h1>` text: "MCP Tools Agent" → "Oak Curriculum Agent"
-- Updated `<ChatAssistant>` API prop: `/api/agent-with-mcp-tools` → `/api/oak-curriculum-agent`
-- Preserved all existing styling and layout
-
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
-
-### Task 6: Configure Environment Variables ✅
-
-**File:** `.env.local`
-
-**Implementation:**
-- Three environment variables configured:
-  - `OPENAI_API_KEY` (existing, preserved)
-  - `NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app`
-  - `NEO4J_MCP_API_KEY=your_secret_key_here` (placeholder)
-- Verified `.env.local` excluded from git via `.gitignore` (lines 34, 42)
-- Variables accessible via `process.env` in API routes
-
-### Key Decisions
-
-1. **URL Construction:** API key in URL path (not headers) per project pattern
-2. **Singleton Reuse:** Connection persists across requests for performance
-3. **No Premature Disconnect:** Client stays connected during streaming (prevents errors)
-4. **Schema Pre-fetching:** Fetched once per conversation, injected into system prompt (not exposed as GPT-5 tool)
+**Key components:**
+- Next.js frontend with AI SDK chat interface
+- MCP client for Neo4j database connectivity
+- Custom Neo4j MCP server deployed to Google Cloud Run
+- GPT-5 for natural language to Cypher query translation
 
 ---
 
-## Session 2: Security Investigation & Deployment Configuration
+## Session 1: Core Agent Implementation
 
-### Issue: MCP Server Connection Failure (404 Error)
+### 1. Neo4j MCP Client (`lib/mcp/client/neo4j-client.ts`)
 
-**Root Causes Identified:**
-1. Incorrect URL in `.env.local` (placeholder from docs, not actual Cloud Run URL)
-2. Incorrect endpoint path (using `/api/mcp/` instead of `/sse` for SSE transport)
-3. API key pattern not supported by official Neo4j MCP server
+Created a client to connect to the Neo4j MCP server using Server-Sent Events (SSE) transport.
 
-**Discoveries:**
-- Actual Cloud Run URL: `https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app`
-- Neo4j MCP server uses `/sse` endpoint for SSE transport
-- Server deployed without API key authentication (public access)
-- Service secured only by Neo4j database credentials stored in Cloud Run environment
+**Key features:**
+- Singleton pattern for connection reuse
+- SSE transport via `SSEClientTransport`
+- Methods: `connect()`, `disconnect()`, `getTools()`, `isClientConnected()`
+- Emoji-prefixed console logging for debugging
+- Type-safe with `Record<string, any>` for MCP tools
 
-### Security Analysis
+**Configuration:**
+- Endpoint: `${NEO4J_MCP_URL}/api/mcp/`
+- No API key required (server uses Neo4j credentials)
 
-**Current State:**
-- Cloud Run service: Publicly accessible (`allUsers` has `roles/run.invoker`)
-- Authentication: None at Cloud Run level
-- Database security: Neo4j credentials stored as Cloud Run environment variables
-- Risk: Anyone with URL can execute read/write Cypher queries
+### 2. System Prompt Builder (`components/agent/oak-curriculum-prompt.ts`)
 
-**IAM Authentication Attempt:**
-- Removed public access from Cloud Run
-- Granted `run-neo4j@oak-ai-playground.iam.gserviceaccount.com` invoker permission
-- User lacks `iam.serviceAccountKeys.create` permission
-- Cannot create service account key for Next.js authentication
+Built a function that generates GPT-5 system prompts with the Neo4j schema dynamically injected.
 
-**Decision:** Restore public access for development; add IAM authentication later
+**Includes:**
+- Text-to-Cypher instructions
+- Read-only constraints (prevents CREATE/SET/DELETE)
+- Educator-focused response guidelines
+- Neo4j schema in JSON format
 
-### Task: Fix MCP Client Configuration ✅
+### 3. API Route (`app/api/oak-curriculum-agent/route.ts`)
 
-**Files Modified:**
-- `.env.local`: Updated `NEO4J_MCP_URL` to actual Cloud Run URL, removed `NEO4J_MCP_API_KEY`
-- `lib/mcp/client/neo4j-client.ts`: Removed API key from URL construction, changed endpoint to `/sse`
-- `lib/mcp/client/types.ts`: Split `MCPClientConfig` (Firecrawl) and `Neo4jMCPClientConfig` (no API key)
+Implemented the main agent endpoint with schema pre-fetching.
 
-**Changes:**
-```typescript
-// Before
-serverUrl = `${baseUrl}/${this.apiKey}/api/mcp/`
+**Flow:**
+1. Connect to Neo4j MCP client
+2. Pre-fetch database schema using `get_neo4j_schema` tool
+3. Build system prompt with schema
+4. Stream responses using `streamText()` with GPT-5
+5. Expose only `read_neo4j_cypher` tool (read-only access)
 
-// After
-serverUrl = `${baseUrl}/sse`
+**Security:** Only read operations allowed - write tools (`write_neo4j_cypher`) not exposed to GPT-5.
+
+### 4. Environment Setup (`.env.local`)
+
+```bash
+OPENAI_API_KEY=sk-...
+NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
 ```
 
-**Type Check:** ✅ Passed `pnpm tsc --noEmit`
+---
 
-### Key Decisions
+## Session 2: MCP Server Deployment
 
-1. **Development Mode:** Public access accepted for MVP phase
-2. **Production Security:** IAM authentication requires admin permissions (deferred)
-3. **Endpoint Correction:** `/sse` is correct for SSE transport, not `/api/mcp/`
-4. **No API Key:** Official Neo4j MCP server doesn't support API key in URL path
+### Problem: Connection Timeout
 
-### Next Steps
+The Next.js client couldn't connect to the MCP server. Root cause: **transport mode mismatch**.
 
-- **Security:** Add Cloud Run IAM authentication (requires admin to create service account key)
-- **Alternative:** Deploy with read-only Neo4j user credentials
-- Tasks 7-9: Type checking, testing, validation
+- **Issue:** Existing MCP server used `--transport http` (FastMCP's HTTP mode)
+- **Incompatibility:** AI SDK's `SSEClientTransport` requires Server-Sent Events, not HTTP POST/JSON-RPC
+- **Result:** Connection hung indefinitely
+
+### Solution: Deploy MCP Server with SSE Transport
+
+**MCP Server Details:**
+- **Source:** `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
+- **Deployment repo:** `/Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server`
+- **Package:** `mcp-neo4j-cypher` (installed via PyPI in Dockerfile)
+
+**Key Configuration Change:**
+
+Modified `mcp_server_start.sh`:
+```bash
+# Changed from:
+--transport http
+
+# To:
+--transport sse
+```
+
+**Deployment:**
+```bash
+cd /Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server
+
+gcloud builds submit \
+  --config cloudbuild.yaml \
+  --substitutions _NEO4J_URI=neo4j+s://...,_NEO4J_USERNAME=neo4j,_NEO4J_PASSWORD=...
+```
+
+**Deployed to:**
+- **Platform:** Google Cloud Run
+- **Project:** `oak-ai-playground`
+- **Region:** `europe-west1`
+- **Service:** `neo4j-mcp-server`
+- **URL:** `https://neo4j-mcp-server-6336353060.europe-west1.run.app`
+- **Endpoint:** `/api/mcp/`
+
+### How It Works
+
+**Connection flow:**
+1. Next.js API route creates `Neo4jMCPClient` singleton
+2. Client connects via `SSEClientTransport` to Cloud Run endpoint
+3. MCP server (FastMCP with SSE mode) accepts connection
+4. Client retrieves three tools: `get_neo4j_schema`, `read_neo4j_cypher`, `write_neo4j_cypher`
+5. Schema pre-fetched using `get_neo4j_schema`
+6. Only `read_neo4j_cypher` exposed to GPT-5 (read-only access)
+
+### Important Notes
+
+**Transport Compatibility:**
+- ✅ `--transport sse` works with `SSEClientTransport`
+- ❌ `--transport http` does NOT work with `SSEClientTransport`
+
+**URL Requirements:**
+- ✅ Use regional URL: `neo4j-mcp-server-6336353060.europe-west1.run.app`
+- ❌ Short URL causes "Invalid host header" errors
+
+**Security:**
+- MCP server is publicly accessible (development mode)
+- Authentication via Neo4j database credentials only
+- Write operations blocked at application level (tool not exposed)

@@ -1,249 +1,162 @@
-# MCP Tools Agent
+# Oak Curriculum Agent
 
-AI agent with Model Context Protocol (MCP) integration for dynamic tool retrieval. Built with Next.js 15, TypeScript, AI SDK 5, and Firecrawl MCP server.
+An AI-powered chat interface for exploring the UK National Curriculum knowledge graph through natural language conversation.
 
-## Features
+**Status:** MVP development completed
 
-- **MCP Integration**: Dynamic tool retrieval from external MCP servers
-- **Firecrawl Tools**: Web scraping and crawling capabilities via Firecrawl MCP server
-- **Streaming Responses**: Real-time streaming with GPT-5 and AI SDK
-- **AI Elements UI**: Pre-built components for tool calls, reasoning, and sources
-- **shadcn/ui Design System**: Clean, modern interface components
-- **TypeScript**: Full type safety throughout the application
+## What It Does
 
-## What is MCP?
+Ask questions about the UK National Curriculum in plain English and get instant answers from a Neo4j knowledge graph containing:
 
-**Model Context Protocol (MCP)** allows AI agents to dynamically retrieve tools from external servers instead of hardcoding them. This enables:
+- **16,695 curriculum nodes** - Phases, Key Stages, Years, Subjects, Units, Lessons
+- **Rich content** - Learning objectives, teacher tips, misconceptions, resources
+- **Complete structure** - Primary to Secondary education
 
-- Flexible tool integration without code changes
-- Access to third-party tool ecosystems
-- Runtime tool discovery and configuration
-- Easier maintenance and updates
+**Example queries:**
+- "What subjects are available for Year 7?"
+- "Show me all lessons about fractions"
+- "What are common misconceptions about photosynthesis?"
+- "How does multiplication progress across key stages?"
 
-Learn more: [AI SDK MCP Integration](https://ai-sdk.dev/cookbook/node/mcp-tools)
+## Quick Start
 
-## Current MCP Server
+### Prerequisites
 
-This template uses the **Firecrawl MCP Server** for web scraping capabilities:
+- Node.js 18+ and pnpm
+- OpenAI API key (GPT-5 access)
+- Access to Neo4j MCP server
 
-- **Server**: https://mcp.firecrawl.dev
-- **Transport**: SSE (Server-Sent Events)
-- **Documentation**: https://docs.firecrawl.dev/mcp-server
-- **Tools**: Web scraping, crawling, and search
-
-## Setup
-
-### 1. Install dependencies
+### Installation
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd curriculum-agent
+
+# Install dependencies
 pnpm install
+
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your credentials
 ```
 
-### 2. Create environment variables
+### Configuration
 
-Create a `.env.local` file with:
+Create `.env.local`:
 
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
-FIRECRAWL_API_KEY=your_firecrawl_api_key_here
+OPENAI_API_KEY=sk-...
+NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
 ```
 
-**Get API Keys**:
-- OpenAI: https://platform.openai.com/api-keys
-- Firecrawl: https://firecrawl.dev
-
-### 3. Start development server
+### Run
 
 ```bash
+# Development
 pnpm dev
+
+# Production build
+pnpm build
+pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to use the MCP Tools Agent.
+Visit `http://localhost:3000` and start asking questions!
 
-## Architecture & Data Flow
+## How It Works
 
-```text
-┌─────────────────────────┐         ┌──────────────────────────────┐         ┌─────────────────────────┐
-│      Browser UI         │         │    Next.js API Route         │         │    Firecrawl MCP        │
-│  ChatAssistant          │         │  /api/agent-with-mcp-tools   │         │  mcp.firecrawl.dev      │
-│  - AI Elements          │         │  - MCP client connection     │         │  - Web scraping tools   │
-│  - Tool display         │         │  - Dynamic tool retrieval    │         │  - SSE transport        │
-│  - Streaming messages   │         │  - streamText() with tools   │         │                         │
-└─────────────────────────┘         └──────────────────────────────┘         └─────────────────────────┘
-           │                                      │                                      │
-           │ 1) User sends message                │                                      │
-           │─────────────────────────────────────>│                                      │
-           │   POST { messages: [...] }           │                                      │
-           │                                      │ 2) Connect to MCP server             │
-           │                                      │─────────────────────────────────────>│
-           │                                      │                                      │
-           │                                      │ 3) Retrieve tools via MCP            │
-           │                                      │<─────────────────────────────────────│
-           │                                      │   { firecrawl_scrape, ... }          │
-           │                                      │                                      │
-           │                                      ├──> OpenAI GPT-5                      │
-           │                                      │    streamText({ tools })             │
-           │                                      │<── Streaming response                │
-           │                                      │                                      │
-           │                                      │ 4) Tool calls during stream          │
-           │                                      │─────────────────────────────────────>│
-           │                                      │<─────────────────────────────────────│
-           │                                      │   Tool results                       │
-           │ 5) Stream UI messages                │                                      │
-           │<─────────────────────────────────────│                                      │
-           │   { parts: [text, tool, ...] }       │                                      │
-           │                                      │                                      │
-           │ 6) Render tool calls & results       │                                      │
-           │    with AI Elements                  │                                      │
-           v                                      v                                      v
+1. **Natural language input** - Ask curriculum questions in plain English
+2. **Text-to-Cypher translation** - GPT-5 converts your question to a Neo4j query
+3. **Graph database query** - MCP server executes read-only Cypher queries
+4. **Educator-friendly response** - Results formatted for teaching professionals
+
+**Architecture:**
+```
+User → Next.js Chat UI → GPT-5 → Neo4j MCP Server → Neo4j AuraDB
+                           ↓
+                    Natural Language → Cypher
 ```
 
-**Key Flow**:
-1. User sends message via chat interface
-2. API route connects to Firecrawl MCP server
-3. MCP server returns available tools dynamically
-4. GPT-5 streams response and can call MCP tools as needed
-5. Tool calls and results are streamed to the UI
-6. AI Elements components display tools, reasoning, and sources
+The agent pre-fetches the database schema and uses it to generate accurate Cypher queries. Only read operations are permitted - no data modification possible.
 
-## Adding Your Own MCP Server
+## Key Technologies
 
-To integrate a different MCP server:
-
-### 1. Create MCP client
-
-Create a new file in `/lib/mcp/client/your-mcp-client.ts`:
-
-```typescript
-import { experimental_createMCPClient } from "ai";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-
-export class YourMCPClient {
-  private client: Awaited<ReturnType<typeof experimental_createMCPClient>> | null = null;
-  private apiKey: string;
-  private serverUrl: string;
-
-  constructor(config: { apiKey: string; serverUrl?: string }) {
-    this.apiKey = config.apiKey;
-    this.serverUrl = config.serverUrl || "https://your-mcp-server.com/sse";
-  }
-
-  async connect(): Promise<void> {
-    const transport = new SSEClientTransport(new URL(this.serverUrl));
-    this.client = await experimental_createMCPClient({ transport });
-  }
-
-  async getTools(): Promise<Record<string, any>> {
-    if (!this.client) await this.connect();
-    return await this.client!.tools();
-  }
-}
-
-let instance: YourMCPClient | null = null;
-
-export function getYourMCPClient(apiKey?: string): YourMCPClient {
-  if (!instance) {
-    const key = apiKey || process.env.YOUR_MCP_API_KEY;
-    if (!key) throw new Error("YOUR_MCP_API_KEY not found");
-    instance = new YourMCPClient({ apiKey: key });
-  }
-  return instance;
-}
-```
-
-### 2. Update API route
-
-In `/app/api/agent-with-mcp-tools/route.ts`:
-
-```typescript
-import { getYourMCPClient } from "@/lib/mcp/client/your-mcp-client";
-
-// Replace Firecrawl client with yours
-const mcpClient = getYourMCPClient();
-await mcpClient.connect();
-const tools = await mcpClient.getTools();
-```
-
-### 3. Add environment variable
-
-Add to `.env.local`:
-
-```bash
-YOUR_MCP_API_KEY=your_api_key_here
-```
-
-### 4. Update documentation
-
-Update `CLAUDE.md` and this README with your MCP server details.
+- **Frontend:** Next.js 15, Tailwind CSS, shadcn/ui, AI Elements
+- **AI:** OpenAI GPT-5, AI SDK 5
+- **Database:** Neo4j AuraDB (via MCP)
+- **Infrastructure:** Google Cloud Run (MCP server)
 
 ## Project Structure
 
 ```
 curriculum-agent/
 ├── app/
-│   ├── page.tsx                           # Main MCP Tools Agent page
-│   ├── api/
-│   │   └── agent-with-mcp-tools/
-│   │       └── route.ts                   # API route with MCP integration
-│   └── layout.tsx                         # Root layout with metadata
+│   ├── page.tsx                          # Main chat interface
+│   └── api/oak-curriculum-agent/
+│       └── route.ts                      # Agent API with MCP integration
 ├── components/
-│   ├── chat/
-│   │   └── chat-assistant.tsx             # Chat UI with tool display
-│   ├── ai-elements/                       # AI Elements components
-│   │   ├── conversation.tsx
-│   │   ├── message.tsx
-│   │   ├── tool.tsx
-│   │   └── ...
-│   ├── agent/
-│   │   └── web-scraper-prompt.ts          # System instructions
-│   └── ui/                                # shadcn/ui components
-├── lib/
-│   ├── mcp/
-│   │   └── client/
-│   │       ├── firecrawl-client.ts        # Firecrawl MCP client
-│   │       └── types.ts                   # MCP type definitions
-│   └── utils.ts                           # Utility functions
-├── types/                                 # TypeScript types
-└── CLAUDE.md                              # Detailed architecture docs
+│   ├── chat/chat-assistant.tsx           # Chat UI
+│   ├── agent/oak-curriculum-prompt.ts    # System prompt builder
+│   └── ai-elements/                      # Vercel AI Elements
+├── lib/mcp/client/
+│   └── neo4j-client.ts                   # Neo4j MCP client (SSE)
+└── Documentation files (*.md)
 ```
+
+## Documentation
+
+- **[FUNCTIONAL.md](FUNCTIONAL.md)** - Feature requirements and use cases
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical design and system architecture
+- **[CLAUDE.md](CLAUDE.md)** - Development standards and patterns
+- **[HISTORY.md](HISTORY.md)** - Implementation timeline and decisions
+- **[TO-DO.md](TO-DO.md)** - Task breakdown and completion status
+
+## MCP Server Deployment
+
+The Neo4j MCP server is deployed separately on Google Cloud Run.
+
+**Source:** [neo4j-contrib/mcp-neo4j](https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher)
+
+**Deployment repo:** `/Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server`
+
+**Critical configuration:** Server must use `--transport sse` (not `--transport http`) for compatibility with AI SDK's SSEClientTransport.
+
+**Deployed to:**
+- Platform: Google Cloud Run
+- Region: europe-west1
+- Service: neo4j-mcp-server
+- URL: https://neo4j-mcp-server-6336353060.europe-west1.run.app
+- Endpoint: `/api/mcp/`
+
+## Security
+
+**Current state (Development):**
+- MCP server is publicly accessible
+- Authentication via Neo4j database credentials
+- Write operations blocked at application level (tool not exposed)
+
+**Production recommendations:** See [ARCHITECTURE.md - Section 9](ARCHITECTURE.md#9-security-considerations) for Cloud Run IAM authentication options.
 
 ## Development
 
-### Run development server
-
 ```bash
+# Type check
+pnpm tsc --noEmit
+
+# Start dev server
 pnpm dev
 ```
 
-### Build for production
-
-```bash
-pnpm build
-pnpm start
-```
-
-### Type checking
-
-```bash
-pnpm tsc --noEmit
-```
+See [CLAUDE.md](CLAUDE.md) for development standards and best practices.
 
 ## Resources
 
 - [AI SDK Documentation](https://ai-sdk.dev/) - AI integration toolkit
-- [MCP Integration Guide](https://ai-sdk.dev/cookbook/node/mcp-tools) - How to use MCP with AI SDK
-- [AI Elements](https://ai-sdk.dev/elements/overview) - Pre-built AI UI components
+- [MCP Integration Guide](https://ai-sdk.dev/cookbook/node/mcp-tools) - MCP with AI SDK
+- [Neo4j MCP Server](https://github.com/neo4j-contrib/mcp-neo4j) - Database MCP server
 - [Next.js 15](https://nextjs.org/) - React framework
-- [Firecrawl](https://firecrawl.dev) - Web scraping MCP server
 - [shadcn/ui](https://ui.shadcn.com/) - Component library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
-
-## Learn More
-
-- See `CLAUDE.md` for detailed architecture documentation
-- See `/lib/mcp/CLAUDE.md` for MCP implementation details
-- See `/components/chat/claude.md` for chat component guidelines
 
 ## License
 
-MIT
+[Your license here]

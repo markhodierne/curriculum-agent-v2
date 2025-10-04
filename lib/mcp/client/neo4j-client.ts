@@ -24,7 +24,7 @@ export class Neo4jMCPClient {
       throw new Error("NEO4J_MCP_URL not found in environment variables");
     }
 
-    this.serverUrl = `${baseUrl}/sse`;
+    this.serverUrl = `${baseUrl}/api/mcp/`;
   }
 
   /**

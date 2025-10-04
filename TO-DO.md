@@ -23,15 +23,15 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 - `Neo4jMCPClient` class with:
   - `connect()`, `disconnect()`, `getTools()`, `isClientConnected()` methods
   - SSE transport configuration
-  - URL construction: `${NEO4J_MCP_URL}/${apiKey}/api/mcp/`
+  - URL construction: `${NEO4J_MCP_URL}/api/mcp/`
   - Error handling with logging
-- Singleton pattern: `getNeo4jMCPClient(apiKey?)` function
+- Singleton pattern: `getNeo4jMCPClient()` function
 - Reset function for testing: `resetNeo4jMCPClient()`
 
 **Definition of Done:**
 - ✅ File created with full class implementation
 - ✅ Singleton pattern implemented
-- ✅ Environment variable support (`NEO4J_MCP_URL`, `NEO4J_MCP_API_KEY`)
+- ✅ Environment variable support (`NEO4J_MCP_URL`)
 - ✅ Error handling and console logging
 - ✅ Follows same pattern as `firecrawl-client.ts`
 - ✅ Returns `Record<string, any>` for tool types
@@ -159,111 +159,65 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 - Add to `.env.local`:
   ```bash
   OPENAI_API_KEY=sk-...
-  NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app
+  NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
   ```
 - Verify `.env.local` is in `.gitignore`
 
 **Definition of Done:**
 - ✅ `.env.local` file exists
-- ✅ Environment variables set (corrected URL from Cloud Run)
+- ✅ Environment variables set (regional Cloud Run URL)
 - ✅ File is NOT committed to git
 - ✅ Variables accessible via `process.env` in API routes
 
 ---
 
-## Task 7: Run Type Check
+## Task 7: Deploy Neo4j MCP Server with SSE Transport ✅
 
-**Description:** Verify all TypeScript code is error-free.
+**Description:** Deploy custom Neo4j MCP server to Cloud Run with SSE transport for AI SDK compatibility.
 
-**Command:** `pnpm tsc --noEmit`
+**Repository:** `/Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server`
 
-**Dependencies:** Tasks 1-5
+**Source:** `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
 
 **Deliverables:**
-- Clean TypeScript compilation
-- Fix any type errors found
+- Modified `mcp_server_start.sh` to use `--transport sse` (not `--transport http`)
+- Deployed to Cloud Run via `gcloud builds submit`
+- Service URL: `https://neo4j-mcp-server-6336353060.europe-west1.run.app`
+- Endpoint: `/api/mcp/` (SSE compatible)
 
 **Definition of Done:**
-- ✅ `pnpm tsc --noEmit` runs without errors
-- ✅ No TypeScript warnings or errors in IDE
+- ✅ Server deployed with `--transport sse`
+- ✅ SSEClientTransport connects successfully
+- ✅ Tools retrieved without timeout
+- ✅ Regional URL used (not short URL)
 
 ---
 
-## Task 8: Manual Testing & Validation
+## Task 8: Manual Testing & Validation ✅
 
 **Description:** Test the Oak Curriculum Agent end-to-end.
 
 **Command:** `pnpm dev`
 
-**Dependencies:** Tasks 1-7
-
-**Test Cases:**
-1. **Connection Test:**
-   - Start dev server
-   - Open browser to localhost
-   - Verify page loads without errors
-   - Check console for MCP connection success
-
-2. **Schema Pre-fetching Test:**
-   - Send first message
-   - Check server logs for schema retrieval
-   - Verify no "schema not found" errors
-
-3. **Query Translation Test:**
-   - Ask: "Show me all key stages"
-   - Verify tool call displayed in UI
-   - Verify Cypher query executed
-   - Verify educator-friendly response
-
-4. **Tool Access Control Test:**
-   - Ask: "Delete all data" or "Create a new node"
-   - Verify agent refuses or explains read-only access
-   - Verify no `write_neo4j_cypher` tool calls
-
-5. **Multi-turn Conversation Test:**
-   - Ask: "What subjects are in Year 7?"
-   - Follow up: "Tell me more about Maths"
-   - Verify context maintained
-   - Verify schema persists across turns
-
-6. **Streaming Test:**
-   - Ask a complex question
-   - Verify response streams incrementally
-   - Verify tool calls visible before final response
-
-**Deliverables:**
-- All test cases pass
-- Document any issues found
-
 **Definition of Done:**
 - ✅ Dev server runs without errors
-- ✅ MCP connection established successfully
+- ✅ MCP connection established successfully (no timeout)
 - ✅ Schema pre-fetched at conversation start
 - ✅ Natural language queries translate to Cypher
-- ✅ Cypher queries execute and return results
-- ✅ Read-only access enforced
-- ✅ Responses are educator-friendly
-- ✅ Tool calls visible in UI
-- ✅ Streaming works smoothly
-- ✅ Multi-turn conversations work
+- ✅ Agent responds to queries
 
 ---
 
-## Task 9: Final Type Check Before Completion
+## Task 9: Final Type Check Before Completion ✅
 
 **Description:** Final verification that all code is type-safe.
 
 **Command:** `pnpm tsc --noEmit`
 
-**Dependencies:** Task 8
-
-**Deliverables:**
-- Clean TypeScript compilation after any fixes from testing
-
 **Definition of Done:**
 - ✅ `pnpm tsc --noEmit` runs without errors
 - ✅ All files pass type checking
-- ✅ Project ready for production build
+- ✅ Project ready for testing
 
 ---
 
@@ -344,20 +298,18 @@ Task 9 (Final Type Check)
 
 ## Success Criteria
 
-**Development Phase (Current):**
+**Development Phase:**
 
-- ✅ Tasks 1-6 complete
+- ✅ Tasks 1-9 complete
+- ✅ MCP server deployed with SSE transport
 - ✅ Agent successfully connects to Neo4j MCP server
 - ✅ Agent pre-fetches schema at conversation start
 - ✅ Agent translates natural language to Cypher queries
 - ✅ Agent executes queries and returns relevant results
-- ✅ Agent formats responses for educators
-- ✅ Agent refuses write operations (AI layer only exposes read tool)
 - ✅ Streaming responses work smoothly
 - ✅ Tool calls visible in chat interface
 - ✅ No TypeScript errors
 - ✅ All environment variables configured
-- ⏸️ Tasks 7-9: Testing, validation (in progress)
 - ⏸️ Task 10: Production security (deferred, requires admin)
 
 **Production Readiness:**

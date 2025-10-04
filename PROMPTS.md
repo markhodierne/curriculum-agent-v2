@@ -64,7 +64,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 6.
+We are working through `TO-DO.md` and are on task 7.
 
 **Before implementing anything:**
 
@@ -80,28 +80,21 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## Task 6: Configure Environment Variables
+## Task 7: Run Type Check
 
-**Description:** Set up required environment variables for Neo4j MCP server.
+**Description:** Verify all TypeScript code is error-free.
 
-**File:** `.env.local`
+**Command:** `pnpm tsc --noEmit`
 
-**Dependencies:** None (can be done in parallel)
+**Dependencies:** Tasks 1-5
 
 **Deliverables:**
-- Add to `.env.local`:
-  ```bash
-  OPENAI_API_KEY=sk-...
-  NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
-  NEO4J_MCP_API_KEY=your_secret_key_here
-  ```
-- Verify `.env.local` is in `.gitignore`
+- Clean TypeScript compilation
+- Fix any type errors found
 
 **Definition of Done:**
-- ✅ `.env.local` file exists
-- ✅ All three environment variables set
-- ✅ File is NOT committed to git
-- ✅ Variables accessible via `process.env` in API routes
+- ✅ `pnpm tsc --noEmit` runs without errors
+- ✅ No TypeScript warnings or errors in IDE
 
 ```
 
@@ -136,15 +129,9 @@ Only proceed when dependencies are satisfied and coordination is clear.
 
 
 
+### FINAL DOCUMENTATION CHECK
 
+Now double check ALL documentation - HISTORY.md, ARCHITECTURE.md, FUNCTIONAL.md, TO-DO.md and CLAUDE.md.
+They must each be VERY well-written and explained. Professional grade documentation - but readable and understandable by a junior member of staff.
 
-LATEST
-
-
-Reset and start testing again:
-
-confirm agent design of back end is correct and all LangGraph
-confirm database structure
-get the functional flow through teh agent design
-start integrating to the front end 
-clean up!!!!
+Make sure that all of the DOCUMENTATION is CONSISTENT, CONCISE and ACCURATE. All content must be RELEVANT and relate directly to the application implementation.

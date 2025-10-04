@@ -27,7 +27,16 @@ export async function POST(request: NextRequest) {
 
     // Pre-fetch schema using get_neo4j_schema tool
     console.log("📊 Pre-fetching Neo4j schema...");
+    console.log("   Available tools:", Object.keys(allTools));
+
+    if (!allTools.get_neo4j_schema) {
+      throw new Error("get_neo4j_schema tool not found in MCP tools");
+    }
+
     const schemaResult = await allTools.get_neo4j_schema.execute({});
+    console.log("   Schema result type:", typeof schemaResult);
+    console.log("   Schema result:", JSON.stringify(schemaResult, null, 2).substring(0, 500));
+
     const schema = JSON.parse(schemaResult.content[0].text);
     console.log("✅ Schema pre-fetched successfully");
 

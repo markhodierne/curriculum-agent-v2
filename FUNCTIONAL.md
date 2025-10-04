@@ -100,13 +100,13 @@ Users can ask questions like:
 ## 5. Technical Constraints
 
 ### 5.1 MCP Integration
-- Must connect to Neo4j MCP server via SSE transport
-- Must authenticate using URL-based API key
-- Must handle connection lifecycle properly (no premature disconnection)
+- Connect to Neo4j MCP server via SSE transport
+- MCP server must use `--transport sse` mode (not `--transport http`)
+- Handle connection lifecycle properly (no premature disconnection during streaming)
 
 ### 5.2 Schema Management
-- Schema must be pre-fetched at conversation start
-- Schema must be injected into GPT-5 system prompt
+- Pre-fetch schema at conversation start using `get_neo4j_schema` tool
+- Inject schema into GPT-5 system prompt
 - Schema persists throughout multi-turn conversation
 - Fresh schema retrieved for each new conversation session
 
@@ -118,12 +118,12 @@ Users can ask questions like:
 ## 6. Success Criteria
 
 ### 6.1 Functional Requirements
-- ✅ Agent successfully connects to Neo4j MCP server with API key
-- ✅ Agent pre-fetches schema at conversation start
-- ✅ Agent translates natural language questions into valid Cypher queries
-- ✅ Agent executes queries and returns relevant results
-- ✅ Agent formats responses in educator-friendly language
-- ✅ Agent refuses to perform write operations
+- ✅ Agent connects to Neo4j MCP server via SSE
+- ✅ Schema pre-fetched at conversation start
+- ✅ Natural language questions translate into valid Cypher queries
+- ✅ Queries execute and return relevant results
+- ✅ Responses formatted in educator-friendly language
+- ✅ Write operations blocked (tool not exposed)
 
 ### 6.2 Quality Requirements
 - ✅ Cypher queries are syntactically correct
@@ -134,8 +134,8 @@ Users can ask questions like:
 - ✅ Streaming responses work smoothly
 
 ### 6.3 Security Requirements
-- ✅ API key stored in environment variables (never hardcoded)
-- ✅ Read-only database access enforced
+- ✅ Environment variables used for configuration (never hardcoded)
+- ✅ Read-only database access enforced at application level
 - ✅ No external data sources queried
 
 ## 7. Future Enhancements (Out of Scope)

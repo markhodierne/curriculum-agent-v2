@@ -66,7 +66,11 @@
 - **Transport:** SSE (Server-Sent Events)
 
 ### 2.3 External Services
-- **MCP Server:** Custom Neo4j MCP server (Google Cloud Run)
+- **MCP Server:** Neo4j MCP server (Google Cloud Run, `mcp-neo4j-cypher` package)
+  - Source: `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
+  - Deployment: `/Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server`
+  - Transport: SSE (`--transport sse`)
+  - URL: `https://neo4j-mcp-server-6336353060.europe-west1.run.app`
 - **Database:** Neo4j AuraDB
 - **AI Provider:** OpenAI
 
@@ -172,8 +176,8 @@ export function getNeo4jMCPClient(serverUrl?: string): Neo4jMCPClient {
 
 **URL Construction:**
 ```typescript
-serverUrl = `${process.env.NEO4J_MCP_URL}/sse`
-// Example: https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app/sse
+serverUrl = `${process.env.NEO4J_MCP_URL}/api/mcp/`
+// Example: https://neo4j-mcp-server-6336353060.europe-west1.run.app/api/mcp/
 ```
 
 ### 5.2 System Prompt Builder (`components/agent/oak-curriculum-prompt.ts`)
@@ -396,15 +400,17 @@ const schema = JSON.parse(schemaResult.content[0].text);
 # OpenAI
 OPENAI_API_KEY=sk-...
 
-# Neo4j MCP Server (SSE endpoint)
-NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app
+# Neo4j MCP Server
+NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
 ```
 
 ### 8.2 URL Construction
 
 **Base URL:** `process.env.NEO4J_MCP_URL`
-**SSE Endpoint:** `${NEO4J_MCP_URL}/sse`
-**Example:** `https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app/sse`
+**SSE Endpoint:** `${NEO4J_MCP_URL}/api/mcp/`
+**Example:** `https://neo4j-mcp-server-6336353060.europe-west1.run.app/api/mcp/`
+
+**Note:** Use regional URL (not short URL) to avoid "Invalid host header" errors
 
 ## 9. Security Considerations
 

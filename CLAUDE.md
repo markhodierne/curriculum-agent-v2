@@ -73,6 +73,25 @@ export function getMCPClient(): MCPClient {
 - ❌ NEVER disconnect during `streamText()` - causes "closed client" errors
 - ✅ Use `Record<string, any>` for tool types (avoid TypeScript deep instantiation)
 
+### MCP Server Deployment (Neo4j Example)
+
+**Source:** `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
+
+**Critical:** AI SDK's `SSEClientTransport` requires `--transport sse` mode:
+
+```bash
+# Deploy with SSE transport (not http)
+mcp-neo4j-cypher \
+  --transport sse \
+  --db-url "${NEO4J_URI}" \
+  --username "${NEO4J_USERNAME}" \
+  --password "${NEO4J_PASSWORD}"
+```
+
+**Transport compatibility:**
+- ✅ `--transport sse` → Works with `SSEClientTransport`
+- ❌ `--transport http` → Incompatible (uses POST/JSON-RPC, not SSE)
+
 ### Schema Pre-fetching Pattern
 
 For Neo4j or database MCP servers, pre-fetch schema and inject into system prompt:
@@ -212,14 +231,16 @@ return result.toUIMessageStreamResponse();
 Required in `.env.local`:
 
 ```bash
-OPENAI_API_KEY=sk-...                                          # OpenAI GPT-5 access
-NEO4J_MCP_URL=https://neo4j-mcp-server-6lb6k47dpq-ew.a.run.app # MCP server base URL
+OPENAI_API_KEY=sk-...                                                    # OpenAI GPT-5 access
+NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app  # MCP server base URL
 ```
 
 **SSE Endpoint Construction:**
 ```typescript
-const sseUrl = `${process.env.NEO4J_MCP_URL}/sse`
+const sseUrl = `${process.env.NEO4J_MCP_URL}/api/mcp/`
 ```
+
+**Important:** Use regional URL (not short URL) to avoid "Invalid host header" errors.
 
 **Security Note:** Cloud Run service is currently publicly accessible (development mode). For production, implement Cloud Run IAM authentication or use read-only Neo4j credentials. See `ARCHITECTURE.md` section 9.2 for options.
 
@@ -234,7 +255,8 @@ const sseUrl = `${process.env.NEO4J_MCP_URL}/sse`
 ❌ Forgetting `pnpm tsc --noEmit` before commit
 ❌ Using deprecated `maxSteps` instead of `stopWhen: stepCountIs(n)`
 ❌ Hardcoding schema instead of fetching dynamically
-❌ Using `/api/mcp/` endpoint for SSE transport (use `/sse` instead)
+❌ Using `--transport http` with `SSEClientTransport` (requires `--transport sse`)
+❌ Using short Cloud Run URL instead of regional URL
 
 ## Quick Reference
 
