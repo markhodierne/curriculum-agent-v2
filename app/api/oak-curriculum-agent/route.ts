@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     console.log("🤖 Streaming Oak Curriculum Agent response...");
 
     const result = streamText({
-      model: openai("gpt-5"),
+      model: openai("gpt-5-mini"),
       system: systemPrompt,
       messages: modelMessages,
       tools: wrappedTools,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       providerOptions: {
         openai: {
           reasoning_effort: "low",
-          textVerbosity: "low",
+          textVerbosity: "medium",
           reasoningSummary: "detailed",
         },
       },
