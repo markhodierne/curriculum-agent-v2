@@ -221,7 +221,32 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 
 ---
 
-## Task 10: Implement Production Security (Deferred)
+## Task 10: Migrate to HTTP Transport ✅
+
+**Description:** Update MCP client from deprecated SSE transport to HTTP transport.
+
+**File:** `lib/mcp/client/neo4j-client.ts`
+
+**Dependencies:** MCP server redeployed with HTTP transport
+
+**Changes:**
+- Import: `SSEClientTransport` → `StreamableHTTPClientTransport`
+- Path: `@modelcontextprotocol/sdk/client/sse.js` → `@modelcontextprotocol/sdk/client/streamableHttp.js`
+- Transport: `new SSEClientTransport(url)` → `new StreamableHTTPClientTransport(url)`
+- Endpoint unchanged: `${NEO4J_MCP_URL}/api/mcp/`
+
+**Additional:**
+- Updated title: "Oak Curriculum Agent" → "Oak Curriculum Chat" (`app/page.tsx:16`)
+
+**Definition of Done:**
+- ✅ `StreamableHTTPClientTransport` imported correctly
+- ✅ Transport instantiation updated
+- ✅ Type check passes (`pnpm tsc --noEmit`)
+- ✅ App connects successfully with HTTP transport
+
+---
+
+## Task 11: Implement Production Security (Deferred)
 
 **Description:** Add Cloud Run IAM authentication to secure MCP server endpoint.
 
@@ -258,7 +283,7 @@ This task list builds the Oak Curriculum Agent, an AI-powered chat interface for
 - ⏸️ Next.js authenticates to Cloud Run via service account
 - ⏸️ Public access removed from Cloud Run
 - ⏸️ MCP connection works with authentication
-- ⏸️ TypeScript errors resolved
+- ⏸️ Type check passes
 
 **Reference:** See `ARCHITECTURE.md` section 9.2 for detailed security options
 
@@ -281,11 +306,13 @@ Task 4 (API Route)
   ↓
 Task 5 (Update Main Page)
   ↓
-Task 7 (Type Check)
+Task 7 (Deploy Neo4j MCP Server)
   ↓
 Task 8 (Manual Testing)
   ↓
 Task 9 (Final Type Check)
+  ↓
+Task 10 (Migrate to HTTP Transport)
 ```
 
 **Parallel opportunities:**
@@ -300,8 +327,8 @@ Task 9 (Final Type Check)
 
 **Development Phase:**
 
-- ✅ Tasks 1-9 complete
-- ✅ MCP server deployed with SSE transport
+- ✅ Tasks 1-10 complete
+- ✅ MCP server deployed with HTTP transport
 - ✅ Agent successfully connects to Neo4j MCP server
 - ✅ Agent pre-fetches schema at conversation start
 - ✅ Agent translates natural language to Cypher queries
@@ -310,7 +337,7 @@ Task 9 (Final Type Check)
 - ✅ Tool calls visible in chat interface
 - ✅ No TypeScript errors
 - ✅ All environment variables configured
-- ⏸️ Task 10: Production security (deferred, requires admin)
+- ⏸️ Task 11: Production security (deferred, requires admin)
 
 **Production Readiness:**
 

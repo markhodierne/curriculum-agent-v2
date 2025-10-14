@@ -132,3 +132,36 @@ gcloud builds submit \
 - MCP server is publicly accessible (development mode)
 - Authentication via Neo4j database credentials only
 - Write operations blocked at application level (tool not exposed)
+
+---
+
+## Session 3: Migration to HTTP Transport
+
+### Problem: SSE Transport Deprecated
+
+MCP protocol deprecated SSE transport in favor of HTTP transport.
+
+**Changes required:**
+- Update MCP client from `SSEClientTransport` to `StreamableHTTPClientTransport`
+- MCP server already redeployed with HTTP transport
+
+### Solution: Update Client to HTTP Transport
+
+**Updated `lib/mcp/client/neo4j-client.ts`:**
+
+```typescript
+// Before:
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+const transport = new SSEClientTransport(new URL(this.serverUrl));
+
+// After:
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+const transport = new StreamableHTTPClientTransport(new URL(this.serverUrl));
+```
+
+**Endpoint:** Unchanged - `${NEO4J_MCP_URL}/api/mcp/`
+
+**Additional Changes:**
+- Updated page title from "Oak Curriculum Agent" to "Oak Curriculum Chat" (`app/page.tsx:16`)
+
+**Status:** ✅ Complete - TypeScript passes, app functional with HTTP transport

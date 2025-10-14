@@ -17,7 +17,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Next.js API Route                            │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │  1. Connect to Neo4j MCP Client (SSE)                     │  │
+│  │  1. Connect to Neo4j MCP Client (HTTP)                    │  │
 │  │  2. Pre-fetch schema via get_neo4j_schema                 │  │
 │  │  3. Build system prompt with schema                       │  │
 │  │  4. Call streamText(GPT-5, messages, tools)               │  │
@@ -25,7 +25,7 @@
 │  └────────────────────┬──────────────────────┬────────────────┘  │
 └─────────────────────────┼──────────────────────┼───────────────────┘
                          │                      │
-                         │ SSE Transport        │ Tool Execution
+                         │ HTTP Transport       │ Tool Execution
                          ▼                      ▼
 ┌──────────────────────────────────┐  ┌────────────────────────────┐
 │   Neo4j MCP Server (Cloud Run)   │  │   OpenAI GPT-5             │
@@ -63,13 +63,13 @@
 - **AI Orchestration:** AI SDK 5 (`streamText`)
 - **LLM:** OpenAI GPT-5
 - **MCP Protocol:** `@modelcontextprotocol/sdk`
-- **Transport:** SSE (Server-Sent Events)
+- **Transport:** HTTP (StreamableHTTP)
 
 ### 2.3 External Services
 - **MCP Server:** Neo4j MCP server (Google Cloud Run, `mcp-neo4j-cypher` package)
   - Source: `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
   - Deployment: `/Users/markhodierne/projects/oak/oak-knowledge-graph-neo4j-mcp-server`
-  - Transport: SSE (`--transport sse`)
+  - Transport: HTTP (`--transport http`)
   - URL: `https://neo4j-mcp-server-6336353060.europe-west1.run.app`
 - **Database:** Neo4j AuraDB
 - **AI Provider:** OpenAI
@@ -145,17 +145,17 @@ curriculum-agent/
 
 ### 5.1 Neo4j MCP Client (`lib/mcp/client/neo4j-client.ts`)
 
-**Purpose:** Manages connection to Neo4j MCP server via SSE
+**Purpose:** Manages connection to Neo4j MCP server via HTTP
 
 **Class:** `Neo4jMCPClient`
 
 **Properties:**
 - `client: MCPClient | null` - MCP client instance
-- `serverUrl: string` - Full MCP server SSE endpoint URL
+- `serverUrl: string` - Full MCP server HTTP endpoint URL
 - `isConnected: boolean` - Connection state
 
 **Methods:**
-- `connect(): Promise<void>` - Initialize SSE connection
+- `connect(): Promise<void>` - Initialize HTTP connection
 - `disconnect(): Promise<void>` - Close connection
 - `getTools(): Promise<Record<string, any>>` - Retrieve MCP tools
 - `isClientConnected(): boolean` - Check connection status
@@ -300,13 +300,13 @@ export default function HomePage() {
 
 ### 6.1 Transport Configuration
 
-**Protocol:** SSE (Server-Sent Events)
+**Protocol:** HTTP (StreamableHTTP)
 
 **Transport Setup:**
 ```typescript
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-const transport = new SSEClientTransport(new URL(serverUrl));
+const transport = new StreamableHTTPClientTransport(new URL(serverUrl));
 const client = await experimental_createMCPClient({ transport });
 ```
 
@@ -407,7 +407,7 @@ NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
 ### 8.2 URL Construction
 
 **Base URL:** `process.env.NEO4J_MCP_URL`
-**SSE Endpoint:** `${NEO4J_MCP_URL}/api/mcp/`
+**HTTP Endpoint:** `${NEO4J_MCP_URL}/api/mcp/`
 **Example:** `https://neo4j-mcp-server-6336353060.europe-west1.run.app/api/mcp/`
 
 **Note:** Use regional URL (not short URL) to avoid "Invalid host header" errors
@@ -457,7 +457,7 @@ NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app
 
 ### 10.1 Connection Reuse
 - Singleton MCP client reduces connection overhead
-- Persistent SSE connection across requests
+- Persistent HTTP connection across requests
 - Schema cached in conversation context
 
 ### 10.2 Streaming

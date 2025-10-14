@@ -49,7 +49,7 @@ export class MCPClient {
   private client: Awaited<ReturnType<typeof experimental_createMCPClient>> | null = null;
 
   async connect() {
-    const transport = new SSEClientTransport(new URL(this.serverUrl));
+    const transport = new StreamableHTTPClientTransport(new URL(this.serverUrl));
     this.client = await experimental_createMCPClient({ transport });
   }
 
@@ -68,7 +68,7 @@ export function getMCPClient(): MCPClient {
 ### Connection Rules
 
 - ✅ Use singleton pattern for connection reuse
-- ✅ SSE transport for hosted servers, stdio for local processes
+- ✅ HTTP transport for hosted servers, stdio for local processes
 - ✅ Connect once per API request
 - ❌ NEVER disconnect during `streamText()` - causes "closed client" errors
 - ✅ Use `Record<string, any>` for tool types (avoid TypeScript deep instantiation)
@@ -77,20 +77,20 @@ export function getMCPClient(): MCPClient {
 
 **Source:** `https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher`
 
-**Critical:** AI SDK's `SSEClientTransport` requires `--transport sse` mode:
+**Current:** AI SDK uses `StreamableHTTPClientTransport` for HTTP-based MCP servers:
 
 ```bash
-# Deploy with SSE transport (not http)
+# Deploy with HTTP transport
 mcp-neo4j-cypher \
-  --transport sse \
+  --transport http \
   --db-url "${NEO4J_URI}" \
   --username "${NEO4J_USERNAME}" \
   --password "${NEO4J_PASSWORD}"
 ```
 
 **Transport compatibility:**
-- ✅ `--transport sse` → Works with `SSEClientTransport`
-- ❌ `--transport http` → Incompatible (uses POST/JSON-RPC, not SSE)
+- ✅ `--transport http` → Works with `StreamableHTTPClientTransport`
+- ⚠️ SSE transport deprecated (use HTTP instead)
 
 ### Schema Pre-fetching Pattern
 
@@ -235,9 +235,9 @@ OPENAI_API_KEY=sk-...                                                    # OpenA
 NEO4J_MCP_URL=https://neo4j-mcp-server-6336353060.europe-west1.run.app  # MCP server base URL
 ```
 
-**SSE Endpoint Construction:**
+**HTTP Endpoint Construction:**
 ```typescript
-const sseUrl = `${process.env.NEO4J_MCP_URL}/api/mcp/`
+const httpUrl = `${process.env.NEO4J_MCP_URL}/api/mcp/`
 ```
 
 **Important:** Use regional URL (not short URL) to avoid "Invalid host header" errors.
@@ -255,7 +255,6 @@ const sseUrl = `${process.env.NEO4J_MCP_URL}/api/mcp/`
 ❌ Forgetting `pnpm tsc --noEmit` before commit
 ❌ Using deprecated `maxSteps` instead of `stopWhen: stepCountIs(n)`
 ❌ Hardcoding schema instead of fetching dynamically
-❌ Using `--transport http` with `SSEClientTransport` (requires `--transport sse`)
 ❌ Using short Cloud Run URL instead of regional URL
 
 ## Quick Reference

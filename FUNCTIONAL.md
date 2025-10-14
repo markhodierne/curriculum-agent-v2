@@ -100,8 +100,8 @@ Users can ask questions like:
 ## 5. Technical Constraints
 
 ### 5.1 MCP Integration
-- Connect to Neo4j MCP server via SSE transport
-- MCP server must use `--transport sse` mode (not `--transport http`)
+- Connect to Neo4j MCP server via HTTP transport
+- MCP server must use `--transport http` mode
 - Handle connection lifecycle properly (no premature disconnection during streaming)
 
 ### 5.2 Schema Management
@@ -118,7 +118,7 @@ Users can ask questions like:
 ## 6. Success Criteria
 
 ### 6.1 Functional Requirements
-- ✅ Agent connects to Neo4j MCP server via SSE
+- ✅ Agent connects to Neo4j MCP server via HTTP
 - ✅ Schema pre-fetched at conversation start
 - ✅ Natural language questions translate into valid Cypher queries
 - ✅ Queries execute and return relevant results
