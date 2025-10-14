@@ -13,7 +13,7 @@ export default function Home() {
             height={32}
             className="object-contain"
           />
-          <h1 className="text-xl font-semibold">Oak Curriculum Agent</h1>
+          <h1 className="text-xl font-semibold">Oak Curriculum Chat</h1>
         </div>
       </div>
 
