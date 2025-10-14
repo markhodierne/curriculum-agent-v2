@@ -1,11 +1,11 @@
 /**
- * Neo4j MCP Client using SSE Transport
+ * Neo4j MCP Client using HTTP Transport
  * Connects to Neo4j MCP server for curriculum knowledge graph access
  * AI SDK MCP Integration: https://ai-sdk.dev/cookbook/node/mcp-tools
  */
 
 import { experimental_createMCPClient } from "ai";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { Neo4jMCPClientConfig } from "./types";
 
 export class Neo4jMCPClient {
@@ -16,7 +16,7 @@ export class Neo4jMCPClient {
   private isConnected: boolean = false;
 
   constructor(config?: Neo4jMCPClientConfig) {
-    // URL construction: ${NEO4J_MCP_URL}/sse
+    // URL construction: ${NEO4J_MCP_URL}/api/mcp/
     // Note: Service is currently publicly accessible (development mode)
     // TODO: Add IAM authentication for production
     const baseUrl = config?.serverUrl || process.env.NEO4J_MCP_URL;
@@ -37,9 +37,9 @@ export class Neo4jMCPClient {
     }
 
     try {
-      console.log("🚀 Connecting to Neo4j MCP server via SSE...");
+      console.log("🚀 Connecting to Neo4j MCP server via HTTP...");
 
-      const transport = new SSEClientTransport(new URL(this.serverUrl));
+      const transport = new StreamableHTTPClientTransport(new URL(this.serverUrl));
 
       this.client = await experimental_createMCPClient({
         transport,
