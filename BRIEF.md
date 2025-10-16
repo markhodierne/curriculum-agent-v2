@@ -4,8 +4,10 @@ https://neo4j-mcp-server-6336353060.europe-west1.run.app
 
 The application is the "Oak Curriculum Agent". The MCP provides access to a knowledge graph hosted on Neo4j AuraDB. The knowledge graph maps out a structure and resources that help schools to deliver the UK National Curriculum as specified by the Department for Education.
 
-The LLM MUST use the MCP as its only source of content.
+Currently, the application does a very poor job as an agent. The implementation is very basic.
 
-Help me to understand OAuth. Do I need to implement this between the app and the MCP server? Does anything need to be changed on GCP to enable this?
+Here are my ideas for this "v2":
 
-Ask me any other questions about this app so that we build a world class agent that explores the knowledge graph.
+1. Create a 'home page' where the user can select the implementation of the agent:
+- Basic (this is the current implementation unchanged - it will serve as a baseline)
+- 
