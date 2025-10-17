@@ -367,18 +367,50 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 - ✓ Task 3: References EvaluationSchema for output format
 - ✓ CLAUDE.md standards: JSDoc, TypeScript, naming conventions
 
+### Task 9: Inngest Client Setup ✅ (Completed 2025-10-17)
+
+**Objective**: Create Inngest client singleton and event type definitions.
+
+**Actions Taken**:
+- **Created Files** (2):
+  - `lib/inngest/client.ts` - Singleton Inngest client with lazy initialization
+  - `lib/inngest/events.ts` - TypeScript event type definitions
+
+**Key Features**:
+- **Singleton Pattern**: `getInngestClient()` creates single reusable instance
+- **Environment Validation**: Checks `INNGEST_EVENT_KEY` before instantiation, helpful errors
+- **Event Types**: Full TypeScript definitions for `interaction.complete` and `reflection.complete`
+- **Type Guards**: Helper functions `isInteractionCompleteEvent()`, `isReflectionCompleteEvent()`
+- **Export Pattern**: Both function and named export (`inngest`) for flexibility
+
+**Event Schema**:
+- `InteractionCompleteEvent`: Emitted by Query Agent, contains query/answer/cypher/results/scores
+- `ReflectionCompleteEvent`: Emitted by Reflection Agent, adds evaluation scores to interaction data
+- Both events fully typed matching ARCHITECTURE.md section 1.2
+
+**Verification**:
+- TypeScript compilation successful: `pnpm tsc --noEmit` ✓
+- Inngest package runtime import successful ✓
+- All event types exportable ✓
+- Created `__test-verification__.md` documenting import patterns
+
+**Integration Points**:
+- **Task 10** (Reflection Function): Uses `inngest.createFunction()` to listen for `interaction.complete`
+- **Task 11** (Learning Function): Listens for `reflection.complete`
+- **Task 13** (Query Agent): Uses `inngest.send()` to emit `interaction.complete`
+
 ---
 
 ## Current State
 
-**Progress**: Tasks 1-8 complete (Foundation → Query Prompt → Reflection Prompt)
-**Codebase**: Both agent prompt builders ready for integration
-**Next Task**: Task 9 - Inngest Client Setup
+**Progress**: Tasks 1-9 complete (Foundation → Prompts → Inngest Client)
+**Codebase**: Event-driven async workflow infrastructure ready
+**Next Task**: Task 10 - Reflection Agent Function
 
 ---
 
 ## Notes for Next Session
 
-- Reflection prompt provides rigorous 5-dimension evaluation framework
-- Both Query and Reflection prompts ready for their respective agents
-- Ready to implement Inngest client (Task 9) and agent functions (Tasks 10-11)
+- Inngest client uses basic pattern without complex generics for compatibility
+- Event types provide full type safety for three-agent flow
+- All previous tasks' foundations (types, prompts, database, memory) ready for agent implementation

@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 9.
+We are working through `TO-DO.md` and are on task 10.
 
 **Before implementing anything:**
 
@@ -86,24 +86,30 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 9: Inngest Client Setup**
+## **Task 10: Reflection Agent Function**
 
-**Description**: Create Inngest client singleton and event type definitions.
+**Description**: Implement async Reflection Agent as Inngest function.
 
 **Deliverables**:
-- [ ] Create `lib/inngest/client.ts` with singleton Inngest client
-- [ ] Create `lib/inngest/events.ts` with TypeScript event type definitions:
-  - `interaction.complete` event schema
-  - `reflection.complete` event schema
+- [ ] Create `lib/inngest/functions/reflection.ts`
+- [ ] Implement `reflectionFunction` using `inngest.createFunction()` (see ARCHITECTURE.md section 6.2)
+- [ ] Use `generateObject()` with `EvaluationSchema`
+- [ ] Calculate weighted overall score
+- [ ] Save evaluation to Supabase `evaluation_metrics` table
+- [ ] Emit `reflection.complete` event
+- [ ] Add retry logic (3 attempts)
+- [ ] Add `onFailure` handler with default scores fallback
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 2 (Inngest installed)
+**Dependencies**: Task 9 (Inngest client), Task 4 (Supabase), Task 8 (prompt), Task 3 (types)
 
 **Definition of Done**:
-- Inngest client singleton created
-- Event types defined with TypeScript
-- Environment variables referenced correctly
+- Function listens to `interaction.complete` event
+- Generates structured evaluation using LLM
+- Saves results to Supabase
+- Emits next event for Learning Agent
+- Retry logic functional
 - TypeScript compiles
 
 ```

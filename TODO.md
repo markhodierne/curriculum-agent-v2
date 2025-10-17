@@ -56,25 +56,9 @@ Created `lib/agents/prompts/reflection-prompt.ts` with 5-dimension evaluation ru
 
 ---
 
-## **Task 9: Inngest Client Setup**
+## ✅ **Task 9: Inngest Client Setup** (Completed 2025-10-17)
 
-**Description**: Create Inngest client singleton and event type definitions.
-
-**Deliverables**:
-- [ ] Create `lib/inngest/client.ts` with singleton Inngest client
-- [ ] Create `lib/inngest/events.ts` with TypeScript event type definitions:
-  - `interaction.complete` event schema
-  - `reflection.complete` event schema
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 2 (Inngest installed)
-
-**Definition of Done**:
-- Inngest client singleton created
-- Event types defined with TypeScript
-- Environment variables referenced correctly
-- TypeScript compiles
+Created `lib/inngest/client.ts` (singleton) and `lib/inngest/events.ts` (event types for `interaction.complete` and `reflection.complete`). See HISTORY.md.
 
 ---
 
