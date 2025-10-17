@@ -369,48 +369,45 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ### Task 9: Inngest Client Setup ✅ (Completed 2025-10-17)
 
-**Objective**: Create Inngest client singleton and event type definitions.
+**Created Files**: `lib/inngest/client.ts`, `lib/inngest/events.ts`
 
-**Actions Taken**:
-- **Created Files** (2):
-  - `lib/inngest/client.ts` - Singleton Inngest client with lazy initialization
-  - `lib/inngest/events.ts` - TypeScript event type definitions
+**Features**: Singleton pattern with environment validation; event types for `interaction.complete` and `reflection.complete`; type guards for event checking
 
-**Key Features**:
-- **Singleton Pattern**: `getInngestClient()` creates single reusable instance
-- **Environment Validation**: Checks `INNGEST_EVENT_KEY` before instantiation, helpful errors
-- **Event Types**: Full TypeScript definitions for `interaction.complete` and `reflection.complete`
-- **Type Guards**: Helper functions `isInteractionCompleteEvent()`, `isReflectionCompleteEvent()`
-- **Export Pattern**: Both function and named export (`inngest`) for flexibility
+**Verification**: TypeScript compilation ✓
 
-**Event Schema**:
-- `InteractionCompleteEvent`: Emitted by Query Agent, contains query/answer/cypher/results/scores
-- `ReflectionCompleteEvent`: Emitted by Reflection Agent, adds evaluation scores to interaction data
-- Both events fully typed matching ARCHITECTURE.md section 1.2
+### Task 10: Reflection Agent Function ✅ (Completed 2025-10-17)
 
-**Verification**:
-- TypeScript compilation successful: `pnpm tsc --noEmit` ✓
-- Inngest package runtime import successful ✓
-- All event types exportable ✓
-- Created `__test-verification__.md` documenting import patterns
+**Created File**: `lib/inngest/functions/reflection.ts`
 
-**Integration Points**:
-- **Task 10** (Reflection Function): Uses `inngest.createFunction()` to listen for `interaction.complete`
-- **Task 11** (Learning Function): Listens for `reflection.complete`
-- **Task 13** (Query Agent): Uses `inngest.send()` to emit `interaction.complete`
+**Implementation**:
+- Inngest function listening for `interaction.complete` events
+- Uses AI SDK `generateObject()` with GPT-4o and `EvaluationSchema`
+- 4 steps: evaluate-interaction, calculate-overall-score, save-evaluation, trigger-learning
+- Weighted overall score: `(G×0.30) + (A×0.30) + (C×0.20) + (P×0.10) + (Cl×0.10)`
+- Saves to Supabase `evaluation_metrics` table
+- Emits `reflection.complete` event for Learning Agent
+
+**Error Handling**:
+- 3 retries with exponential backoff
+- `onFailure` handler emits event with default scores (0.5) to avoid blocking pipeline
+- Graceful fallback if Supabase save fails (evaluation still succeeds)
+- Detailed console logging for debugging
+
+**Verification**: TypeScript compilation ✓
 
 ---
 
 ## Current State
 
-**Progress**: Tasks 1-9 complete (Foundation → Prompts → Inngest Client)
-**Codebase**: Event-driven async workflow infrastructure ready
-**Next Task**: Task 10 - Reflection Agent Function
+**Progress**: Tasks 1-10 complete (Foundation → Prompts → Async Agents)
+**Next Task**: Task 11 - Learning Agent Function (creates memory nodes in Neo4j)
 
 ---
 
-## Notes for Next Session
+## Key Patterns Established
 
-- Inngest client uses basic pattern without complex generics for compatibility
-- Event types provide full type safety for three-agent flow
-- All previous tasks' foundations (types, prompts, database, memory) ready for agent implementation
+- **Singleton Pattern**: Used for all clients (Supabase, Inngest, MCP)
+- **Error Handling**: Async agents never block pipeline, use fallbacks
+- **Type Safety**: Zod schemas for LLM outputs, strict TypeScript interfaces
+- **AI SDK v5**: `generateObject()` for structured outputs, `embed()` for embeddings
+- **Inngest Steps**: Granular `step.run()` for independent retries

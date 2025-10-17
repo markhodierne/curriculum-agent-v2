@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 10.
+We are working through `TO-DO.md` and are on task 11.
 
 **Before implementing anything:**
 
@@ -86,30 +86,31 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 10: Reflection Agent Function**
+## **Task 11: Learning Agent Function**
 
-**Description**: Implement async Reflection Agent as Inngest function.
+**Description**: Implement async Learning Agent for memory creation and pattern extraction.
 
 **Deliverables**:
-- [ ] Create `lib/inngest/functions/reflection.ts`
-- [ ] Implement `reflectionFunction` using `inngest.createFunction()` (see ARCHITECTURE.md section 6.2)
-- [ ] Use `generateObject()` with `EvaluationSchema`
-- [ ] Calculate weighted overall score
-- [ ] Save evaluation to Supabase `evaluation_metrics` table
-- [ ] Emit `reflection.complete` event
-- [ ] Add retry logic (3 attempts)
-- [ ] Add `onFailure` handler with default scores fallback
+- [ ] Create `lib/inngest/functions/learning.ts`
+- [ ] Implement `learningFunction` using `inngest.createFunction()` (see ARCHITECTURE.md section 6.3)
+- [ ] Create `:Memory` node in Neo4j with all properties
+- [ ] Link memory to evidence nodes via `:USED_EVIDENCE` relationships
+- [ ] Extract `:QueryPattern` if score > 0.8
+- [ ] Link similar memories via `:SIMILAR_TO` relationships
+- [ ] Update `memory_stats` table in Supabase
+- [ ] Use `step.run()` for granular retry
+- [ ] Add error handling for each step (don't fail on non-critical steps)
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 9 (Inngest client), Task 4 (Supabase), Task 8 (prompt), Task 3 (types)
+**Dependencies**: Task 10 (needs reflection event), Task 5 (embeddings), Task 4 (Supabase)
 
 **Definition of Done**:
-- Function listens to `interaction.complete` event
-- Generates structured evaluation using LLM
-- Saves results to Supabase
-- Emits next event for Learning Agent
-- Retry logic functional
+- Function listens to `reflection.complete` event
+- Creates memory node with all properties
+- Links evidence and patterns
+- Updates stats cache
+- Granular retry per step
 - TypeScript compiles
 
 ```
