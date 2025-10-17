@@ -50,31 +50,9 @@ Created `lib/agents/prompts/query-prompt.ts` with system prompt builder for Quer
 
 ---
 
-## **Task 8: Reflection Agent System Prompt Builder**
+## ✅ **Task 8: Reflection Agent System Prompt Builder** (Completed 2025-10-17)
 
-**Description**: Create evaluation rubric prompt for Reflection Agent.
-
-**Deliverables**:
-- [ ] Create `lib/agents/prompts/reflection-prompt.ts`
-- [ ] Implement `buildEvaluationPrompt(query: string, answer: string, cypherQueries: string[], graphResults: any[]): string` (see ARCHITECTURE.md section 6.2)
-- [ ] Include 5-dimension rubric:
-  - Grounding (30%)
-  - Accuracy (30%)
-  - Completeness (20%)
-  - Pedagogy (10%)
-  - Clarity (10%)
-- [ ] Specify scoring guidelines (0.0-1.0 for each dimension)
-- [ ] Request strengths, weaknesses, suggestions in output
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 3 (needs types)
-
-**Definition of Done**:
-- Rubric clearly defined with scoring criteria
-- Prompt requests structured JSON output
-- All 5 dimensions explained
-- TypeScript compiles
+Created `lib/agents/prompts/reflection-prompt.ts` with 5-dimension evaluation rubric (11-point scale per dimension). See HISTORY.md.
 
 ---
 

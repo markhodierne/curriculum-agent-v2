@@ -308,20 +308,77 @@
 - ✓ Task 3: Uses Memory type interface
 - ✓ CLAUDE.md standards: Naming, documentation, type safety
 
+### Task 8: Reflection Agent System Prompt Builder ✅ (Completed 2025-10-17)
+
+**Objective**: Create evaluation rubric prompt for Reflection Agent to assess interaction quality.
+
+**Actions Taken**:
+- **Created File**: `lib/agents/prompts/reflection-prompt.ts`
+- **Implemented Function**: `buildEvaluationPrompt(query, answer, cypherQueries, graphResults): string`
+  - Comprehensive 5-dimension evaluation rubric with detailed scoring criteria
+  - Each dimension scored 0.0-1.0 with 11-point scale and specific guidelines
+  - Evidence-based evaluation comparing answer to actual graph results
+  - Requests structured JSON output matching `EvaluationSchema`
+
+**5-Dimension Rubric** (matching ARCHITECTURE.md section 6.2):
+1. **Grounding (30% weight)**: Claims supported by graph evidence
+   - 11-point scale from 1.0 (perfect citations) to 0.0 (fully hallucinated)
+2. **Accuracy (30% weight)**: Information correct per curriculum
+   - 11-point scale from 1.0 (no errors) to 0.0 (completely wrong)
+3. **Completeness (20% weight)**: Fully answers the question
+   - 11-point scale from 1.0 (comprehensive) to 0.0 (doesn't answer)
+4. **Pedagogy (10% weight)**: Appropriate curriculum context
+   - 11-point scale from 1.0 (excellent framing) to 0.0 (inappropriate)
+5. **Clarity (10% weight)**: Well-structured and clear
+   - 11-point scale from 1.0 (crystal clear) to 0.0 (incomprehensible)
+
+**Overall Score Calculation**:
+```
+Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (Pedagogy × 0.10) + (Clarity × 0.10)
+```
+
+**Qualitative Feedback**:
+- 3 specific strengths
+- 3 specific weaknesses
+- 3 actionable suggestions for improvement
+
+**Helper Functions**:
+- `formatCypherQueries()`: Formats queries with syntax highlighting markers
+- `formatGraphResults()`: Converts Neo4j results to JSON, truncates if >8000 chars
+
+**Verification**:
+- TypeScript compilation successful: `pnpm tsc --noEmit` ✓
+- All functions have explicit return types ✓
+- Comprehensive JSDoc comments with usage examples ✓
+- Follows CLAUDE.md standards (naming, documentation, type safety) ✓
+
+**Key Features**:
+- Evidence-based evaluation (not abstract standards)
+- Granular scoring with specific criteria at each level
+- Actionable feedback for learning improvement
+- Pedagogical focus for curriculum education
+- Graceful handling of edge cases (no queries, large results)
+
+**Integration Points**:
+- **Task 10** (Reflection Function): Will call this to generate evaluation prompts
+- Uses `EvaluationSchema` from Task 3 for structured output
+
+**Dependencies Met**:
+- ✓ Task 3: References EvaluationSchema for output format
+- ✓ CLAUDE.md standards: JSDoc, TypeScript, naming conventions
+
 ---
 
 ## Current State
 
-**Progress**: Tasks 1-7 complete (Foundation + Type System + Database Layer + Embeddings + Memory Retrieval + Query Prompt)
-**Codebase**: Query Agent system prompt builder ready for API route integration (Task 13)
-**Next Task**: Task 8 - Reflection Agent System Prompt Builder
+**Progress**: Tasks 1-8 complete (Foundation → Query Prompt → Reflection Prompt)
+**Codebase**: Both agent prompt builders ready for integration
+**Next Task**: Task 9 - Inngest Client Setup
 
 ---
 
 ## Notes for Next Session
 
-- Query prompt builder provides comprehensive instructions for agent behavior
-- Schema pre-fetching pattern implemented (fetched once, stays in prompt)
-- Few-shot learning fully integrated (memories injected as examples)
-- Confidence scoring system clearly defined with 5 tiers
-- Ready to implement Reflection Agent prompt (Task 8) and Inngest setup (Task 9)
+- Reflection prompt provides rigorous 5-dimension evaluation framework
+- Both Query and Reflection prompts ready for their respective agents
+- Ready to implement Inngest client (Task 9) and agent functions (Tasks 10-11)

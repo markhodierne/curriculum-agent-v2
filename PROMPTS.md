@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 8.
+We are working through `TO-DO.md` and are on task 9.
 
 **Before implementing anything:**
 
@@ -86,30 +86,24 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 8: Reflection Agent System Prompt Builder**
+## **Task 9: Inngest Client Setup**
 
-**Description**: Create evaluation rubric prompt for Reflection Agent.
+**Description**: Create Inngest client singleton and event type definitions.
 
 **Deliverables**:
-- [ ] Create `lib/agents/prompts/reflection-prompt.ts`
-- [ ] Implement `buildEvaluationPrompt(query: string, answer: string, cypherQueries: string[], graphResults: any[]): string` (see ARCHITECTURE.md section 6.2)
-- [ ] Include 5-dimension rubric:
-  - Grounding (30%)
-  - Accuracy (30%)
-  - Completeness (20%)
-  - Pedagogy (10%)
-  - Clarity (10%)
-- [ ] Specify scoring guidelines (0.0-1.0 for each dimension)
-- [ ] Request strengths, weaknesses, suggestions in output
+- [ ] Create `lib/inngest/client.ts` with singleton Inngest client
+- [ ] Create `lib/inngest/events.ts` with TypeScript event type definitions:
+  - `interaction.complete` event schema
+  - `reflection.complete` event schema
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 3 (needs types)
+**Dependencies**: Task 2 (Inngest installed)
 
 **Definition of Done**:
-- Rubric clearly defined with scoring criteria
-- Prompt requests structured JSON output
-- All 5 dimensions explained
+- Inngest client singleton created
+- Event types defined with TypeScript
+- Environment variables referenced correctly
 - TypeScript compiles
 
 ```
