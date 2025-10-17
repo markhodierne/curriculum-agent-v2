@@ -8,169 +8,45 @@ This document contains atomic, sequential tasks for building the Phase 1 MVP (4-
 
 ---
 
-## **Task 1: Codebase Cleanup & Audit**
+## ✅ **Task 1: Codebase Cleanup & Audit** (Completed 2025-10-17)
 
-**Description**: Remove all Firecrawl-related code and verify codebase contains only Phase 1-relevant files.
-
-**Deliverables**:
-- [ ] Delete `lib/mcp/client/firecrawl-client.ts`
-- [ ] Delete `components/agent/web-scraper-prompt.ts`
-- [ ] Delete `app/api/agent-with-mcp-tools/route.ts`
-- [ ] Update `lib/mcp/index.ts` to remove Firecrawl exports (keep only Neo4j exports)
-- [ ] Review `lib/mcp/client/types.ts` and remove Firecrawl-specific type definitions
-- [ ] Run `pnpm tsc --noEmit` to verify no broken imports
-- [ ] Document findings in commit message
-
-**Dependencies**: None
-
-**Definition of Done**:
-- No Firecrawl references exist in codebase
-- TypeScript compiles without errors
-- All imports resolve correctly
+Removed Firecrawl code, verified TypeScript compilation. See HISTORY.md.
 
 ---
 
-## **Task 2: Environment Setup & Dependencies**
+## ✅ **Task 2: Environment Setup & Dependencies** (Completed 2025-10-17)
 
-**Description**: Install Phase 1 dependencies and create environment variable templates.
-
-**Deliverables**:
-- [ ] Install Inngest: `pnpm add inngest`
-- [ ] Install Supabase: `pnpm add @supabase/supabase-js`
-- [ ] Install Tremor: `pnpm add @tremor/react`
-- [ ] Create `.env.example` with all required variables (see CLAUDE.md section: Environment Variables)
-- [ ] Update `.gitignore` to ensure `.env.local` is not committed
-- [ ] Create `docs/` directory for test queries
-- [ ] Run `pnpm tsc --noEmit` to verify dependencies installed correctly
-
-**Dependencies**: Task 1
-
-**Definition of Done**:
-- All packages installed and appear in `package.json`
-- `.env.example` exists with documented variables
-- TypeScript compiles without errors
-- Developer can copy `.env.example` to `.env.local` and fill in values
+Installed Inngest, Supabase, Tremor. Created `.env.example`. See HISTORY.md.
 
 ---
 
-## **Task 3: TypeScript Type Definitions**
+## ✅ **Task 3: TypeScript Type Definitions** (Completed 2025-10-17)
 
-**Description**: Create core TypeScript interfaces and types for agents, memory, and evaluation.
-
-**Deliverables**:
-- [ ] Create `lib/types/agent.ts` with `AgentContext`, `QueryAgentResult`, `Citation` interfaces (see ARCHITECTURE.md section 4.3)
-- [ ] Create `lib/types/memory.ts` with `Memory`, `QueryPattern` interfaces
-- [ ] Create `lib/types/evaluation.ts` with Zod schema `EvaluationSchema` and `Evaluation` type
-- [ ] Create `lib/types/index.ts` to export all types
-- [ ] Run `pnpm tsc --noEmit` to verify types are valid
-
-**Dependencies**: Task 2
-
-**Definition of Done**:
-- All type files exist with complete interfaces
-- Zod schemas defined for external data validation
-- No TypeScript errors
-- Types are exportable from `lib/types/index`
+Created `lib/types/` with agent, memory, evaluation types. See HISTORY.md.
 
 ---
 
-## **Task 4: Database Setup - Supabase Client**
+## ✅ **Task 4: Database Setup - Supabase Client** (Completed 2025-10-17)
 
-**Description**: Create Supabase client singleton and define table schemas.
-
-**Deliverables**:
-- [ ] Create `lib/database/supabase.ts` with singleton client (see ARCHITECTURE.md section 4.2)
-- [ ] Create `lib/database/schema.ts` with SQL table definitions:
-  - `interactions` table
-  - `feedback` table
-  - `evaluation_metrics` table
-  - `memory_stats` table
-- [ ] Create `lib/database/queries.ts` with common query functions
-- [ ] Add JSDoc comments for all exported functions
-- [ ] Run `pnpm tsc --noEmit` to verify
-
-**Dependencies**: Task 3 (needs types)
-
-**Definition of Done**:
-- Supabase client singleton functional
-- All table schemas documented
-- Common queries abstracted into functions
-- TypeScript compiles without errors
+Created `lib/database/supabase.ts` (singleton), `schema.ts` (4 tables), `queries.ts` (15 functions). See HISTORY.md.
 
 ---
 
-## **Task 5: OpenAI Embeddings Service**
+## ✅ **Task 5: OpenAI Embeddings Service** (Completed 2025-10-17)
 
-**Description**: Create embedding generation service for memory retrieval.
-
-**Deliverables**:
-- [ ] Create `lib/memory/embeddings.ts`
-- [ ] Implement `generateEmbedding(text: string): Promise<number[]>` function
-- [ ] Use `text-embedding-3-small` model (1536 dimensions)
-- [ ] Add error handling with try-catch
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 3 (needs types)
-
-**Definition of Done**:
-- Embedding function accepts text and returns 1536-dim float array
-- Error handling implemented
-- OpenAI API key read from environment
-- Function is async and returns Promise
-- TypeScript compiles
+Created `lib/memory/embeddings.ts` with embedding generation using text-embedding-3-small model. See HISTORY.md.
 
 ---
 
-## **Task 6: Memory Retrieval Service**
+## ✅ **Task 6: Memory Retrieval Service** (Completed 2025-10-17)
 
-**Description**: Implement vector similarity search for memory retrieval.
-
-**Deliverables**:
-- [ ] Create `lib/memory/retrieval.ts`
-- [ ] Implement `retrieveSimilarMemories(query: string, limit?: number): Promise<Memory[]>` (see CLAUDE.md Memory Retrieval section)
-- [ ] Use Neo4j MCP client to execute vector search Cypher
-- [ ] Filter for high-quality memories (score > 0.75)
-- [ ] Return top 3 memories by default
-- [ ] Add error handling and fallbacks (return empty array on error)
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 5 (needs embeddings), Task 3 (needs types)
-
-**Definition of Done**:
-- Vector search Cypher query correct
-- Returns parsed Memory[] array
-- Defaults to limit=3
-- Error handling prevents crashes
-- TypeScript compiles
+Created `lib/memory/retrieval.ts` with vector similarity search for few-shot learning. See HISTORY.md.
 
 ---
 
-## **Task 7: Query Agent System Prompt Builder**
+## ✅ **Task 7: Query Agent System Prompt Builder** (Completed 2025-10-17)
 
-**Description**: Create function to build Query Agent system prompt with schema and few-shot examples.
-
-**Deliverables**:
-- [ ] Create `lib/agents/prompts/query-prompt.ts`
-- [ ] Implement `buildQueryPrompt(schema: GraphSchema, memories: Memory[]): string` (see ARCHITECTURE.md section 6.1)
-- [ ] Include instructions for:
-  - Multi-turn tool calling
-  - Confidence score assignment
-  - Citation format [Node-ID]
-  - Cypher query generation guidelines
-- [ ] Format memories as few-shot examples
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 3 (needs Memory type)
-
-**Definition of Done**:
-- Prompt clearly instructs agent on behavior
-- Schema injection works
-- Few-shot examples formatted correctly
-- Returns complete system prompt string
-- TypeScript compiles
+Created `lib/agents/prompts/query-prompt.ts` with system prompt builder for Query Agent. See HISTORY.md.
 
 ---
 

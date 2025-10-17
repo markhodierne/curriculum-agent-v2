@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 4.
+We are working through `TO-DO.md` and are on task 8.
 
 **Before implementing anything:**
 
@@ -86,28 +86,31 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 4: Database Setup - Supabase Client**
+## **Task 8: Reflection Agent System Prompt Builder**
 
-**Description**: Create Supabase client singleton and define table schemas.
+**Description**: Create evaluation rubric prompt for Reflection Agent.
 
 **Deliverables**:
-- [ ] Create `lib/database/supabase.ts` with singleton client (see ARCHITECTURE.md section 4.2)
-- [ ] Create `lib/database/schema.ts` with SQL table definitions:
-  - `interactions` table
-  - `feedback` table
-  - `evaluation_metrics` table
-  - `memory_stats` table
-- [ ] Create `lib/database/queries.ts` with common query functions
-- [ ] Add JSDoc comments for all exported functions
-- [ ] Run `pnpm tsc --noEmit` to verify
+- [ ] Create `lib/agents/prompts/reflection-prompt.ts`
+- [ ] Implement `buildEvaluationPrompt(query: string, answer: string, cypherQueries: string[], graphResults: any[]): string` (see ARCHITECTURE.md section 6.2)
+- [ ] Include 5-dimension rubric:
+  - Grounding (30%)
+  - Accuracy (30%)
+  - Completeness (20%)
+  - Pedagogy (10%)
+  - Clarity (10%)
+- [ ] Specify scoring guidelines (0.0-1.0 for each dimension)
+- [ ] Request strengths, weaknesses, suggestions in output
+- [ ] Add JSDoc comments
+- [ ] Run `pnpm tsc --noEmit`
 
 **Dependencies**: Task 3 (needs types)
 
 **Definition of Done**:
-- Supabase client singleton functional
-- All table schemas documented
-- Common queries abstracted into functions
-- TypeScript compiles without errors
+- Rubric clearly defined with scoring criteria
+- Prompt requests structured JSON output
+- All 5 dimensions explained
+- TypeScript compiles
 
 ```
 
