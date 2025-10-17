@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 1.
+We are working through `TO-DO.md` and are on task 4.
 
 **Before implementing anything:**
 
@@ -86,25 +86,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 1: Codebase Cleanup & Audit**
+## **Task 4: Database Setup - Supabase Client**
 
-**Description**: Remove all Firecrawl-related code and verify codebase contains only Phase 1-relevant files.
+**Description**: Create Supabase client singleton and define table schemas.
 
 **Deliverables**:
-- [ ] Delete `lib/mcp/client/firecrawl-client.ts`
-- [ ] Delete `components/agent/web-scraper-prompt.ts`
-- [ ] Delete `app/api/agent-with-mcp-tools/route.ts`
-- [ ] Update `lib/mcp/index.ts` to remove Firecrawl exports (keep only Neo4j exports)
-- [ ] Review `lib/mcp/client/types.ts` and remove Firecrawl-specific type definitions
-- [ ] Run `pnpm tsc --noEmit` to verify no broken imports
-- [ ] Document findings in commit message
+- [ ] Create `lib/database/supabase.ts` with singleton client (see ARCHITECTURE.md section 4.2)
+- [ ] Create `lib/database/schema.ts` with SQL table definitions:
+  - `interactions` table
+  - `feedback` table
+  - `evaluation_metrics` table
+  - `memory_stats` table
+- [ ] Create `lib/database/queries.ts` with common query functions
+- [ ] Add JSDoc comments for all exported functions
+- [ ] Run `pnpm tsc --noEmit` to verify
 
-**Dependencies**: None
+**Dependencies**: Task 3 (needs types)
 
 **Definition of Done**:
-- No Firecrawl references exist in codebase
+- Supabase client singleton functional
+- All table schemas documented
+- Common queries abstracted into functions
 - TypeScript compiles without errors
-- All imports resolve correctly
 
 ```
 
