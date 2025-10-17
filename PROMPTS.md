@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 7.
+We are working through `TO-DO.md` and are on task 1.
 
 **Before implementing anything:**
 
@@ -86,21 +86,25 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## Task 7: Run Type Check
+## **Task 1: Codebase Cleanup & Audit**
 
-**Description:** Verify all TypeScript code is error-free.
+**Description**: Remove all Firecrawl-related code and verify codebase contains only Phase 1-relevant files.
 
-**Command:** `pnpm tsc --noEmit`
+**Deliverables**:
+- [ ] Delete `lib/mcp/client/firecrawl-client.ts`
+- [ ] Delete `components/agent/web-scraper-prompt.ts`
+- [ ] Delete `app/api/agent-with-mcp-tools/route.ts`
+- [ ] Update `lib/mcp/index.ts` to remove Firecrawl exports (keep only Neo4j exports)
+- [ ] Review `lib/mcp/client/types.ts` and remove Firecrawl-specific type definitions
+- [ ] Run `pnpm tsc --noEmit` to verify no broken imports
+- [ ] Document findings in commit message
 
-**Dependencies:** Tasks 1-5
+**Dependencies**: None
 
-**Deliverables:**
-- Clean TypeScript compilation
-- Fix any type errors found
-
-**Definition of Done:**
-- ✅ `pnpm tsc --noEmit` runs without errors
-- ✅ No TypeScript warnings or errors in IDE
+**Definition of Done**:
+- No Firecrawl references exist in codebase
+- TypeScript compiles without errors
+- All imports resolve correctly
 
 ```
 
