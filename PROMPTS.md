@@ -4,11 +4,15 @@
 
 We're going to discuss the specification for a software project. The project details are contained in `BRIEF.md`.
 
-First start by confirming, and improving where possible, the functional specification so that it is clear, detailed and complete. There should be no ambiguity about what the application should do. Where appropriate, you should also confirm HOW the AI agent application should work. In this respect, we should leverage the full capabilities of the AI orchestration framework that we are using so that code is as simple and abstracted as possible.
+IMPORTANT: The Brief contains the details fro the FULL project. I want you to create a project for me that is just the FIRST STEP towards this full vision i.e. that is PHASE 1, the MVP. Leave the brief as it is - but from this point on, we will concern ourselves with implementing PHASE 1 ONLY.
 
-Then, ask me one question at a time so we can develop thorough, step-by-step technical specifications. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. This will be built in only a few hours with Claude Code so try and keep the conversation short, apply KISS principles and use logical inference based on previous answers when possible.
+First start by confirming, and improving where possible, the functional specification so that it is clear, detailed and complete. There should be no ambiguity about what the application should do. Where appropriate, you should also confirm HOW the AI agent application should work. In this respect, we should leverage the full capabilities of the AI orchestration framework that we are using so that code is as simple and abstracted as possible. Remember, the scope of our work is PHASE ONE ONLY.
+
+Then, ask me one question at a time so we can develop thorough, step-by-step technical specifications. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. This will be built in only a few hours with Claude Code so try and keep the conversation short, apply KISS principles and use logical inference based on previous answers when possible. Remember, the scope of our work is PHASE ONE ONLY.
 
 We should cover: language (ask this first), frameworks, libraries, package managers, styling choices, data structure options (SQL/NoSQL/Graph) BEFORE data storage, architecture, project structure, components, interfaces, design patterns, error handling, UI features, user experience, coding standards, naming conventions, agreed principles, version control, commit standards, testing and documentation requirements. Ask the questions that are RELEVANT for the application that we are building. If there is already some degree of technology specification in BRIEF.md, use this as an opportunity to confirm the choices and make recommendations.
+
+IMPORTANT: we are looking to create an application that leverages the VER~Y LATEST thinking about how to build effective agent systems.
 
 Do not wrap up until you have answers from me for each of these topics. There will be three outputs at the end: a functional spec, an architectural spec, and our code standards specification for `CLAUDE.md`, review the template for this file currently in the repo to understand what we must cover. DO NOT CREATE THESE DOCUMENTS YET - focus on gathering all of the information needed.
 
@@ -36,6 +40,8 @@ Break the project down into manageable, atomic to-do tasks that:
 
 - Build on each other logically
 - Are small enough to complete in one session
+
+IMPORTANT: Make the FIRST task a review of the existing code base. i believe that there are some existing references (e.g. to Firecrawler?) that do not relate to the project we are building. Scour everything carefully and make sure it's all what we need for this project and this project only. 
 
 Create `TO-DO.md` with:
 
