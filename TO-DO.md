@@ -68,32 +68,9 @@ Created `lib/inngest/functions/reflection.ts` with Inngest function using `gener
 
 ---
 
-## **Task 11: Learning Agent Function**
+## ✅ **Task 11: Learning Agent Function** (Completed 2025-10-17)
 
-**Description**: Implement async Learning Agent for memory creation and pattern extraction.
-
-**Deliverables**:
-- [ ] Create `lib/inngest/functions/learning.ts`
-- [ ] Implement `learningFunction` using `inngest.createFunction()` (see ARCHITECTURE.md section 6.3)
-- [ ] Create `:Memory` node in Neo4j with all properties
-- [ ] Link memory to evidence nodes via `:USED_EVIDENCE` relationships
-- [ ] Extract `:QueryPattern` if score > 0.8
-- [ ] Link similar memories via `:SIMILAR_TO` relationships
-- [ ] Update `memory_stats` table in Supabase
-- [ ] Use `step.run()` for granular retry
-- [ ] Add error handling for each step (don't fail on non-critical steps)
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 10 (needs reflection event), Task 5 (embeddings), Task 4 (Supabase)
-
-**Definition of Done**:
-- Function listens to `reflection.complete` event
-- Creates memory node with all properties
-- Links evidence and patterns
-- Updates stats cache
-- Granular retry per step
-- TypeScript compiles
+Created `lib/inngest/functions/learning.ts` with 6-step memory creation: embedding generation, memory node creation, evidence linking, pattern extraction (score > 0.8), similar memory linking, stats cache update. See HISTORY.md.
 
 ---
 

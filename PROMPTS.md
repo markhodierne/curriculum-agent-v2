@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 11.
+We are working through `TO-DO.md` and are on task 12.
 
 **Before implementing anything:**
 
@@ -86,31 +86,23 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 11: Learning Agent Function**
+## **Task 12: Inngest Webhook API Route**
 
-**Description**: Implement async Learning Agent for memory creation and pattern extraction.
+**Description**: Create Next.js API route to serve Inngest functions.
 
 **Deliverables**:
-- [ ] Create `lib/inngest/functions/learning.ts`
-- [ ] Implement `learningFunction` using `inngest.createFunction()` (see ARCHITECTURE.md section 6.3)
-- [ ] Create `:Memory` node in Neo4j with all properties
-- [ ] Link memory to evidence nodes via `:USED_EVIDENCE` relationships
-- [ ] Extract `:QueryPattern` if score > 0.8
-- [ ] Link similar memories via `:SIMILAR_TO` relationships
-- [ ] Update `memory_stats` table in Supabase
-- [ ] Use `step.run()` for granular retry
-- [ ] Add error handling for each step (don't fail on non-critical steps)
+- [ ] Create `app/api/inngest/route.ts`
+- [ ] Use `serve()` from `inngest/next` to export GET, POST, PUT handlers
+- [ ] Register both `reflectionFunction` and `learningFunction`
 - [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
+- [ ] Test route compiles: `pnpm tsc --noEmit`
 
-**Dependencies**: Task 10 (needs reflection event), Task 5 (embeddings), Task 4 (Supabase)
+**Dependencies**: Task 10 (Reflection), Task 11 (Learning)
 
 **Definition of Done**:
-- Function listens to `reflection.complete` event
-- Creates memory node with all properties
-- Links evidence and patterns
-- Updates stats cache
-- Granular retry per step
+- API route exports GET, POST, PUT
+- Both functions registered
+- Inngest webhook can call this endpoint
 - TypeScript compiles
 
 ```

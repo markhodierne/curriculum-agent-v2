@@ -397,10 +397,57 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 11: Learning Agent Function ✅ (Completed 2025-10-17)
+
+**Created File**: `lib/inngest/functions/learning.ts` (409 lines)
+
+**Implementation**:
+- Inngest function listening for `reflection.complete` events
+- No LLM call (data operations only)
+- 6 granular steps with independent retry:
+  1. **generate-embedding**: Create 1536-dim vector for query (critical)
+  2. **create-memory-node**: Write `:Memory` node with all properties (critical)
+  3. **link-evidence**: Connect via `:USED_EVIDENCE` relationships (critical)
+  4. **extract-pattern**: Create `:QueryPattern` if score > 0.8 (non-critical)
+  5. **link-similar-memories**: Vector search for `:SIMILAR_TO` links (non-critical)
+  6. **update-stats**: Refresh `memory_stats` cache in Supabase (non-critical)
+
+**Memory Node Properties**:
+- Query/answer text, Cypher queries, embedding vector
+- All 5 evaluation scores + overall score (grounding, accuracy, completeness, pedagogy, clarity)
+- Evaluator notes (strengths/weaknesses/suggestions as JSON)
+- Metadata: id, type, memories_used, timestamps
+
+**Helper Function**: `hashCypherPattern()` - Extracts MATCH patterns from Cypher for pattern tracking
+
+**Error Handling**:
+- Critical steps (1-3): Throw errors to trigger Inngest retry
+- Non-critical steps (4-6): Catch/log errors, return gracefully (don't block pipeline)
+
+**Pattern Extraction**:
+- Triggered only if overall score > 0.8
+- Uses `MERGE` to upsert `:QueryPattern` nodes
+- Increments success_count on match
+- Links pattern to memory via `:APPLIED_PATTERN`
+
+**Stats Update**:
+- Queries Neo4j for current memory/pattern counts and averages
+- Updates single-row `memory_stats` table in Supabase
+- Enables fast dashboard queries (pre-aggregated data)
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-10 complete (Foundation → Prompts → Async Agents)
-**Next Task**: Task 11 - Learning Agent Function (creates memory nodes in Neo4j)
+**Progress**: Tasks 1-11 complete (Three-agent learning loop fully implemented)
+**Next Task**: Task 12 - Inngest Webhook API Route
+
+**Three-Agent Learning Loop Status**:
+- ✅ Query Agent (Task 7 prompt, ready for Task 13 API route)
+- ✅ Reflection Agent (Task 10)
+- ✅ Learning Agent (Task 11) ← Just completed
 
 ---
 
@@ -411,3 +458,5 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 - **Type Safety**: Zod schemas for LLM outputs, strict TypeScript interfaces
 - **AI SDK v5**: `generateObject()` for structured outputs, `embed()` for embeddings
 - **Inngest Steps**: Granular `step.run()` for independent retries
+- **MCP Tool Access**: `tools.write_neo4j_cypher` or fallback to `tools.read_neo4j_cypher`
+- **Non-Blocking Steps**: Non-critical operations (pattern extraction, similar memory linking) log errors but don't fail
