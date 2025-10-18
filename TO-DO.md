@@ -178,26 +178,9 @@ Created `components/chat/agent-trace-panel.tsx` (122 lines) with collapsible UI,
 
 ---
 
-## **Task 20: Chat Page - Create Chat Route**
+## ✅ **Task 20: Chat Page - Create Chat Route** (Completed 2025-10-18)
 
-**Description**: Create new `/chat` page route with ChatAssistant.
-
-**Deliverables**:
-- [ ] Create `app/chat/page.tsx`
-- [ ] Import and render ChatAssistant
-- [ ] Add "Back to Home" button in header
-- [ ] Add app title in header
-- [ ] Style with Tailwind (match existing layout)
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 19 (updated ChatAssistant)
-
-**Definition of Done**:
-- `/chat` route renders
-- ChatAssistant functional
-- Back button navigates to home
-- TypeScript compiles
+Created `app/chat/page.tsx` (88 lines) with full-height chat interface, header with Oak logo/title/back button, ChatAssistant integration. See HISTORY.md.
 
 ---
 

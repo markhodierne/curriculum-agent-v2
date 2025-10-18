@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 20.
+We are working through `TO-DO.md` and are on task 21.
 
 **Before implementing anything:**
 
@@ -86,25 +86,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 20: Chat Page - Create Chat Route**
+## **Task 21: Dashboard - Learning Curve Chart Component**
 
-**Description**: Create new `/chat` page route with ChatAssistant.
+**Description**: Create Tremor line chart showing learning improvement over time.
 
 **Deliverables**:
-- [ ] Create `app/chat/page.tsx`
-- [ ] Import and render ChatAssistant
-- [ ] Add "Back to Home" button in header
-- [ ] Add app title in header
-- [ ] Style with Tailwind (match existing layout)
+- [ ] Create `components/dashboard/learning-curve.tsx`
+- [ ] Use Tremor `LineChart` component
+- [ ] Query Supabase `evaluation_metrics` table for data
+- [ ] Display:
+  - X-axis: Interaction number
+  - Y-axis: Average evaluation score (0-1)
+  - Trend line
+  - Target line at 0.70
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 19 (updated ChatAssistant)
+**Dependencies**: Task 2 (Tremor), Task 4 (Supabase)
 
 **Definition of Done**:
-- `/chat` route renders
-- ChatAssistant functional
-- Back button navigates to home
+- Chart displays evaluation scores over time
+- Data fetched from Supabase
+- Tremor LineChart renders correctly
 - TypeScript compiles
 
 ```
