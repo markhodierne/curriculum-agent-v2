@@ -125,29 +125,9 @@ Updated `app/page.tsx` (139 lines) with model configuration, sessionStorage pers
 
 ---
 
-## **Task 16: Chat Page - Evidence Panel Component**
+## ✅ **Task 16: Chat Page - Evidence Panel Component** (Completed 2025-10-18)
 
-**Description**: Create collapsible evidence panel showing citations with confidence scores.
-
-**Deliverables**:
-- [ ] Create `components/chat/evidence-panel.tsx`
-- [ ] Accept `citations: Citation[]` prop
-- [ ] Display:
-  - Overall confidence score
-  - Star rating visualization (★★★★★)
-  - List of citations with node ID, text, confidence, reason
-- [ ] Use shadcn/ui Collapsible component
-- [ ] Default: collapsed with summary
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 3 (Citation type)
-
-**Definition of Done**:
-- Component accepts citations array
-- Displays confidence scores and stars
-- Collapsible behavior functional
-- TypeScript compiles
+Created `components/chat/evidence-panel.tsx` (190 lines) with collapsible UI, star ratings (5-tier system), overall confidence calculation. See HISTORY.md.
 
 ---
 

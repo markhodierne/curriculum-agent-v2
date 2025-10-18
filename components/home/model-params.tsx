@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'; // Used in Reset button
 
 /**
  * Props for ModelParams component
@@ -121,13 +121,9 @@ export function ModelParams({
                 Configure model parameters (optional)
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" className="w-9 p-0">
-              {isOpen ? (
-                <span className="text-lg">−</span>
-              ) : (
-                <span className="text-lg">+</span>
-              )}
-            </Button>
+            <span className="flex h-9 w-9 items-center justify-center rounded-md text-lg">
+              {isOpen ? '−' : '+'}
+            </span>
           </CollapsibleTrigger>
         </CardHeader>
 

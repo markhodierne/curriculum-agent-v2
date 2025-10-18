@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 16.
+We are working through `TO-DO.md` and are on task 17.
 
 **Before implementing anything:**
 
@@ -86,27 +86,25 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-### **Task 16: Chat Page - Evidence Panel Component**
+## **Task 17: Chat Page - Agent Trace Panel Component**
 
-**Description**: Create collapsible evidence panel showing citations with confidence scores.
+**Description**: Create collapsible agent trace panel showing reasoning steps.
 
 **Deliverables**:
-- [ ] Create `components/chat/evidence-panel.tsx`
-- [ ] Accept `citations: Citation[]` prop
+- [ ] Create `components/chat/agent-trace-panel.tsx`
+- [ ] Accept `steps: string[]` prop (array of step descriptions)
 - [ ] Display:
-  - Overall confidence score
-  - Star rating visualization (★★★★★)
-  - List of citations with node ID, text, confidence, reason
-- [ ] Use shadcn/ui Collapsible component
-- [ ] Default: collapsed with summary
+  - Summary: "Agent Trace (X steps)"
+  - Expandable list of steps
+- [ ] Use shadcn/ui Collapsible
+- [ ] Default: collapsed
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 3 (Citation type)
+**Dependencies**: Task 2 (shadcn/ui)
 
 **Definition of Done**:
-- Component accepts citations array
-- Displays confidence scores and stars
+- Component displays trace steps
 - Collapsible behavior functional
 - TypeScript compiles
 

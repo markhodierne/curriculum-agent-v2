@@ -532,10 +532,28 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 16: Chat Page - Evidence Panel Component ✅ (Completed 2025-10-18)
+
+**Created File**: `components/chat/evidence-panel.tsx` (190 lines)
+
+**Implementation**:
+- Accepts `citations: Citation[]` prop from Task 3 type
+- Collapsible panel using shadcn/ui Collapsible component
+- Default collapsed with summary: "Evidence (N citations) - Overall confidence: ★★★★★ 0.92"
+- Expanded shows: nodeId, nodeType, text, confidence score, reason
+- Helper functions: `getStarRating()` (5-tier system), `calculateOverallConfidence()`
+- Star rating tiers match FUNCTIONAL.md specs exactly
+- Graceful empty state handling
+- Visual hierarchy: border-left accent, amber stars, proper spacing
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-15 complete (Backend + Home page ready)
-**Next Task**: Task 16 - Evidence Panel Component
+**Progress**: Tasks 1-16 complete (Backend + Home page + Evidence panel ready)
+**Next Task**: Task 17 - Agent Trace Panel Component
 
 **Three-Agent Learning Loop Status**:
 - ✅ Query Agent API route (Task 13)
@@ -547,7 +565,9 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 **Frontend Status**:
 - ✅ Home UI components (Task 14)
 - ✅ Home page integration (Task 15)
-- ⏳ Chat UI components (Tasks 16-18)
+- ✅ Evidence Panel (Task 16)
+- ⏳ Agent Trace Panel (Task 17)
+- ⏳ Feedback Controls (Task 18)
 - ⏳ Chat page updates (Tasks 19-20)
 
 ---
