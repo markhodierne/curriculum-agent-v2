@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 19.
+We are working through `TO-DO.md` and are on task 20.
 
 **Before implementing anything:**
 
@@ -86,29 +86,25 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 19: Chat Page - Update ChatAssistant**
+## **Task 20: Chat Page - Create Chat Route**
 
-**Description**: Update existing ChatAssistant to integrate new Phase 1 components and useChat with config.
+**Description**: Create new `/chat` page route with ChatAssistant.
 
 **Deliverables**:
-- [ ] Update `components/chat/chat-assistant.tsx`:
-  - Read model config from sessionStorage
-  - Pass config to useChat `body` parameter
-  - Update API endpoint to `/api/chat`
-  - Add Evidence Panel below assistant messages
-  - Add Agent Trace Panel below assistant messages
-  - Add Feedback Controls below assistant messages
-  - Update tool display names for Neo4j tools (e.g., "Querying curriculum graph")
-- [ ] Maintain existing performance optimizations (debouncing, memoization)
-- [ ] Add JSDoc comments for new sections
+- [ ] Create `app/chat/page.tsx`
+- [ ] Import and render ChatAssistant
+- [ ] Add "Back to Home" button in header
+- [ ] Add app title in header
+- [ ] Style with Tailwind (match existing layout)
+- [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 16 (Evidence), Task 17 (Trace), Task 18 (Feedback)
+**Dependencies**: Task 19 (updated ChatAssistant)
 
 **Definition of Done**:
-- Config read from sessionStorage
-- All new components integrated
-- Tool calls display with readable names
+- `/chat` route renders
+- ChatAssistant functional
+- Back button navigates to home
 - TypeScript compiles
 
 ```

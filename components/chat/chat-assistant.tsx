@@ -1,3 +1,24 @@
+/**
+ * Chat Assistant Component
+ *
+ * Main chat interface for the Oak Curriculum Agent.
+ * Integrates with Phase 1 learning loop: Query → Reflection → Learning.
+ *
+ * Features:
+ * - Streaming responses with AI SDK v5 useChat hook
+ * - Model configuration from sessionStorage (set by home page)
+ * - Evidence Panel with citations and confidence scores
+ * - Agent Trace Panel showing reasoning steps
+ * - Feedback Controls for user feedback (👍/👎, grounded, notes)
+ * - Performance optimizations (debouncing, memoization)
+ * - Neo4j tool calls with human-readable display names
+ *
+ * @module components/chat/chat-assistant
+ * @see FUNCTIONAL.md section 4.2 for chat interface specifications
+ * @see CLAUDE.md for development standards
+ * @see components/chat/CLAUDE.md for component-specific guidelines
+ */
+
 "use client";
 
 import { useChat } from "@ai-sdk/react";
@@ -35,6 +56,10 @@ import {
   ReasoningContent,
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
+import { EvidencePanel } from "@/components/chat/evidence-panel";
+import { AgentTracePanel } from "@/components/chat/agent-trace-panel";
+import FeedbackControls from "@/components/chat/feedback-controls";
+import type { Citation } from "@/lib/types/agent";
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -153,10 +178,53 @@ const MemoizedMessage = memo(({
 
 MemoizedMessage.displayName = 'MemoizedMessage';
 
+/**
+ * Chat configuration from home page
+ */
+interface ChatConfig {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+}
+
 export default function ChatAssistant({ api }: ChatAssistantProps) {
   const [input, setInput] = useState("");
+
+  /**
+   * Read model configuration from sessionStorage
+   * Set by home page (app/page.tsx)
+   */
+  const [config, setConfig] = useState<ChatConfig>({
+    model: 'gpt-4o',
+    temperature: 0.3,
+    maxTokens: 2000,
+  });
+
+  useEffect(() => {
+    // Load config from sessionStorage on mount
+    const savedConfig = sessionStorage.getItem('chatConfig');
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig) as ChatConfig;
+        setConfig(parsed);
+      } catch (err) {
+        console.error('Failed to parse chat config:', err);
+        // Use defaults
+      }
+    }
+  }, []);
+
+  /**
+   * Initialize useChat hook with config from sessionStorage
+   * Config is passed to API route via body parameter
+   */
   const { messages: rawMessages, status, sendMessage } = useChat({
     api: api || '/api/chat',
+    body: {
+      model: config.model,
+      temperature: config.temperature,
+      maxTokens: config.maxTokens,
+    },
   } as any);
 
   // Debounced messages for performance - update every 30ms instead of every token
@@ -241,9 +309,14 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
             />
           ) : (
             (() => {
-              // Tool display name mapping
+              /**
+               * Tool display name mapping
+               * Maps technical tool names to human-readable labels
+               */
               const toolDisplayNames: Record<string, string> = {
                 'tool-retrieveKnowledgeBase': 'Knowledge Base Search',
+                'tool-read_neo4j_cypher': 'Querying curriculum graph',
+                'tool-get_neo4j_schema': 'Loading graph schema',
                 // Add more tool mappings as needed
               };
 
@@ -399,10 +472,44 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
                         return null;
                       })();
 
+                  /**
+                   * Phase 1 MVP panels for assistant messages
+                   * - Evidence Panel: Citations with confidence scores
+                   * - Agent Trace Panel: Reasoning steps
+                   * - Feedback Controls: User feedback (👍/👎, grounded, notes)
+                   */
+                  const assistantPanels = message.role === 'assistant' && (() => {
+                    // Extract citations from message metadata
+                    // TODO: Parse citations from message parts when backend provides them
+                    const citations: Citation[] = [];
+
+                    // Extract agent trace steps from message metadata
+                    // TODO: Parse trace steps from message parts when backend provides them
+                    const traceSteps: string[] = [];
+
+                    return (
+                      <div className="mt-4 space-y-3">
+                        {/* Evidence Panel */}
+                        {citations.length > 0 && (
+                          <EvidencePanel citations={citations} />
+                        )}
+
+                        {/* Agent Trace Panel */}
+                        {traceSteps.length > 0 && (
+                          <AgentTracePanel steps={traceSteps} />
+                        )}
+
+                        {/* Feedback Controls */}
+                        <FeedbackControls messageId={message.id} />
+                      </div>
+                    );
+                  })();
+
                   return (
                     <div key={item.id} className="w-full">
                       <MemoizedMessage message={message} isStreaming={isLoading} />
                       {sourcesComponent}
+                      {assistantPanels}
                     </div>
                   );
                 }

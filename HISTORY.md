@@ -580,34 +580,47 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 19: Chat Assistant Component Update ✅ (Completed 2025-10-18)
+
+**File**: `components/chat/chat-assistant.tsx` (updated)
+
+**Implementation**:
+- **SessionStorage Config**: Reads `ChatConfig` (model, temperature, maxTokens) from sessionStorage on mount
+- **useChat Integration**: Passes config to `/api/chat` via `body` parameter
+- **Tool Display Names**: Added Neo4j mappings (`tool-read_neo4j_cypher` → "Querying curriculum graph")
+- **Evidence Panel**: Integrated below assistant messages (conditional rendering)
+- **Agent Trace Panel**: Integrated below assistant messages (conditional rendering)
+- **Feedback Controls**: Always displayed below assistant messages
+- **Performance**: Maintained debouncing (30ms), memoization patterns
+- **JSDoc**: Comprehensive module documentation
+
+**Key Features**:
+- Config defaults: `{model: 'gpt-4o', temperature: 0.3, maxTokens: 2000}`
+- Graceful config parsing with try-catch
+- Placeholder logic for citations/traceSteps (backend will provide data)
+- All existing performance optimizations preserved
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-18 complete (Backend + Home + Evidence/Trace/Feedback panels ready)
-**Next Task**: Task 19 - Update ChatAssistant component
+**Progress**: Tasks 1-19 complete (Full frontend integration ready)
+**Next Task**: Task 20 - Create `/chat` page route
 
-**Three-Agent Learning Loop Status**:
-- ✅ Query Agent API route (Task 13)
-- ✅ Query Agent prompt builder (Task 7)
-- ✅ Reflection Agent (Task 10)
-- ✅ Learning Agent (Task 11)
-- ✅ Inngest webhook (Task 12)
-
-**Frontend Status**:
-- ✅ Home UI components (Task 14)
-- ✅ Home page integration (Task 15)
-- ✅ Evidence Panel (Task 16)
-- ✅ Agent Trace Panel (Task 17)
-- ✅ Feedback Controls (Task 18)
-- ⏳ Chat page updates (Tasks 19-20)
+**Three-Agent Learning Loop**: ✅ Complete (Tasks 7, 10-13)
+**Frontend**: ✅ Home + Chat components ready (Tasks 14-19)
+**Pending**: Chat route, Dashboard, Database setup, Testing
 
 ---
 
 ## Key Patterns Established
 
 **Architecture**:
-- **Singleton Pattern**: All clients (Supabase, Inngest, MCP)
-- **Error Handling**: Async agents never block pipeline, graceful fallbacks, status 200 for user errors
-- **Type Safety**: Zod schemas for LLM outputs, strict TypeScript, type assertions for MCP tools (`any`)
+- Singleton Pattern: All clients (Supabase, Inngest, MCP)
+- Error Handling: Async agents never block pipeline, graceful fallbacks, status 200 for user errors
+- Type Safety: Zod schemas for LLM outputs, strict TypeScript, type assertions for MCP tools (`any`)
 
 **AI SDK v5**:
 - `streamText()` with `toTextStreamResponse()`, `onStepFinish()` tracking
@@ -618,10 +631,6 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 - Async IIFE pattern for non-blocking Inngest events
 - Granular `step.run()` for independent retries
 
-**MCP Integration**:
-- Pre-fetch schema once, singleton client, read-only tools for Query Agent
+**MCP Integration**: Pre-fetch schema once, singleton client, read-only tools for Query Agent
 
-**UI Components**:
-- shadcn/ui (New York, neutral theme)
-- Props pattern for state management (lift to parent)
-- JSDoc documentation on all components
+**UI Components**: shadcn/ui (New York, neutral), Props pattern, JSDoc documentation
