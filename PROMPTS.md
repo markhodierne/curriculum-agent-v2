@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 13.
+We are working through `TO-DO.md` and are on task 15.
 
 **Before implementing anything:**
 
@@ -86,32 +86,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 13: Query Agent API Route (Chat Endpoint)**
+## **Task 15: Home Page - Main Page**
 
-**Description**: Implement main chat API route with Query Agent logic.
+**Description**: Update home page to implement model selection and navigation.
 
 **Deliverables**:
-- [ ] Update `app/api/oak-curriculum-agent/route.ts` to `app/api/chat/route.ts`
-- [ ] Implement POST handler with:
-  - Message parsing
-  - Model/temperature/maxTokens from request body
-  - Similar memory retrieval (call Task 6 function)
-  - Schema pre-fetching via MCP
-  - System prompt building (call Task 7 function)
-  - `streamText()` with Neo4j tools
-  - `onFinish()` hook to emit `interaction.complete` event (non-blocking)
-- [ ] Add error handling (fail-safe, see CLAUDE.md Error Handling section)
+- [ ] Update `app/page.tsx` to become home page (not chat)
+- [ ] Import and render:
+  - App title + description
+  - Model selector
+  - Advanced params (collapsible)
+  - "Start Chat" button
+- [ ] Save config to sessionStorage on button click
+- [ ] Navigate to `/chat` with config
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 6 (memory retrieval), Task 7 (prompt), Task 9 (Inngest for event emission)
+**Dependencies**: Task 14 (home components)
 
 **Definition of Done**:
-- API route accepts messages array + model config
-- Retrieves memories before each query
-- Streams response using AI SDK
-- Emits event on completion (non-blocking)
-- Error handling graceful
+- Home page displays model selector
+- Config saved to sessionStorage
+- Button navigates to `/chat`
 - TypeScript compiles
 
 ```

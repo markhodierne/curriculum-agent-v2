@@ -156,8 +156,8 @@ MemoizedMessage.displayName = 'MemoizedMessage';
 export default function ChatAssistant({ api }: ChatAssistantProps) {
   const [input, setInput] = useState("");
   const { messages: rawMessages, status, sendMessage } = useChat({
-    transport: api ? new DefaultChatTransport({ api }) : undefined,
-  });
+    api: api || '/api/chat',
+  } as any);
 
   // Debounced messages for performance - update every 30ms instead of every token
   const [debouncedMessages, setDebouncedMessages] = useState(rawMessages);

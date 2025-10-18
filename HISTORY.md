@@ -475,31 +475,81 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 **Verification**: TypeScript compilation ✓
 
+**Testing Readiness**:
+- ✅ Backend complete and ready for testing
+- ⚠️ Requires Inngest env vars (Task 28) for full functionality
+- ⚠️ Frontend updated to use `/api/chat` endpoint
+- 📖 Testing deferred to Task 29 (after env setup in Task 28)
+- 📖 See `TESTING-GUIDE.md` for comprehensive testing instructions
+- 📖 See `QUICKSTART-TESTING.md` for 5-minute learning verification
+
+---
+
+### Task 14: Home Page - UI Components ✅ (Completed 2025-10-18)
+
+**Objective**: Create home page components for model selection and configuration.
+
+**Created Files** (3):
+- `components/home/app-description.tsx` - Application title and learning mechanism explanation
+- `components/home/model-selector.tsx` - Model dropdown (GPT-4o/gpt-4o-mini/GPT-5)
+- `components/home/model-params.tsx` - Collapsible advanced settings (temperature, max tokens)
+
+**Implementation Details**:
+- **AppDescription**: Card component explaining agent capabilities and learning loop
+- **ModelSelector**: Dropdown using shadcn/ui Select with model metadata (label, description)
+- **ModelParams**: Collapsible panel with Temperature slider (0-1, step 0.1) and Max tokens input (500-4000)
+
+**shadcn/ui Components Used**:
+- Added `Slider` component via `pnpm dlx shadcn@latest add slider`
+- Existing: `Card`, `Select`, `Collapsible`, `Input`, `Button`
+
+**State Management**:
+- All components accept `value` and `onChange` props for React state
+- Parent component (Task 15) will manage state and sessionStorage persistence
+
+**Verification**: TypeScript compilation ✓
+
 ---
 
 ## Current State
 
-**Progress**: Tasks 1-13 complete (Query Agent fully functional)
-**Next Task**: Task 14 - Home Page UI Components
+**Progress**: Tasks 1-14 complete (Backend + Home UI components ready)
+**Next Task**: Task 15 - Home Page (integrate components, navigation to /chat)
 
 **Three-Agent Learning Loop Status**:
-- ✅ Query Agent API route (Task 13) ← Just completed
+- ✅ Query Agent API route (Task 13)
 - ✅ Query Agent prompt builder (Task 7)
 - ✅ Reflection Agent (Task 10)
 - ✅ Learning Agent (Task 11)
 - ✅ Inngest webhook (Task 12)
 
-**Complete end-to-end flow operational**: User query → Memory retrieval → Streaming response → Event emission → Reflection → Learning → Memory creation
+**Frontend Status**:
+- ✅ Home UI components (Task 14)
+- ⏳ Home page integration (Task 15)
+- ⏳ Chat UI updates (Tasks 16-20)
 
 ---
 
 ## Key Patterns Established
 
+**Architecture**:
 - **Singleton Pattern**: All clients (Supabase, Inngest, MCP)
 - **Error Handling**: Async agents never block pipeline, graceful fallbacks, status 200 for user errors
 - **Type Safety**: Zod schemas for LLM outputs, strict TypeScript, type assertions for MCP tools (`any`)
-- **AI SDK v5**: `streamText()` with `toTextStreamResponse()`, `onStepFinish()` tracking, `generateObject()`, `embed()`
-- **Event Emission**: Async IIFE pattern for non-blocking Inngest events
-- **Inngest Steps**: Granular `step.run()` for independent retries
-- **MCP Integration**: Pre-fetch schema once, singleton client, read-only tools for Query Agent
-- **Memory Retrieval**: Vector search for few-shot learning (3 high-quality memories per query)
+
+**AI SDK v5**:
+- `streamText()` with `toTextStreamResponse()`, `onStepFinish()` tracking
+- `generateObject()` for structured outputs
+- `embed()` for vector embeddings
+
+**Event-Driven**:
+- Async IIFE pattern for non-blocking Inngest events
+- Granular `step.run()` for independent retries
+
+**MCP Integration**:
+- Pre-fetch schema once, singleton client, read-only tools for Query Agent
+
+**UI Components**:
+- shadcn/ui (New York, neutral theme)
+- Props pattern for state management (lift to parent)
+- JSDoc documentation on all components
