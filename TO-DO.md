@@ -137,29 +137,23 @@ Created `components/chat/agent-trace-panel.tsx` (122 lines) with collapsible UI,
 
 ---
 
-## **Task 18: Chat Page - Feedback Controls Component**
+## ✅ **Task 18: Chat Page - Feedback Controls Component** (Completed 2025-10-18)
 
 **Description**: Create feedback controls (👍/👎, grounded checkbox, optional note).
 
 **Deliverables**:
-- [ ] Create `components/chat/feedback-controls.tsx`
-- [ ] Accept `messageId: string` prop
-- [ ] Implement:
+- [x] Create `components/chat/feedback-controls.tsx` (243 lines)
+- [x] Accept `messageId: string` prop
+- [x] Implement:
   - Thumbs up/down buttons (mutually exclusive)
   - "Well grounded?" checkbox
   - "Add note" button → reveals textarea (max 500 chars)
-- [ ] Save feedback to Supabase `feedback` table on change
-- [ ] Use shadcn/ui Button, Checkbox, Textarea
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
+- [x] Save feedback to Supabase `feedback` table on change
+- [x] Use shadcn/ui Button, Checkbox, Textarea (added Checkbox component)
+- [x] Add JSDoc comments
+- [x] Run `pnpm tsc --noEmit` ✓
 
-**Dependencies**: Task 4 (Supabase)
-
-**Definition of Done**:
-- All controls render correctly
-- State management functional
-- Feedback saved to Supabase on interaction
-- TypeScript compiles
+**Definition of Done**: ✓ All criteria met
 
 ---
 

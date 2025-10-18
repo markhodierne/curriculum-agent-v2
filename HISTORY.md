@@ -560,10 +560,30 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 18: Feedback Controls Component ✅ (Completed 2025-10-18)
+
+**File**: `components/chat/feedback-controls.tsx` (243 lines)
+
+**Implementation**:
+- Thumbs up/down buttons (mutually exclusive, toggle on/off)
+- "Well grounded?" checkbox (independent boolean)
+- "Add note" button reveals textarea (max 500 chars, enforced)
+- Auto-saves to Supabase `feedback` table on interaction
+- Loads existing feedback on mount, updates on change
+- Character counter: "150/500 characters"
+
+**shadcn/ui**: Added Checkbox component via `pnpm dlx shadcn@latest add checkbox`
+
+**State Management**: Tracks `feedbackId` to distinguish create vs update operations
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-17 complete (Backend + Home page + Evidence + Agent Trace panels ready)
-**Next Task**: Task 18 - Feedback Controls Component
+**Progress**: Tasks 1-18 complete (Backend + Home + Evidence/Trace/Feedback panels ready)
+**Next Task**: Task 19 - Update ChatAssistant component
 
 **Three-Agent Learning Loop Status**:
 - ✅ Query Agent API route (Task 13)
@@ -577,7 +597,7 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 - ✅ Home page integration (Task 15)
 - ✅ Evidence Panel (Task 16)
 - ✅ Agent Trace Panel (Task 17)
-- ⏳ Feedback Controls (Task 18)
+- ✅ Feedback Controls (Task 18)
 - ⏳ Chat page updates (Tasks 19-20)
 
 ---
