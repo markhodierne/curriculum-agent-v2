@@ -550,10 +550,20 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 17: Agent Trace Panel ✅ (Completed 2025-10-18)
+
+**File**: `components/chat/agent-trace-panel.tsx` (122 lines)
+
+**Features**: Collapsible panel showing numbered reasoning steps (memory retrieval, Cypher generation, execution, synthesis); blue theme; `whitespace-pre-wrap` for formatting
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-16 complete (Backend + Home page + Evidence panel ready)
-**Next Task**: Task 17 - Agent Trace Panel Component
+**Progress**: Tasks 1-17 complete (Backend + Home page + Evidence + Agent Trace panels ready)
+**Next Task**: Task 18 - Feedback Controls Component
 
 **Three-Agent Learning Loop Status**:
 - ✅ Query Agent API route (Task 13)
@@ -566,7 +576,7 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 - ✅ Home UI components (Task 14)
 - ✅ Home page integration (Task 15)
 - ✅ Evidence Panel (Task 16)
-- ⏳ Agent Trace Panel (Task 17)
+- ✅ Agent Trace Panel (Task 17)
 - ⏳ Feedback Controls (Task 18)
 - ⏳ Chat page updates (Tasks 19-20)
 

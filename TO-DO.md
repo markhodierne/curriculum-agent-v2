@@ -131,27 +131,9 @@ Created `components/chat/evidence-panel.tsx` (190 lines) with collapsible UI, st
 
 ---
 
-## **Task 17: Chat Page - Agent Trace Panel Component**
+## ✅ **Task 17: Chat Page - Agent Trace Panel Component** (Completed 2025-10-18)
 
-**Description**: Create collapsible agent trace panel showing reasoning steps.
-
-**Deliverables**:
-- [ ] Create `components/chat/agent-trace-panel.tsx`
-- [ ] Accept `steps: string[]` prop (array of step descriptions)
-- [ ] Display:
-  - Summary: "Agent Trace (X steps)"
-  - Expandable list of steps
-- [ ] Use shadcn/ui Collapsible
-- [ ] Default: collapsed
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 2 (shadcn/ui)
-
-**Definition of Done**:
-- Component displays trace steps
-- Collapsible behavior functional
-- TypeScript compiles
+Created `components/chat/agent-trace-panel.tsx` (122 lines) with collapsible UI, numbered steps, blue theme. See HISTORY.md.
 
 ---
 
