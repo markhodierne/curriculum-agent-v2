@@ -93,7 +93,7 @@ import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 
 export async function POST(req: NextRequest) {
-  const { messages, model, temperature, maxTokens } = await req.json();
+  const { messages, model, temperature } = await req.json();
 
   // 1. Retrieve similar memories (few-shot learning)
   const memories = await retrieveSimilarMemories(messages[messages.length - 1].content);
@@ -105,34 +105,40 @@ export async function POST(req: NextRequest) {
   const tools = await getMCPTools();
 
   // 4. Stream response
-  const result = streamText({
+  const result = await streamText({
     model: openai(model),             // 'gpt-4o' | 'gpt-4o-mini' | 'gpt-5'
     system: systemPrompt,
     messages,
     tools,
     temperature,
-    maxTokens,
-    maxSteps: 10,                     // Agent can call tools up to 10 times
+    // Note: maxTokens not supported in AI SDK v5.0.76
+
+    // Track tool calls with onStepFinish
+    onStepFinish: ({ toolCalls, toolResults }) => {
+      // Extract metadata for event emission
+    },
   });
 
   // 5. Emit event after completion (non-blocking)
-  result.onFinish(async (finishResult) => {
+  (async () => {
+    const fullResponse = await result.text;
     await inngest.send({
       name: 'interaction.complete',
       data: { /* ... */ }
     });
-  });
+  })();
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }
 ```
 
 **Key Points**:
 - `streamText()` handles multi-turn tool calling automatically
 - Agent can call `read_neo4j_cypher` multiple times per query
-- Use `maxSteps` to limit iterations (not `maxSteps` deprecated)
-- `onFinish()` for non-blocking event emission
-- Always use `toDataStreamResponse()` for client compatibility
+- Use `onStepFinish()` to track tool calls and results
+- Event emission in async IIFE (non-blocking, doesn't await)
+- Use `toTextStreamResponse()` for streaming compatibility
+- `maxTokens` parameter removed (not in AI SDK v5.0.76)
 
 ### Reflection Agent (Async)
 
