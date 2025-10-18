@@ -119,29 +119,9 @@ Created `app/api/inngest/route.ts` with `serve()` exports, registered both async
 
 ---
 
-## **Task 15: Home Page - Main Page**
+## ✅ **Task 15: Home Page - Main Page** (Completed 2025-10-18)
 
-**Description**: Update home page to implement model selection and navigation.
-
-**Deliverables**:
-- [ ] Update `app/page.tsx` to become home page (not chat)
-- [ ] Import and render:
-  - App title + description
-  - Model selector
-  - Advanced params (collapsible)
-  - "Start Chat" button
-- [ ] Save config to sessionStorage on button click
-- [ ] Navigate to `/chat` with config
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 14 (home components)
-
-**Definition of Done**:
-- Home page displays model selector
-- Config saved to sessionStorage
-- Button navigates to `/chat`
-- TypeScript compiles
+Updated `app/page.tsx` (139 lines) with model configuration, sessionStorage persistence, and navigation to `/chat`. See HISTORY.md.
 
 ---
 

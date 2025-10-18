@@ -511,10 +511,31 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 15: Home Page - Main Page ✅ (Completed 2025-10-18)
+
+**Created File**: `app/page.tsx` (139 lines) - replaced chat interface with model configuration landing page
+
+**Implementation**:
+- State management for model (default: 'gpt-4o'), temperature (0.3), maxTokens (2000)
+- Renders AppDescription, ModelSelector, ModelParams components from Task 14
+- `handleStartChat()` saves config to sessionStorage as JSON
+- Navigation to `/chat` using Next.js `useRouter`
+- Responsive layout with Oak logo, centered button, footer note
+
+**Key Features**:
+- **ChatConfig Interface**: Type-safe config object (model, temperature, maxTokens)
+- **SessionStorage**: Config persisted under `'chatConfig'` key for chat page to read
+- **Client Component**: Uses `'use client'` directive with React hooks
+- **Default Values**: Match FUNCTIONAL.md specs exactly
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-14 complete (Backend + Home UI components ready)
-**Next Task**: Task 15 - Home Page (integrate components, navigation to /chat)
+**Progress**: Tasks 1-15 complete (Backend + Home page ready)
+**Next Task**: Task 16 - Evidence Panel Component
 
 **Three-Agent Learning Loop Status**:
 - ✅ Query Agent API route (Task 13)
@@ -525,8 +546,9 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 **Frontend Status**:
 - ✅ Home UI components (Task 14)
-- ⏳ Home page integration (Task 15)
-- ⏳ Chat UI updates (Tasks 16-20)
+- ✅ Home page integration (Task 15)
+- ⏳ Chat UI components (Tasks 16-18)
+- ⏳ Chat page updates (Tasks 19-20)
 
 ---
 

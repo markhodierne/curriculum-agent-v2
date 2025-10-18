@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 15.
+We are working through `TO-DO.md` and are on task 16.
 
 **Before implementing anything:**
 
@@ -86,28 +86,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 15: Home Page - Main Page**
+### **Task 16: Chat Page - Evidence Panel Component**
 
-**Description**: Update home page to implement model selection and navigation.
+**Description**: Create collapsible evidence panel showing citations with confidence scores.
 
 **Deliverables**:
-- [ ] Update `app/page.tsx` to become home page (not chat)
-- [ ] Import and render:
-  - App title + description
-  - Model selector
-  - Advanced params (collapsible)
-  - "Start Chat" button
-- [ ] Save config to sessionStorage on button click
-- [ ] Navigate to `/chat` with config
+- [ ] Create `components/chat/evidence-panel.tsx`
+- [ ] Accept `citations: Citation[]` prop
+- [ ] Display:
+  - Overall confidence score
+  - Star rating visualization (★★★★★)
+  - List of citations with node ID, text, confidence, reason
+- [ ] Use shadcn/ui Collapsible component
+- [ ] Default: collapsed with summary
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 14 (home components)
+**Dependencies**: Task 3 (Citation type)
 
 **Definition of Done**:
-- Home page displays model selector
-- Config saved to sessionStorage
-- Button navigates to `/chat`
+- Component accepts citations array
+- Displays confidence scores and stars
+- Collapsible behavior functional
 - TypeScript compiles
 
 ```
