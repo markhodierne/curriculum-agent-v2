@@ -184,29 +184,9 @@ Created `app/chat/page.tsx` (88 lines) with full-height chat interface, header w
 
 ---
 
-## **Task 21: Dashboard - Learning Curve Chart Component**
+## ✅ **Task 21: Dashboard - Learning Curve Chart Component** (Completed 2025-10-18)
 
-**Description**: Create Tremor line chart showing learning improvement over time.
-
-**Deliverables**:
-- [ ] Create `components/dashboard/learning-curve.tsx`
-- [ ] Use Tremor `LineChart` component
-- [ ] Query Supabase `evaluation_metrics` table for data
-- [ ] Display:
-  - X-axis: Interaction number
-  - Y-axis: Average evaluation score (0-1)
-  - Trend line
-  - Target line at 0.70
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 2 (Tremor), Task 4 (Supabase)
-
-**Definition of Done**:
-- Chart displays evaluation scores over time
-- Data fetched from Supabase
-- Tremor LineChart renders correctly
-- TypeScript compiles
+Created `components/dashboard/learning-curve.tsx` with Tremor LineChart showing learning improvement. See HISTORY.md.
 
 ---
 

@@ -619,14 +619,31 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 21: Dashboard - Learning Curve Chart Component ✅ (Completed 2025-10-18)
+
+**Created File**: `components/dashboard/learning-curve.tsx` (225 lines)
+
+**Implementation**:
+- Tremor `LineChart` with two data series: evaluation scores (blue), target line at 0.70 (gray)
+- Fetches from Supabase via `getAllEvaluationMetrics()` on mount
+- X-axis: interaction number (1, 2, 3...), Y-axis: overall score (0.0-1.0)
+- Calculates improvement stats: first 10 avg vs last 10 avg with percentage change
+- Loading/error/empty states with helpful messages
+- Chart config: 256px height, animation enabled, legend, grid lines, fixed Y-axis (0-1)
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-20 complete ✅
-**Next Task**: Task 21 - Dashboard - Learning Curve Chart Component
+**Progress**: Tasks 1-21 complete ✅
+**Next Task**: Task 22 - Dashboard - Stats Cards Component
 
 **Three-Agent Learning Loop**: ✅ Complete (Tasks 7, 10-13)
 **Frontend**: ✅ Home + Chat pages complete (Tasks 14-20)
-**Pending**: Dashboard (Tasks 21-25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
+**Dashboard**: Learning curve chart ✅ (Task 21)
+**Pending**: Stats cards, interactions table, pattern library (Tasks 22-25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
 
 ---
 
@@ -648,4 +665,4 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 **MCP Integration**: Pre-fetch schema once, singleton client, read-only tools for Query Agent
 
-**UI Components**: shadcn/ui (New York, neutral), Props pattern, JSDoc documentation
+**UI Components**: shadcn/ui (New York, neutral), Tremor charts, Props pattern, JSDoc documentation

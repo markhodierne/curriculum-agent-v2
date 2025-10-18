@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 21.
+We are working through `TO-DO.md` and are on task 22.
 
 **Before implementing anything:**
 
@@ -86,28 +86,28 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 21: Dashboard - Learning Curve Chart Component**
+## **Task 22: Dashboard - Stats Cards Component**
 
-**Description**: Create Tremor line chart showing learning improvement over time.
+**Description**: Create stat cards for total interactions, avg confidence, memories.
 
 **Deliverables**:
-- [ ] Create `components/dashboard/learning-curve.tsx`
-- [ ] Use Tremor `LineChart` component
-- [ ] Query Supabase `evaluation_metrics` table for data
-- [ ] Display:
-  - X-axis: Interaction number
-  - Y-axis: Average evaluation score (0-1)
-  - Trend line
-  - Target line at 0.70
+- [ ] Create `components/dashboard/stats-cards.tsx`
+- [ ] Query Supabase `memory_stats` table
+- [ ] Display 3 cards:
+  - Total Interactions
+  - Average Confidence
+  - Memories Created
+- [ ] Use Tremor `Card` component
+- [ ] Add icons (Lucide React)
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
 **Dependencies**: Task 2 (Tremor), Task 4 (Supabase)
 
 **Definition of Done**:
-- Chart displays evaluation scores over time
+- Three stat cards display
 - Data fetched from Supabase
-- Tremor LineChart renders correctly
+- Cards styled with Tremor
 - TypeScript compiles
 
 ```
