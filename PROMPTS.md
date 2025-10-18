@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 12.
+We are working through `TO-DO.md` and are on task 13.
 
 **Before implementing anything:**
 
@@ -86,23 +86,32 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 12: Inngest Webhook API Route**
+## **Task 13: Query Agent API Route (Chat Endpoint)**
 
-**Description**: Create Next.js API route to serve Inngest functions.
+**Description**: Implement main chat API route with Query Agent logic.
 
 **Deliverables**:
-- [ ] Create `app/api/inngest/route.ts`
-- [ ] Use `serve()` from `inngest/next` to export GET, POST, PUT handlers
-- [ ] Register both `reflectionFunction` and `learningFunction`
+- [ ] Update `app/api/oak-curriculum-agent/route.ts` to `app/api/chat/route.ts`
+- [ ] Implement POST handler with:
+  - Message parsing
+  - Model/temperature/maxTokens from request body
+  - Similar memory retrieval (call Task 6 function)
+  - Schema pre-fetching via MCP
+  - System prompt building (call Task 7 function)
+  - `streamText()` with Neo4j tools
+  - `onFinish()` hook to emit `interaction.complete` event (non-blocking)
+- [ ] Add error handling (fail-safe, see CLAUDE.md Error Handling section)
 - [ ] Add JSDoc comments
-- [ ] Test route compiles: `pnpm tsc --noEmit`
+- [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 10 (Reflection), Task 11 (Learning)
+**Dependencies**: Task 6 (memory retrieval), Task 7 (prompt), Task 9 (Inngest for event emission)
 
 **Definition of Done**:
-- API route exports GET, POST, PUT
-- Both functions registered
-- Inngest webhook can call this endpoint
+- API route accepts messages array + model config
+- Retrieves memories before each query
+- Streams response using AI SDK
+- Emits event on completion (non-blocking)
+- Error handling graceful
 - TypeScript compiles
 
 ```

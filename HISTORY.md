@@ -437,17 +437,30 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 **Verification**: TypeScript compilation ✓
 
+### Task 12: Inngest Webhook API Route ✅ (Completed 2025-10-18)
+
+**Created File**: `app/api/inngest/route.ts`
+
+**Implementation**:
+- Uses `serve()` from `inngest/next` to export GET, POST, PUT handlers
+- Registers `reflectionFunction` and `learningFunction`
+- Provides webhook endpoint for Inngest Cloud: `/api/inngest`
+- GET: Function discovery, POST: Event routing, PUT: Config updates
+
+**Verification**: TypeScript compilation ✓
+
 ---
 
 ## Current State
 
-**Progress**: Tasks 1-11 complete (Three-agent learning loop fully implemented)
-**Next Task**: Task 12 - Inngest Webhook API Route
+**Progress**: Tasks 1-12 complete (Async pipeline fully wired)
+**Next Task**: Task 13 - Query Agent API Route (Chat Endpoint)
 
 **Three-Agent Learning Loop Status**:
-- ✅ Query Agent (Task 7 prompt, ready for Task 13 API route)
+- ✅ Query Agent prompt builder (Task 7)
 - ✅ Reflection Agent (Task 10)
-- ✅ Learning Agent (Task 11) ← Just completed
+- ✅ Learning Agent (Task 11)
+- ✅ Inngest webhook (Task 12) ← Just completed
 
 ---
 

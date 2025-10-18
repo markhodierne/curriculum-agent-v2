@@ -74,24 +74,9 @@ Created `lib/inngest/functions/learning.ts` with 6-step memory creation: embeddi
 
 ---
 
-## **Task 12: Inngest Webhook API Route**
+## ✅ **Task 12: Inngest Webhook API Route** (Completed 2025-10-18)
 
-**Description**: Create Next.js API route to serve Inngest functions.
-
-**Deliverables**:
-- [ ] Create `app/api/inngest/route.ts`
-- [ ] Use `serve()` from `inngest/next` to export GET, POST, PUT handlers
-- [ ] Register both `reflectionFunction` and `learningFunction`
-- [ ] Add JSDoc comments
-- [ ] Test route compiles: `pnpm tsc --noEmit`
-
-**Dependencies**: Task 10 (Reflection), Task 11 (Learning)
-
-**Definition of Done**:
-- API route exports GET, POST, PUT
-- Both functions registered
-- Inngest webhook can call this endpoint
-- TypeScript compiles
+Created `app/api/inngest/route.ts` with `serve()` exports, registered both async agent functions. See HISTORY.md.
 
 ---
 
