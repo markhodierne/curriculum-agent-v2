@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 22.
+We are working through `TO-DO.md` and are on task 23.
 
 **Before implementing anything:**
 
@@ -86,28 +86,32 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 22: Dashboard - Stats Cards Component**
+## **Task 23: Dashboard - Interactions Table Component**
 
-**Description**: Create stat cards for total interactions, avg confidence, memories.
+**Description**: Create table showing last 20 interactions with key metrics.
 
 **Deliverables**:
-- [ ] Create `components/dashboard/stats-cards.tsx`
-- [ ] Query Supabase `memory_stats` table
-- [ ] Display 3 cards:
-  - Total Interactions
-  - Average Confidence
-  - Memories Created
-- [ ] Use Tremor `Card` component
-- [ ] Add icons (Lucide React)
+- [ ] Create `components/dashboard/interactions-table.tsx`
+- [ ] Query Supabase `interactions` table (last 20, ordered by created_at DESC)
+- [ ] Display columns:
+  - Query (truncated to 50 chars)
+  - Confidence
+  - Grounding
+  - Overall Score
+  - Latency
+  - Timestamp
+- [ ] Make sortable by clicking column headers
+- [ ] Click row → show full interaction details in modal
+- [ ] Use shadcn/ui Table component
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 2 (Tremor), Task 4 (Supabase)
+**Dependencies**: Task 4 (Supabase)
 
 **Definition of Done**:
-- Three stat cards display
-- Data fetched from Supabase
-- Cards styled with Tremor
+- Table displays last 20 interactions
+- Columns sortable
+- Row click shows modal with details
 - TypeScript compiles
 
 ```
