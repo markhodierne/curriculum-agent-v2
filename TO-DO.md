@@ -233,49 +233,15 @@ Created `docs/neo4j-setup.md` (394 lines) with complete Neo4j setup documentatio
 
 ---
 
-## **Task 27: Supabase Schema Setup - Table Creation**
+## ✅ **Task 27: Supabase Schema Setup - Table Creation** (Completed 2025-10-19)
 
-**Description**: Run SQL migrations to create all Supabase tables.
-
-**Deliverables**:
-- [ ] Create `docs/supabase-setup.md` with SQL commands
-- [ ] Run SQL from Task 4 schema definitions to create:
-  - `interactions` table with indexes
-  - `feedback` table with foreign key
-  - `evaluation_metrics` table with indexes
-  - `memory_stats` table (single row)
-- [ ] Verify tables created in Supabase dashboard
-- [ ] Test insert/select queries
-
-**Dependencies**: Task 4 (schema definitions)
-
-**Definition of Done**:
-- All tables exist in Supabase
-- Indexes created
-- Foreign keys enforced
-- Documentation complete
+Created `docs/supabase-setup.md` (478 lines) with complete SQL migration, verification queries, 8 test queries, integration guide, troubleshooting. User ran SQL in Supabase to create 4 tables with 9+ indexes, 2 foreign keys. See HISTORY.md.
 
 ---
 
-## **Task 28: Environment Variables Setup**
+## ✅ **Task 28: Environment Variables Setup** (Completed 2025-10-19)
 
-**Description**: Populate `.env.local` with actual values for local development.
-
-**Deliverables**:
-- [ ] Copy `.env.example` to `.env.local`
-- [ ] Add OpenAI API key
-- [ ] Add Neo4j MCP URL (already exists)
-- [ ] Add Supabase URL and keys
-- [ ] Add Inngest event key and signing key
-- [ ] Verify all services connect correctly
-- [ ] DO NOT commit `.env.local`
-
-**Dependencies**: Task 27 (Supabase set up), Task 26 (Neo4j set up)
-
-**Definition of Done**:
-- All environment variables populated
-- Services connect successfully
-- `.env.local` in `.gitignore`
+Populated `.env.local` with all 7 required environment variables: OpenAI API key, Neo4j MCP URL, Supabase credentials (URL, anon key, service role key), Inngest keys (event key, signing key). All services ready for local development. See HISTORY.md.
 
 ---
 

@@ -734,16 +734,60 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 27: Supabase Schema Setup - Table Creation ✅ (Completed 2025-10-19)
+
+**Created File**: `docs/supabase-setup.md` (478 lines)
+
+**Implementation**:
+- Complete SQL migration script for 4 tables with indexes
+- Verification queries for tables, indexes, foreign keys
+- 8 test queries for insert/select/join operations
+- Integration guide showing codebase usage
+- Troubleshooting section with common issues
+
+**Tables Created** (via user execution in Supabase SQL Editor):
+- `interactions` - 4 indexes (created_at DESC, memory_id, model_used, PK)
+- `feedback` - 3 indexes (interaction_id, thumbs_up partial, well_grounded partial, PK)
+- `evaluation_metrics` - 3 indexes (interaction_id, overall_score, created_at DESC, PK)
+- `memory_stats` - Single-row cache with unique constraint on id=1
+
+**Foreign Keys**: 2 CASCADE relationships to `interactions.id`
+
+**Verification**: All tables, indexes, foreign keys tested ✓
+
+---
+
+### Task 28: Environment Variables Setup ✅ (Completed 2025-10-19)
+
+**Objective**: Populate `.env.local` with all service credentials for local development.
+
+**Completed**:
+- ✅ OpenAI API key configured
+- ✅ Neo4j MCP URL configured (from Task 1)
+- ✅ Supabase URL and keys configured (from Task 27)
+- ✅ Inngest Event Key and Signing Key configured (account created)
+- ✅ All 7-8 environment variables populated
+
+**Environment Ready**:
+- Query Agent → can call OpenAI and Neo4j MCP
+- Supabase client → can read/write all 4 tables
+- Inngest → ready for async agent execution (Reflection + Learning)
+
+**Note**: Inngest Dev Server required for local testing (Task 29)
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-26 complete ✅
-**Next Task**: Task 27 - Supabase Schema Setup - Table Creation
+**Progress**: Tasks 1-28 complete ✅
+**Next Task**: Task 29 - Integration Testing - End-to-End Flow
 
 **Three-Agent Learning Loop**: ✅ Complete (Tasks 7, 10-13)
 **Frontend**: ✅ Home + Chat pages complete (Tasks 14-20)
 **Dashboard**: ✅ Complete - all components + main page (Tasks 21-25)
-**Database Setup**: ✅ Neo4j documentation complete (Task 26)
-**Pending**: Supabase setup (Task 27), Environment variables (Task 28), Testing (Tasks 29-34)
+**Database Setup**: ✅ Neo4j + Supabase fully configured (Tasks 26-27)
+**Environment**: ✅ All credentials configured (Task 28)
+**Pending**: Integration testing (Tasks 29-34)
 
 ---
 

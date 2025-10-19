@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 27.
+We are working through `TO-DO.md` and are on task 29.
 
 **Before implementing anything:**
 
@@ -86,27 +86,41 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 27: Supabase Schema Setup - Table Creation**
+## **Task 29: Integration Testing - End-to-End Flow**
 
-**Description**: Run SQL migrations to create all Supabase tables.
+**Description**: Test complete flow from home → chat → dashboard with real interactions.
 
 **Deliverables**:
-- [ ] Create `docs/supabase-setup.md` with SQL commands
-- [ ] Run SQL from Task 4 schema definitions to create:
-  - `interactions` table with indexes
-  - `feedback` table with foreign key
-  - `evaluation_metrics` table with indexes
-  - `memory_stats` table (single row)
-- [ ] Verify tables created in Supabase dashboard
-- [ ] Test insert/select queries
+- [ ] Start dev server: `pnpm dev`
+- [ ] Test home page:
+  - Select model
+  - Set parameters
+  - Navigate to chat
+- [ ] Test chat:
+  - Send query
+  - Verify streaming works
+  - Check evidence panel
+  - Check agent trace
+  - Provide feedback
+- [ ] Verify async pipeline:
+  - Check Inngest dashboard for job completion
+  - Verify Supabase tables have data
+  - Verify Neo4j has Memory nodes
+- [ ] Test dashboard:
+  - Verify learning curve shows data
+  - Check stats cards
+  - View interactions table
+  - See pattern library
+- [ ] Run 5 test queries and document results
 
-**Dependencies**: Task 4 (schema definitions)
+**Dependencies**: All previous tasks complete
 
 **Definition of Done**:
-- All tables exist in Supabase
-- Indexes created
-- Foreign keys enforced
-- Documentation complete
+- Complete flow functional from home → chat → dashboard
+- Async agents processing interactions
+- Data visible in dashboard
+- No errors in console
+- 5 test queries completed successfully
 
 ```
 
