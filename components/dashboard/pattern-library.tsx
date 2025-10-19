@@ -1,0 +1,277 @@
+/**
+ * Dashboard Pattern Library Component
+ *
+ * Displays discovered query patterns from Neo4j :QueryPattern nodes.
+ * Shows pattern name, description, usage count, and success rate.
+ * Patterns are sorted by usage count (total uses) descending.
+ *
+ * Data fetched from Neo4j via MCP client on component mount.
+ * Uses Tremor Card components for consistent dashboard styling.
+ *
+ * Usage:
+ *   import { PatternLibrary } from '@/components/dashboard/pattern-library';
+ *   <PatternLibrary />
+ *
+ * See: FUNCTIONAL.md section 4.3.D, ARCHITECTURE.md section 4.1
+ */
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Card } from '@tremor/react';
+import { getNeo4jMCPClient } from '@/lib/mcp/client/neo4j-client';
+
+/**
+ * Query pattern data structure from Neo4j
+ */
+interface QueryPattern {
+  id: string;
+  name: string;
+  description: string;
+  cypherTemplate: string;
+  successCount: number;
+  failureCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Pattern Library Component
+ *
+ * Fetches and displays discovered query patterns from Neo4j.
+ * Shows loading state while fetching, error state on failure,
+ * and sorted patterns once loaded.
+ *
+ * @returns React component with pattern cards
+ */
+export function PatternLibrary(): React.ReactElement {
+  const [patterns, setPatterns] = useState<QueryPattern[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPatterns();
+  }, []);
+
+  /**
+   * Fetches query patterns from Neo4j via MCP
+   *
+   * Executes Cypher query to retrieve all :QueryPattern nodes,
+   * calculates usage counts and success rates, then sorts by
+   * total usage descending.
+   */
+  async function fetchPatterns(): Promise<void> {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Connect to Neo4j MCP client
+      const mcpClient = getNeo4jMCPClient();
+      await mcpClient.connect();
+
+      // Get MCP tools
+      const tools = await mcpClient.getTools();
+      const readTool = tools.read_neo4j_cypher;
+
+      if (!readTool) {
+        throw new Error('read_neo4j_cypher tool not available');
+      }
+
+      // Query for all QueryPattern nodes
+      const cypher = `
+        MATCH (p:QueryPattern)
+        RETURN p.id as id,
+               p.name as name,
+               p.description as description,
+               p.cypher_template as cypherTemplate,
+               p.success_count as successCount,
+               p.failure_count as failureCount,
+               p.created_at as createdAt,
+               p.updated_at as updatedAt
+        ORDER BY (p.success_count + p.failure_count) DESC
+      `;
+
+      // Execute query via MCP tool
+      const result = await readTool.execute({ query: cypher });
+
+      // Parse results
+      if (result && result.content && Array.isArray(result.content)) {
+        const parsedPatterns = parsePatterns(result.content);
+        setPatterns(parsedPatterns);
+      } else {
+        // No patterns found yet (empty result)
+        setPatterns([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch patterns:', err);
+      setError('Failed to load patterns. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">Pattern Library</h2>
+        <Card className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded" />
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">Pattern Library</h2>
+        <Card>
+          <p className="text-red-600 text-center">{error}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Empty state (no patterns discovered yet)
+  if (patterns.length === 0) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">Pattern Library</h2>
+        <Card>
+          <p className="text-gray-600 text-center">
+            No query patterns discovered yet. Patterns are extracted from high-quality interactions (score {'>'} 0.8).
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">
+        Pattern Library ({patterns.length} {patterns.length === 1 ? 'pattern' : 'patterns'})
+      </h2>
+      <div className="space-y-3">
+        {patterns.map((pattern) => {
+          const usageCount = pattern.successCount + pattern.failureCount;
+          const successRate = usageCount > 0
+            ? (pattern.successCount / usageCount) * 100
+            : 0;
+
+          return (
+            <Card key={pattern.id} decoration="left" decorationColor={getDecorationColor(successRate)}>
+              <div className="space-y-2">
+                {/* Pattern name and success rate */}
+                <div className="flex items-start justify-between">
+                  <h3 className="font-semibold text-gray-900 text-base">
+                    {pattern.name}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-medium ${getSuccessRateColor(successRate)}`}>
+                      {successRate.toFixed(0)}% success
+                    </span>
+                  </div>
+                </div>
+
+                {/* Pattern description */}
+                <p className="text-sm text-gray-600">
+                  {pattern.description || 'No description available'}
+                </p>
+
+                {/* Usage stats */}
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span>
+                    <span className="font-medium text-gray-700">{usageCount}</span> total {usageCount === 1 ? 'use' : 'uses'}
+                  </span>
+                  <span>•</span>
+                  <span>
+                    <span className="font-medium text-green-700">{pattern.successCount}</span> successful
+                  </span>
+                  {pattern.failureCount > 0 && (
+                    <>
+                      <span>•</span>
+                      <span>
+                        <span className="font-medium text-red-700">{pattern.failureCount}</span> failed
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Parses Neo4j MCP tool result into QueryPattern array
+ *
+ * Converts MCP tool response format to typed QueryPattern objects.
+ * Handles missing or invalid data gracefully.
+ *
+ * @param content - MCP tool result content array
+ * @returns Array of QueryPattern objects
+ */
+function parsePatterns(content: any[]): QueryPattern[] {
+  const patterns: QueryPattern[] = [];
+
+  for (const item of content) {
+    try {
+      // MCP returns results wrapped in { text: string } objects
+      const data = typeof item.text === 'string' ? JSON.parse(item.text) : item;
+
+      // Extract pattern data (handle both direct object and nested formats)
+      const patternData = Array.isArray(data) ? data[0] : data;
+
+      if (!patternData || !patternData.id || !patternData.name) {
+        console.warn('Skipping invalid pattern data:', patternData);
+        continue;
+      }
+
+      patterns.push({
+        id: patternData.id,
+        name: patternData.name,
+        description: patternData.description || '',
+        cypherTemplate: patternData.cypherTemplate || '',
+        successCount: patternData.successCount || 0,
+        failureCount: patternData.failureCount || 0,
+        createdAt: patternData.createdAt || '',
+        updatedAt: patternData.updatedAt || '',
+      });
+    } catch (err) {
+      console.error('Failed to parse pattern:', err, item);
+    }
+  }
+
+  return patterns;
+}
+
+/**
+ * Determines card decoration color based on success rate
+ *
+ * @param successRate - Success percentage (0-100)
+ * @returns Tremor color name
+ */
+function getDecorationColor(successRate: number): string {
+  if (successRate >= 90) return 'green';
+  if (successRate >= 75) return 'blue';
+  if (successRate >= 60) return 'amber';
+  return 'red';
+}
+
+/**
+ * Determines text color for success rate display
+ *
+ * @param successRate - Success percentage (0-100)
+ * @returns Tailwind text color class
+ */
+function getSuccessRateColor(successRate: number): string {
+  if (successRate >= 90) return 'text-green-700';
+  if (successRate >= 75) return 'text-blue-700';
+  if (successRate >= 60) return 'text-amber-700';
+  return 'text-red-700';
+}

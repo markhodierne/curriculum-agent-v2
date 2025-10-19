@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 24.
+We are working through `TO-DO.md` and are on task 25.
 
 **Before implementing anything:**
 
@@ -86,29 +86,30 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 24: Dashboard - Pattern Library Component**
+## **Task 25: Dashboard Page - Main Page**
 
-**Description**: Create component showing discovered query patterns.
+**Description**: Create dashboard page assembling all dashboard components.
 
 **Deliverables**:
-- [ ] Create `components/dashboard/pattern-library.tsx`
-- [ ] Query Neo4j for `:QueryPattern` nodes via MCP
-- [ ] Display for each pattern:
-  - Pattern name
-  - Description
-  - Usage count
-  - Success rate (%)
-- [ ] Sort by usage count descending
-- [ ] Use shadcn/ui Card component
+- [ ] Create `app/dashboard/page.tsx`
+- [ ] Import and render:
+  - Learning Curve chart
+  - Stats Cards
+  - Interactions Table
+  - Pattern Library
+- [ ] Add "Back to Chat" button in header
+- [ ] Add auto-refresh every 30s (optional, can use manual refresh button)
+- [ ] Style with Tailwind
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 4 (Supabase or Neo4j query)
+**Dependencies**: Task 21-24 (all dashboard components)
 
 **Definition of Done**:
-- Patterns displayed in cards
-- Data fetched from Neo4j
-- Sorted by usage
+- Dashboard page renders
+- All components functional
+- Back button navigates to chat
+- Data refreshes (manual or auto)
 - TypeScript compiles
 
 ```

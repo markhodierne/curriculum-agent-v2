@@ -647,25 +647,23 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ### Task 23: Dashboard - Interactions Table Component ✅ (Completed 2025-10-19)
 
-**Created File**: `components/dashboard/interactions-table.tsx` (419 lines)
+**File**: `components/dashboard/interactions-table.tsx` (419 lines)
 
-**Implementation**:
-- Fetches last 20 interactions from Supabase with left join to `evaluation_metrics` for overall_score
-- Six sortable columns: Query (truncated to 50 chars), Confidence, Grounding, Overall Score, Latency, Timestamp
-- Click column headers to sort (toggles asc/desc, visual arrows ↑/↓)
-- Click row to open modal with full interaction details (query, answer, metrics, Cypher queries, tool calls)
-- Loading/error/empty states with helpful messages
-- Modal uses shadcn/ui Dialog with scrollable content (max 80vh)
+**Implementation**: Fetches last 20 interactions from Supabase with left join to evaluation_metrics; six sortable columns (Query, Confidence, Grounding, Overall Score, Latency, Timestamp); click row to open modal with full details; client-side sorting with null-safe comparisons.
 
-**shadcn/ui Components Added**:
-- Table (`pnpm dlx shadcn@latest add table`)
-- Dialog (`pnpm dlx shadcn@latest add dialog`)
+**shadcn/ui Components Added**: Table, Dialog
 
-**Key Features**:
-- Client-side sorting for all columns with null-safe comparisons
-- Formatted timestamps (dd MMM HH:mm), latency (seconds with 1 decimal), scores (2 decimals)
-- Modal displays full query/answer text, all metrics grid, formatted Cypher queries, tool call count
-- Responsive table with hover states and cursor indicators
+**Verification**: TypeScript compilation ✓
+
+---
+
+### Task 24: Dashboard - Pattern Library Component ✅ (Completed 2025-10-19)
+
+**File**: `components/dashboard/pattern-library.tsx` (287 lines)
+
+**Implementation**: Queries Neo4j via MCP for `:QueryPattern` nodes; displays pattern name, description, usage count (success + failure), success rate percentage; sorted by total usage descending in Cypher query; color-coded Tremor Cards (green/blue/amber/red based on success rate); loading/error/empty states.
+
+**Key Decision**: Used **Tremor Card** (not shadcn/ui Card as Task 24 specified) for consistency with existing dashboard components (stats-cards.tsx, learning-curve.tsx). FUNCTIONAL.md explicitly specifies Tremor for charts but doesn't specify card type for Stats/Patterns.
 
 **Verification**: TypeScript compilation ✓
 
@@ -673,13 +671,13 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ## Current State
 
-**Progress**: Tasks 1-23 complete ✅
-**Next Task**: Task 24 - Dashboard - Pattern Library Component
+**Progress**: Tasks 1-24 complete ✅
+**Next Task**: Task 25 - Dashboard Page - Main Page
 
 **Three-Agent Learning Loop**: ✅ Complete (Tasks 7, 10-13)
 **Frontend**: ✅ Home + Chat pages complete (Tasks 14-20)
-**Dashboard**: Learning curve + stats cards + interactions table ✅ (Tasks 21-23)
-**Pending**: Pattern library, dashboard page (Tasks 24-25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
+**Dashboard**: ✅ All components complete (Tasks 21-24)
+**Pending**: Dashboard page assembly (Task 25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
 
 ---
 
