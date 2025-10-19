@@ -645,15 +645,41 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 23: Dashboard - Interactions Table Component ✅ (Completed 2025-10-19)
+
+**Created File**: `components/dashboard/interactions-table.tsx` (419 lines)
+
+**Implementation**:
+- Fetches last 20 interactions from Supabase with left join to `evaluation_metrics` for overall_score
+- Six sortable columns: Query (truncated to 50 chars), Confidence, Grounding, Overall Score, Latency, Timestamp
+- Click column headers to sort (toggles asc/desc, visual arrows ↑/↓)
+- Click row to open modal with full interaction details (query, answer, metrics, Cypher queries, tool calls)
+- Loading/error/empty states with helpful messages
+- Modal uses shadcn/ui Dialog with scrollable content (max 80vh)
+
+**shadcn/ui Components Added**:
+- Table (`pnpm dlx shadcn@latest add table`)
+- Dialog (`pnpm dlx shadcn@latest add dialog`)
+
+**Key Features**:
+- Client-side sorting for all columns with null-safe comparisons
+- Formatted timestamps (dd MMM HH:mm), latency (seconds with 1 decimal), scores (2 decimals)
+- Modal displays full query/answer text, all metrics grid, formatted Cypher queries, tool call count
+- Responsive table with hover states and cursor indicators
+
+**Verification**: TypeScript compilation ✓
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-22 complete ✅
-**Next Task**: Task 23 - Dashboard - Interactions Table Component
+**Progress**: Tasks 1-23 complete ✅
+**Next Task**: Task 24 - Dashboard - Pattern Library Component
 
 **Three-Agent Learning Loop**: ✅ Complete (Tasks 7, 10-13)
 **Frontend**: ✅ Home + Chat pages complete (Tasks 14-20)
-**Dashboard**: Learning curve + stats cards ✅ (Tasks 21-22)
-**Pending**: Interactions table, pattern library, dashboard page (Tasks 23-25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
+**Dashboard**: Learning curve + stats cards + interactions table ✅ (Tasks 21-23)
+**Pending**: Pattern library, dashboard page (Tasks 24-25), Database setup (Tasks 26-28), Testing (Tasks 29-34)
 
 ---
 

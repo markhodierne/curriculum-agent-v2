@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 23.
+We are working through `TO-DO.md` and are on task 24.
 
 **Before implementing anything:**
 
@@ -86,32 +86,29 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 23: Dashboard - Interactions Table Component**
+## **Task 24: Dashboard - Pattern Library Component**
 
-**Description**: Create table showing last 20 interactions with key metrics.
+**Description**: Create component showing discovered query patterns.
 
 **Deliverables**:
-- [ ] Create `components/dashboard/interactions-table.tsx`
-- [ ] Query Supabase `interactions` table (last 20, ordered by created_at DESC)
-- [ ] Display columns:
-  - Query (truncated to 50 chars)
-  - Confidence
-  - Grounding
-  - Overall Score
-  - Latency
-  - Timestamp
-- [ ] Make sortable by clicking column headers
-- [ ] Click row → show full interaction details in modal
-- [ ] Use shadcn/ui Table component
+- [ ] Create `components/dashboard/pattern-library.tsx`
+- [ ] Query Neo4j for `:QueryPattern` nodes via MCP
+- [ ] Display for each pattern:
+  - Pattern name
+  - Description
+  - Usage count
+  - Success rate (%)
+- [ ] Sort by usage count descending
+- [ ] Use shadcn/ui Card component
 - [ ] Add JSDoc comments
 - [ ] Run `pnpm tsc --noEmit`
 
-**Dependencies**: Task 4 (Supabase)
+**Dependencies**: Task 4 (Supabase or Neo4j query)
 
 **Definition of Done**:
-- Table displays last 20 interactions
-- Columns sortable
-- Row click shows modal with details
+- Patterns displayed in cards
+- Data fetched from Neo4j
+- Sorted by usage
 - TypeScript compiles
 
 ```

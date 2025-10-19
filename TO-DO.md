@@ -196,33 +196,9 @@ Created `components/dashboard/stats-cards.tsx` (212 lines) with three Tremor Car
 
 ---
 
-## **Task 23: Dashboard - Interactions Table Component**
+## ✅ **Task 23: Dashboard - Interactions Table Component** (Completed 2025-10-19)
 
-**Description**: Create table showing last 20 interactions with key metrics.
-
-**Deliverables**:
-- [ ] Create `components/dashboard/interactions-table.tsx`
-- [ ] Query Supabase `interactions` table (last 20, ordered by created_at DESC)
-- [ ] Display columns:
-  - Query (truncated to 50 chars)
-  - Confidence
-  - Grounding
-  - Overall Score
-  - Latency
-  - Timestamp
-- [ ] Make sortable by clicking column headers
-- [ ] Click row → show full interaction details in modal
-- [ ] Use shadcn/ui Table component
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 4 (Supabase)
-
-**Definition of Done**:
-- Table displays last 20 interactions
-- Columns sortable
-- Row click shows modal with details
-- TypeScript compiles
+Created `components/dashboard/interactions-table.tsx` (419 lines) with sortable table, modal details view. See HISTORY.md.
 
 ---
 
