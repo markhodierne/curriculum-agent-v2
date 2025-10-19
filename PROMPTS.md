@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 26.
+We are working through `TO-DO.md` and are on task 27.
 
 **Before implementing anything:**
 
@@ -86,36 +86,27 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 26: Neo4j Schema Setup - Vector Index**
+## **Task 27: Supabase Schema Setup - Table Creation**
 
-**Description**: Create vector index in Neo4j for memory embeddings.
+**Description**: Run SQL migrations to create all Supabase tables.
 
 **Deliverables**:
-- [ ] Create `docs/neo4j-setup.md` with Cypher commands
-- [ ] Document vector index creation:
-  ```cypher
-  CREATE VECTOR INDEX memory_embeddings IF NOT EXISTS
-  FOR (m:Memory)
-  ON m.embedding
-  OPTIONS {
-    indexConfig: {
-      `vector.dimensions`: 1536,
-      `vector.similarity_function`: 'cosine'
-    }
-  }
-  ```
-- [ ] Document property indexes:
-  - `Memory.created_at`
-  - `Memory.overall_score`
-  - `QueryPattern.name` (unique constraint)
-- [ ] Test index creation commands in Neo4j Browser
+- [ ] Create `docs/supabase-setup.md` with SQL commands
+- [ ] Run SQL from Task 4 schema definitions to create:
+  - `interactions` table with indexes
+  - `feedback` table with foreign key
+  - `evaluation_metrics` table with indexes
+  - `memory_stats` table (single row)
+- [ ] Verify tables created in Supabase dashboard
+- [ ] Test insert/select queries
 
-**Dependencies**: None (can be done anytime, but needed before Task 6 is used)
+**Dependencies**: Task 4 (schema definitions)
 
 **Definition of Done**:
-- Documentation created with all Cypher commands
-- Commands tested and verified working
-- Index creation instructions clear
+- All tables exist in Supabase
+- Indexes created
+- Foreign keys enforced
+- Documentation complete
 
 ```
 
