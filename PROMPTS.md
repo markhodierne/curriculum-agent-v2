@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 25.
+We are working through `TO-DO.md` and are on task 26.
 
 **Before implementing anything:**
 
@@ -86,31 +86,36 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 25: Dashboard Page - Main Page**
+## **Task 26: Neo4j Schema Setup - Vector Index**
 
-**Description**: Create dashboard page assembling all dashboard components.
+**Description**: Create vector index in Neo4j for memory embeddings.
 
 **Deliverables**:
-- [ ] Create `app/dashboard/page.tsx`
-- [ ] Import and render:
-  - Learning Curve chart
-  - Stats Cards
-  - Interactions Table
-  - Pattern Library
-- [ ] Add "Back to Chat" button in header
-- [ ] Add auto-refresh every 30s (optional, can use manual refresh button)
-- [ ] Style with Tailwind
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
+- [ ] Create `docs/neo4j-setup.md` with Cypher commands
+- [ ] Document vector index creation:
+  ```cypher
+  CREATE VECTOR INDEX memory_embeddings IF NOT EXISTS
+  FOR (m:Memory)
+  ON m.embedding
+  OPTIONS {
+    indexConfig: {
+      `vector.dimensions`: 1536,
+      `vector.similarity_function`: 'cosine'
+    }
+  }
+  ```
+- [ ] Document property indexes:
+  - `Memory.created_at`
+  - `Memory.overall_score`
+  - `QueryPattern.name` (unique constraint)
+- [ ] Test index creation commands in Neo4j Browser
 
-**Dependencies**: Task 21-24 (all dashboard components)
+**Dependencies**: None (can be done anytime, but needed before Task 6 is used)
 
 **Definition of Done**:
-- Dashboard page renders
-- All components functional
-- Back button navigates to chat
-- Data refreshes (manual or auto)
-- TypeScript compiles
+- Documentation created with all Cypher commands
+- Commands tested and verified working
+- Index creation instructions clear
 
 ```
 

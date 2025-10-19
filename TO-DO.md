@@ -221,31 +221,9 @@ Created `components/dashboard/interactions-table.tsx` (419 lines) with sortable 
 
 ---
 
-## **Task 25: Dashboard Page - Main Page**
+## ✅ **Task 25: Dashboard Page - Main Page** (Completed 2025-10-19)
 
-**Description**: Create dashboard page assembling all dashboard components.
-
-**Deliverables**:
-- [ ] Create `app/dashboard/page.tsx`
-- [ ] Import and render:
-  - Learning Curve chart
-  - Stats Cards
-  - Interactions Table
-  - Pattern Library
-- [ ] Add "Back to Chat" button in header
-- [ ] Add auto-refresh every 30s (optional, can use manual refresh button)
-- [ ] Style with Tailwind
-- [ ] Add JSDoc comments
-- [ ] Run `pnpm tsc --noEmit`
-
-**Dependencies**: Task 21-24 (all dashboard components)
-
-**Definition of Done**:
-- Dashboard page renders
-- All components functional
-- Back button navigates to chat
-- Data refreshes (manual or auto)
-- TypeScript compiles
+Created `app/dashboard/page.tsx` (146 lines) with all dashboard components, manual refresh button, back navigation. See HISTORY.md.
 
 ---
 
