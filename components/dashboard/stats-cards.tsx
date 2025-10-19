@@ -21,7 +21,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@tremor/react';
 import { MessageSquare, Star, Brain } from 'lucide-react';
-import { getMemoryStats, countInteractions } from '@/lib/database/queries';
 
 /**
  * Statistics data structure
@@ -51,26 +50,26 @@ export function StatsCards(): React.ReactElement {
   }, []);
 
   /**
-   * Fetches statistics from Supabase
+   * Fetches statistics from API route
    *
-   * Calls getMemoryStats() and countInteractions() in parallel,
-   * then combines results into Stats object.
+   * Calls /api/dashboard/stats to get aggregated statistics.
    */
   async function fetchStats(): Promise<void> {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch data in parallel
-      const [memoryStats, interactionCount] = await Promise.all([
-        getMemoryStats(),
-        countInteractions(),
-      ]);
+      const response = await fetch('/api/dashboard/stats');
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+
+      const data = await response.json();
 
       setStats({
-        totalInteractions: interactionCount,
-        avgConfidence: memoryStats.avg_confidence,
-        memoriesCreated: memoryStats.total_memories,
+        totalInteractions: data.totalInteractions,
+        avgConfidence: data.avgConfidence,
+        memoriesCreated: data.totalMemories,
       });
     } catch (err) {
       console.error('Failed to fetch stats:', err);

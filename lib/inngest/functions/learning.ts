@@ -158,6 +158,8 @@ export const learningFunction = inngest.createFunction(
         await mcpClient.connect();
         const tools = await mcpClient.getTools();
 
+        console.log('Available MCP tools:', Object.keys(tools));
+
         // Get the write-enabled Cypher tool (not read-only)
         const cypherTool = tools.write_neo4j_cypher || tools.read_neo4j_cypher;
 
@@ -165,65 +167,77 @@ export const learningFunction = inngest.createFunction(
           throw new Error('No Cypher execution tool available from MCP');
         }
 
-        // Create memory node with all properties
+        console.log('Using tool:', cypherTool === tools.write_neo4j_cypher ? 'write_neo4j_cypher' : 'read_neo4j_cypher');
+
+        // Prepare data for Cypher query
+        // Note: MCP write_neo4j_cypher tool only accepts 'query' parameter, not 'parameters'
+        // So we need to escape and embed the values directly in the Cypher query
+        const escapeString = (str: string) => str.replace(/'/g, "\\'").replace(/\n/g, "\\n");
+        const escapeArray = (arr: string[]) => JSON.stringify(arr).replace(/'/g, "\\'");
+
+        const evaluatorNotes = JSON.stringify({
+          strengths: event.data.evaluation.strengths,
+          weaknesses: event.data.evaluation.weaknesses,
+          suggestions: event.data.evaluation.suggestions,
+        }).replace(/'/g, "\\'").replace(/\n/g, "\\n");
+
+        // Generate a unique ID for the memory node
+        const memoryNodeId = `memory-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Create memory node with all properties (values embedded directly)
+        // Note: write_neo4j_cypher returns stats, not query results, so we use a known ID
         const cypher = `
           CREATE (m:Memory {
-            id: randomUUID(),
+            id: '${memoryNodeId}',
             type: 'episodic',
-            user_query: $query,
-            final_answer: $answer,
-            cypher_used: $cypherQueries,
-            confidence_overall: $confidenceOverall,
-            grounding_score: $groundingScore,
-            accuracy_score: $accuracyScore,
-            completeness_score: $completenessScore,
-            pedagogy_score: $pedagogyScore,
-            clarity_score: $clarityScore,
-            overall_score: $overallScore,
-            evaluator_notes: $evaluatorNotes,
-            embedding: $embedding,
-            memories_used: $memoriesUsed,
+            user_query: '${escapeString(event.data.query)}',
+            final_answer: '${escapeString(event.data.answer)}',
+            cypher_used: ${escapeArray(event.data.cypherQueries)},
+            confidence_overall: ${event.data.confidence},
+            grounding_score: ${event.data.evaluation.grounding},
+            accuracy_score: ${event.data.evaluation.accuracy},
+            completeness_score: ${event.data.evaluation.completeness},
+            pedagogy_score: ${event.data.evaluation.pedagogy},
+            clarity_score: ${event.data.evaluation.clarity},
+            overall_score: ${event.data.evaluation.overall},
+            evaluator_notes: '${evaluatorNotes}',
+            embedding: ${JSON.stringify(embedding)},
+            memories_used: ${JSON.stringify(event.data.memoriesUsed || [])},
             created_at: datetime(),
             updated_at: datetime()
           })
-          RETURN m.id as id
         `;
 
-        // Execute Cypher query
+        // Execute Cypher query (only 'query' parameter, no 'parameters')
         const result = await cypherTool.execute({
           query: cypher,
-          parameters: {
-            query: event.data.query,
-            answer: event.data.answer,
-            cypherQueries: event.data.cypherQueries,
-            confidenceOverall: event.data.confidence,
-            groundingScore: event.data.evaluation.grounding,
-            accuracyScore: event.data.evaluation.accuracy,
-            completenessScore: event.data.evaluation.completeness,
-            pedagogyScore: event.data.evaluation.pedagogy,
-            clarityScore: event.data.evaluation.clarity,
-            overallScore: event.data.evaluation.overall,
-            evaluatorNotes: JSON.stringify({
-              strengths: event.data.evaluation.strengths,
-              weaknesses: event.data.evaluation.weaknesses,
-              suggestions: event.data.evaluation.suggestions,
-            }),
-            embedding: embedding,
-            memoriesUsed: event.data.memoriesUsed || [],
-          },
         });
 
-        // Extract memory ID from result
-        let createdId: string;
+        // Check for errors
+        if (result && result.content && result.content.length > 0) {
+          const resultText = result.content[0].text;
+          console.log('MCP tool result text:', resultText.substring(0, 200));
 
-        if (result.success && result.data && result.data.length > 0) {
-          createdId = result.data[0].id;
+          // Check if it's an error message
+          if (resultText.startsWith('Error')) {
+            console.error('MCP tool returned error:', resultText);
+            throw new Error(`Neo4j MCP error: ${resultText}`);
+          }
+
+          const data = JSON.parse(resultText);
+          // write_neo4j_cypher returns stats like: {nodes_created: 1, properties_set: 17}
+          if (data.nodes_created === 1) {
+            console.log(`Memory node created with ID: ${memoryNodeId}`);
+            console.log('Creation stats:', data);
+            return memoryNodeId;
+          } else {
+            console.error('Unexpected creation result:', data);
+            throw new Error('Memory node creation failed - no nodes created');
+          }
         } else {
-          throw new Error('Memory creation returned no ID');
+          console.error('Memory creation result:', JSON.stringify(result, null, 2));
+          throw new Error('Memory creation returned unexpected format');
         }
-
-        console.log(`Memory node created with ID: ${createdId}`);
-        return createdId;
       } catch (error) {
         console.error('Failed to create memory node:', error);
         throw error; // Critical step - fail if memory creation fails
@@ -249,9 +263,11 @@ export const learningFunction = inngest.createFunction(
           throw new Error('No Cypher execution tool available from MCP');
         }
 
+        const evidenceIds = event.data.evidenceNodeIds.map((id: string) => `'${id}'`).join(', ');
+
         const cypher = `
-          MATCH (m:Memory {id: $memoryId})
-          UNWIND $evidenceNodeIds as nodeId
+          MATCH (m:Memory {id: '${memoryId}'})
+          UNWIND [${evidenceIds}] as nodeId
           MATCH (n) WHERE n.id = nodeId
           CREATE (m)-[:USED_EVIDENCE]->(n)
           RETURN count(*) as linkedCount
@@ -259,13 +275,13 @@ export const learningFunction = inngest.createFunction(
 
         const result = await cypherTool.execute({
           query: cypher,
-          parameters: {
-            memoryId: memoryId,
-            evidenceNodeIds: event.data.evidenceNodeIds,
-          },
         });
 
-        const linkedCount = result.success && result.data?.[0]?.linkedCount || 0;
+        let linkedCount = 0;
+        if (result && result.content && result.content.length > 0) {
+          const data = JSON.parse(result.content[0].text);
+          linkedCount = data[0]?.linkedCount || 0;
+        }
         console.log(`Linked ${linkedCount} evidence nodes`);
 
         return { linked: linkedCount };
@@ -305,12 +321,15 @@ export const learningFunction = inngest.createFunction(
 
         console.log(`Pattern identified: ${patternName}`);
 
+        const escapeString = (str: string) => str.replace(/'/g, "\\'").replace(/\n/g, "\\n");
+        const description = `Pattern for query type: ${event.data.query.substring(0, 100)}...`;
+
         const cypher = `
-          MERGE (p:QueryPattern {name: $patternName})
+          MERGE (p:QueryPattern {name: '${patternName}'})
           ON CREATE SET
             p.id = randomUUID(),
-            p.description = $description,
-            p.cypher_template = $cypherTemplate,
+            p.description = '${escapeString(description)}',
+            p.cypher_template = '${escapeString(firstQuery)}',
             p.success_count = 1,
             p.failure_count = 0,
             p.created_at = datetime(),
@@ -319,26 +338,23 @@ export const learningFunction = inngest.createFunction(
             p.success_count = p.success_count + 1,
             p.updated_at = datetime()
           WITH p
-          MATCH (m:Memory {id: $memoryId})
+          MATCH (m:Memory {id: '${memoryId}'})
           MERGE (m)-[:APPLIED_PATTERN]->(p)
           RETURN p.id as patternId, p.success_count as successCount
         `;
 
         const result = await cypherTool.execute({
           query: cypher,
-          parameters: {
-            patternName: patternName,
-            description: `Pattern for query type: ${event.data.query.substring(0, 100)}...`,
-            cypherTemplate: firstQuery,
-            memoryId: memoryId,
-          },
         });
 
-        if (result.success && result.data?.[0]) {
-          const patternId = result.data[0].patternId;
-          const successCount = result.data[0].successCount;
-          console.log(`Pattern ${patternName} updated (ID: ${patternId}, uses: ${successCount})`);
-          return { extracted: true, patternId, patternName, successCount };
+        if (result && result.content && result.content.length > 0) {
+          const data = JSON.parse(result.content[0].text);
+          if (data && data.length > 0) {
+            const patternId = data[0].patternId;
+            const successCount = data[0].successCount;
+            console.log(`Pattern ${patternName} updated (ID: ${patternId}, uses: ${successCount})`);
+            return { extracted: true, patternId, patternName, successCount };
+          }
         }
 
         return { extracted: false, reason: 'query_failed' };
@@ -365,10 +381,10 @@ export const learningFunction = inngest.createFunction(
 
         // Find top 5 similar memories with similarity > 0.8
         const cypher = `
-          MATCH (m:Memory {id: $memoryId})
+          MATCH (m:Memory {id: '${memoryId}'})
           CALL db.index.vector.queryNodes('memory_embeddings', 5, m.embedding)
           YIELD node, score
-          WHERE node.id <> $memoryId AND score > 0.8
+          WHERE node.id <> '${memoryId}' AND score > 0.8
           WITH m, node, score
           MERGE (m)-[r:SIMILAR_TO]->(node)
           ON CREATE SET r.similarity = score, r.created_at = datetime()
@@ -377,12 +393,13 @@ export const learningFunction = inngest.createFunction(
 
         const result = await cypherTool.execute({
           query: cypher,
-          parameters: {
-            memoryId: memoryId,
-          },
         });
 
-        const linkedCount = result.success && result.data?.[0]?.linkedCount || 0;
+        let linkedCount = 0;
+        if (result && result.content && result.content.length > 0) {
+          const data = JSON.parse(result.content[0].text);
+          linkedCount = data[0]?.linkedCount || 0;
+        }
         console.log(`Linked ${linkedCount} similar memories`);
 
         return { linked: linkedCount };
@@ -417,29 +434,31 @@ export const learningFunction = inngest.createFunction(
 
         const result = await cypherTool.execute({
           query: cypher,
-          parameters: {},
         });
 
-        if (result.success && result.data?.[0]) {
-          const stats = result.data[0];
+        if (result && result.content && result.content.length > 0) {
+          const data = JSON.parse(result.content[0].text);
+          if (data && data.length > 0) {
+            const stats = data[0];
 
-          await updateMemoryStats({
-            totalMemories: stats.memoryCount || 0,
-            avgConfidence: stats.avgConfidence || 0,
-            avgOverallScore: stats.avgScore || 0,
-            totalPatterns: stats.patternCount || 0,
-          });
+            await updateMemoryStats({
+              totalMemories: stats.memoryCount || 0,
+              avgConfidence: stats.avgConfidence || 0,
+              avgOverallScore: stats.avgScore || 0,
+              totalPatterns: stats.patternCount || 0,
+            });
 
-          console.log('Memory stats updated in Supabase:', {
-            memories: stats.memoryCount,
-            patterns: stats.patternCount,
-          });
+            console.log('Memory stats updated in Supabase:', {
+              memories: stats.memoryCount,
+              patterns: stats.patternCount,
+            });
 
-          return {
-            updated: true,
-            totalMemories: stats.memoryCount,
-            totalPatterns: stats.patternCount,
-          };
+            return {
+              updated: true,
+              totalMemories: stats.memoryCount,
+              totalPatterns: stats.patternCount,
+            };
+          }
         }
 
         console.warn('Stats query returned no data');

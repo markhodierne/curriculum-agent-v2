@@ -26,11 +26,6 @@ import { ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createFeedback,
-  updateFeedback,
-  getFeedbackByInteractionId,
-} from '@/lib/database/queries';
 
 /**
  * Props for FeedbackControls component
@@ -72,24 +67,35 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Load existing feedback on mount
+   * Load existing feedback on mount via API route
    */
   useEffect(() => {
     async function loadFeedback(): Promise<void> {
       try {
-        const existing = await getFeedbackByInteractionId(messageId);
-        if (existing) {
+        const response = await fetch(`/api/feedback?interactionId=${messageId}`);
+
+        // Gracefully handle 404 (interaction not created yet) or 500 errors
+        if (!response.ok) {
+          if (response.status === 404 || response.status === 500) {
+            // Interaction hasn't been saved yet - this is normal during streaming
+            return;
+          }
+          throw new Error('Failed to fetch feedback');
+        }
+
+        const { feedback } = await response.json();
+        if (feedback) {
           setState({
-            feedbackId: existing.id,
-            thumbsUp: existing.thumbs_up,
-            wellGrounded: existing.well_grounded,
-            note: existing.note || '',
-            showNoteInput: !!existing.note,
+            feedbackId: feedback.id,
+            thumbsUp: feedback.thumbs_up,
+            wellGrounded: feedback.well_grounded,
+            note: feedback.note || '',
+            showNoteInput: !!feedback.note,
           });
         }
       } catch (err) {
-        console.error('Failed to load feedback:', err);
-        // Don't show error to user - just log it
+        // Silently fail - don't show errors for missing interactions
+        // The interaction will be created asynchronously after streaming completes
       }
     }
 
@@ -97,35 +103,57 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
   }, [messageId]);
 
   /**
-   * Saves feedback to Supabase (create or update)
+   * Saves feedback via API route (create or update)
+   * Retries if interaction hasn't been saved yet
    */
-  async function saveFeedback(updates: Partial<FeedbackState>): Promise<void> {
+  async function saveFeedback(updates: Partial<FeedbackState>, retryCount = 0): Promise<void> {
     setIsSaving(true);
     setError(null);
 
     try {
       const newState = { ...state, ...updates };
 
-      if (state.feedbackId) {
-        // Update existing feedback
-        await updateFeedback(state.feedbackId, {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           interactionId: messageId,
+          feedbackId: state.feedbackId,
           thumbsUp: newState.thumbsUp,
           wellGrounded: newState.wellGrounded,
           note: newState.note || null,
-        });
-      } else {
-        // Create new feedback
-        const feedbackId = await createFeedback({
-          interactionId: messageId,
-          thumbsUp: newState.thumbsUp,
-          wellGrounded: newState.wellGrounded,
-          note: newState.note || null,
-        });
-        setState((prev) => ({ ...prev, feedbackId }));
+        }),
+      });
+
+      if (response.status === 202) {
+        // Interaction not ready yet - retry after 1 second (max 5 retries = 5 seconds)
+        if (retryCount < 5) {
+          setTimeout(() => {
+            saveFeedback(updates, retryCount + 1);
+          }, 1000);
+          return;
+        } else {
+          setError('Please wait a moment and try again.');
+          setIsSaving(false);
+          return;
+        }
       }
 
-      setState((prev) => ({ ...prev, ...updates }));
+      if (!response.ok) {
+        // Log the actual error for debugging
+        const errorText = await response.text();
+        console.error('Feedback save failed:', response.status, errorText);
+        throw new Error(`Failed to save feedback: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Update state with feedback ID if newly created
+      if (result.created && result.feedbackId) {
+        setState((prev) => ({ ...prev, feedbackId: result.feedbackId, ...updates }));
+      } else {
+        setState((prev) => ({ ...prev, ...updates }));
+      }
     } catch (err) {
       console.error('Failed to save feedback:', err);
       setError('Failed to save feedback. Please try again.');

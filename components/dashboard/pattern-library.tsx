@@ -5,7 +5,7 @@
  * Shows pattern name, description, usage count, and success rate.
  * Patterns are sorted by usage count (total uses) descending.
  *
- * Data fetched from Neo4j via MCP client on component mount.
+ * Data fetched from API route (/api/dashboard/patterns).
  * Uses Tremor Card components for consistent dashboard styling.
  *
  * Usage:
@@ -19,20 +19,18 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from '@tremor/react';
-import { getNeo4jMCPClient } from '@/lib/mcp/client/neo4j-client';
 
 /**
- * Query pattern data structure from Neo4j
+ * Query pattern data structure from API
  */
 interface QueryPattern {
   id: string;
   name: string;
   description: string;
-  cypherTemplate: string;
   successCount: number;
   failureCount: number;
-  createdAt: string;
-  updatedAt: string;
+  totalUsage: number;
+  successRate: number;
 }
 
 /**
@@ -54,54 +52,24 @@ export function PatternLibrary(): React.ReactElement {
   }, []);
 
   /**
-   * Fetches query patterns from Neo4j via MCP
+   * Fetches query patterns from API route
    *
-   * Executes Cypher query to retrieve all :QueryPattern nodes,
-   * calculates usage counts and success rates, then sorts by
-   * total usage descending.
+   * Calls /api/dashboard/patterns to get top 20 patterns
+   * sorted by total usage descending.
    */
   async function fetchPatterns(): Promise<void> {
     try {
       setLoading(true);
       setError(null);
 
-      // Connect to Neo4j MCP client
-      const mcpClient = getNeo4jMCPClient();
-      await mcpClient.connect();
-
-      // Get MCP tools
-      const tools = await mcpClient.getTools();
-      const readTool = tools.read_neo4j_cypher;
-
-      if (!readTool) {
-        throw new Error('read_neo4j_cypher tool not available');
+      // Fetch from API route
+      const response = await fetch('/api/dashboard/patterns');
+      if (!response.ok) {
+        throw new Error('Failed to fetch patterns');
       }
 
-      // Query for all QueryPattern nodes
-      const cypher = `
-        MATCH (p:QueryPattern)
-        RETURN p.id as id,
-               p.name as name,
-               p.description as description,
-               p.cypher_template as cypherTemplate,
-               p.success_count as successCount,
-               p.failure_count as failureCount,
-               p.created_at as createdAt,
-               p.updated_at as updatedAt
-        ORDER BY (p.success_count + p.failure_count) DESC
-      `;
-
-      // Execute query via MCP tool
-      const result = await readTool.execute({ query: cypher });
-
-      // Parse results
-      if (result && result.content && Array.isArray(result.content)) {
-        const parsedPatterns = parsePatterns(result.content);
-        setPatterns(parsedPatterns);
-      } else {
-        // No patterns found yet (empty result)
-        setPatterns([]);
-      }
+      const { patterns: data } = await response.json();
+      setPatterns(data);
     } catch (err) {
       console.error('Failed to fetch patterns:', err);
       setError('Failed to load patterns. Please refresh the page.');
@@ -155,13 +123,8 @@ export function PatternLibrary(): React.ReactElement {
       </h2>
       <div className="space-y-3">
         {patterns.map((pattern) => {
-          const usageCount = pattern.successCount + pattern.failureCount;
-          const successRate = usageCount > 0
-            ? (pattern.successCount / usageCount) * 100
-            : 0;
-
           return (
-            <Card key={pattern.id} decoration="left" decorationColor={getDecorationColor(successRate)}>
+            <Card key={pattern.id} decoration="left" decorationColor={getDecorationColor(pattern.successRate)}>
               <div className="space-y-2">
                 {/* Pattern name and success rate */}
                 <div className="flex items-start justify-between">
@@ -169,8 +132,8 @@ export function PatternLibrary(): React.ReactElement {
                     {pattern.name}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-medium ${getSuccessRateColor(successRate)}`}>
-                      {successRate.toFixed(0)}% success
+                    <span className={`text-sm font-medium ${getSuccessRateColor(pattern.successRate)}`}>
+                      {pattern.successRate.toFixed(0)}% success
                     </span>
                   </div>
                 </div>
@@ -183,7 +146,7 @@ export function PatternLibrary(): React.ReactElement {
                 {/* Usage stats */}
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span>
-                    <span className="font-medium text-gray-700">{usageCount}</span> total {usageCount === 1 ? 'use' : 'uses'}
+                    <span className="font-medium text-gray-700">{pattern.totalUsage}</span> total {pattern.totalUsage === 1 ? 'use' : 'uses'}
                   </span>
                   <span>•</span>
                   <span>
@@ -205,49 +168,6 @@ export function PatternLibrary(): React.ReactElement {
       </div>
     </div>
   );
-}
-
-/**
- * Parses Neo4j MCP tool result into QueryPattern array
- *
- * Converts MCP tool response format to typed QueryPattern objects.
- * Handles missing or invalid data gracefully.
- *
- * @param content - MCP tool result content array
- * @returns Array of QueryPattern objects
- */
-function parsePatterns(content: any[]): QueryPattern[] {
-  const patterns: QueryPattern[] = [];
-
-  for (const item of content) {
-    try {
-      // MCP returns results wrapped in { text: string } objects
-      const data = typeof item.text === 'string' ? JSON.parse(item.text) : item;
-
-      // Extract pattern data (handle both direct object and nested formats)
-      const patternData = Array.isArray(data) ? data[0] : data;
-
-      if (!patternData || !patternData.id || !patternData.name) {
-        console.warn('Skipping invalid pattern data:', patternData);
-        continue;
-      }
-
-      patterns.push({
-        id: patternData.id,
-        name: patternData.name,
-        description: patternData.description || '',
-        cypherTemplate: patternData.cypherTemplate || '',
-        successCount: patternData.successCount || 0,
-        failureCount: patternData.failureCount || 0,
-        createdAt: patternData.createdAt || '',
-        updatedAt: patternData.updatedAt || '',
-      });
-    } catch (err) {
-      console.error('Failed to parse pattern:', err, item);
-    }
-  }
-
-  return patterns;
 }
 
 /**

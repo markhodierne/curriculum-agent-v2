@@ -24,7 +24,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { LineChart } from '@tremor/react';
-import { getAllEvaluationMetrics } from '@/lib/database/queries';
 
 // Type for chart data points
 interface ChartDataPoint {
@@ -61,11 +60,16 @@ export function LearningCurve() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch all evaluation metrics in chronological order
-        const metrics = await getAllEvaluationMetrics();
+        // Fetch all evaluation metrics from API route
+        const response = await fetch('/api/dashboard/evaluations');
+        if (!response.ok) {
+          throw new Error('Failed to fetch evaluations');
+        }
+
+        const { evaluations } = await response.json();
 
         // Transform metrics into chart data points
-        const data: ChartDataPoint[] = metrics.map((metric, index) => ({
+        const data: ChartDataPoint[] = evaluations.map((metric: any, index: number) => ({
           interaction: index + 1, // 1-indexed interaction numbers
           'Evaluation Score': metric.overall_score,
           'Target (0.70)': 0.7, // Constant target line

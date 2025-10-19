@@ -19,13 +19,13 @@
  */
 
 import { openai } from '@ai-sdk/openai';
-import { streamText, type CoreMessage } from 'ai';
+import { streamText, convertToCoreMessages } from 'ai';
 import { NextRequest } from 'next/server';
 import { retrieveSimilarMemories } from '@/lib/memory/retrieval';
 import { buildQueryPrompt } from '@/lib/agents/prompts/query-prompt';
 import { getNeo4jMCPClient } from '@/lib/mcp';
 import { getInngestClient } from '@/lib/inngest/client';
-import { createInteraction } from '@/lib/database/queries';
+import { createInteraction, updateInteraction } from '@/lib/database/queries';
 
 /**
  * POST /api/chat - Stream chat responses using Query Agent
@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
 
   try {
     // 1. Parse and validate request body
-    const { messages, model, temperature } = await req.json();
+    const { messages: rawMessages, model, temperature } = await req.json();
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       return new Response(
         JSON.stringify({
           error: 'Please provide a valid message to continue the conversation.',
@@ -62,15 +62,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Convert UI messages to Core messages (handles parts array format from AI SDK v5)
+    const messages = convertToCoreMessages(rawMessages);
+
     // Extract latest user message for memory retrieval
     const latestMessage = messages[messages.length - 1];
-    const userQuery =
-      typeof latestMessage.content === 'string'
-        ? latestMessage.content
-        : JSON.stringify(latestMessage.content);
+    let userQuery = '';
+
+    if (typeof latestMessage.content === 'string') {
+      userQuery = latestMessage.content;
+    } else if (Array.isArray(latestMessage.content)) {
+      // Handle array content (multimodal messages)
+      userQuery = latestMessage.content
+        .filter((part: any) => part.type === 'text')
+        .map((part: any) => part.text)
+        .join(' ');
+    } else if (latestMessage.content) {
+      userQuery = JSON.stringify(latestMessage.content);
+    }
 
     console.log('🔍 Query Agent processing:', {
-      query: userQuery.substring(0, 100),
+      query: userQuery?.substring(0, 100) || '(empty)',
       model: model || 'gpt-4o',
       messageCount: messages.length,
     });
@@ -126,12 +138,29 @@ export async function POST(req: NextRequest) {
       stepCount: 0,
     };
 
-    // 6. Stream response using AI SDK
+    // 6. Create interaction record FIRST to get UUID for feedback
+    // We'll update it with full details after streaming completes
+    console.log('📝 Creating interaction record...');
+    const interactionId = await createInteraction({
+      userQuery: userQuery,
+      finalAnswer: '', // Will update after streaming
+      modelUsed: model || 'gpt-4o',
+      temperature: temperature ?? 0.3,
+      confidenceOverall: 0,
+      groundingRate: 0,
+      cypherQueries: [],
+      toolCalls: [],
+      latencyMs: 0,
+      stepCount: 0,
+    });
+    console.log(`✅ Interaction created with ID: ${interactionId}`);
+
+    // 7. Stream response using AI SDK
     console.log('🤖 Streaming Query Agent response...');
     const result = await streamText({
       model: openai(model || 'gpt-4o'),
       system: systemPrompt,
-      messages: messages as CoreMessage[],
+      messages: messages,
       tools: cypherTool,
       temperature: temperature ?? 0.3,
 
@@ -193,8 +222,8 @@ export async function POST(req: NextRequest) {
             ? Math.min(evidenceNodeIds.length / 10, 1.0)
             : 0.0;
 
-        // Save interaction to Supabase
-        const interactionId = await createInteraction({
+        // Update interaction with full details after streaming completes
+        await updateInteraction(interactionId, {
           userQuery: userQuery,
           finalAnswer: fullResponse,
           modelUsed: model || 'gpt-4o',
@@ -239,7 +268,8 @@ export async function POST(req: NextRequest) {
     })();
 
     // Return streaming response (compatible with AI SDK useChat hook)
-    return result.toTextStreamResponse();
+    // Use toUIMessageStreamResponse() - this is the correct method for AI SDK v5 useChat
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('💥 Query Agent API error:', error);
 

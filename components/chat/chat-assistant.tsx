@@ -219,13 +219,15 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
    * Config is passed to API route via body parameter
    */
   const { messages: rawMessages, status, sendMessage } = useChat({
-    api: api || '/api/chat',
-    body: {
-      model: config.model,
-      temperature: config.temperature,
-      maxTokens: config.maxTokens,
-    },
-  } as any);
+    transport: new DefaultChatTransport({
+      api: api || '/api/chat',
+      body: {
+        model: config.model,
+        temperature: config.temperature,
+        maxTokens: config.maxTokens,
+      },
+    }),
+  });
 
   // Debounced messages for performance - update every 30ms instead of every token
   const [debouncedMessages, setDebouncedMessages] = useState(rawMessages);
@@ -372,6 +374,7 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
 
                 // Only add message if it has content (text or legacy content)
                 const hasContent = messageWithTextOnly.parts.length > 0 || !!(message as any).content;
+
                 if (hasContent) {
                   flowItems.push({
                     type: 'message',

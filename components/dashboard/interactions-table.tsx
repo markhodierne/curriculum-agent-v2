@@ -37,7 +37,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { getSupabaseClient } from '@/lib/database/supabase';
 
 // Type definitions for table data
 interface InteractionRow {
@@ -74,10 +73,10 @@ export default function InteractionsTable() {
   const [selectedInteraction, setSelectedInteraction] = useState<InteractionRow | null>(null);
 
   /**
-   * Fetches interactions with evaluation metrics from Supabase
+   * Fetches interactions with evaluation metrics from API route
    *
-   * Joins interactions table with evaluation_metrics to get overall_score.
-   * Fetches last 20 interactions ordered by created_at DESC.
+   * Calls /api/dashboard/interactions to get last 20 interactions
+   * with evaluation scores already joined.
    */
   useEffect(() => {
     async function fetchInteractions() {
@@ -85,55 +84,14 @@ export default function InteractionsTable() {
         setLoading(true);
         setError(null);
 
-        const supabase = getSupabaseClient();
-
-        // Fetch interactions with left join to evaluation_metrics
-        const { data, error: queryError } = await supabase
-          .from('interactions')
-          .select(
-            `
-            id,
-            user_query,
-            final_answer,
-            model_used,
-            temperature,
-            confidence_overall,
-            grounding_rate,
-            latency_ms,
-            step_count,
-            cypher_queries,
-            tool_calls,
-            created_at,
-            evaluation_metrics (
-              overall_score
-            )
-          `
-          )
-          .order('created_at', { ascending: false })
-          .limit(20);
-
-        if (queryError) {
-          throw new Error(`Failed to fetch interactions: ${queryError.message}`);
+        // Fetch from API route
+        const response = await fetch('/api/dashboard/interactions');
+        if (!response.ok) {
+          throw new Error('Failed to fetch interactions');
         }
 
-        // Transform data to flatten evaluation_metrics
-        const transformedData: InteractionRow[] = (data || []).map((row: any) => ({
-          id: row.id,
-          user_query: row.user_query,
-          final_answer: row.final_answer,
-          model_used: row.model_used,
-          temperature: row.temperature,
-          confidence_overall: row.confidence_overall,
-          grounding_rate: row.grounding_rate,
-          latency_ms: row.latency_ms,
-          step_count: row.step_count,
-          cypher_queries: row.cypher_queries,
-          tool_calls: row.tool_calls,
-          created_at: row.created_at,
-          overall_score: row.evaluation_metrics?.[0]?.overall_score ?? null,
-        }));
-
-        setInteractions(transformedData);
+        const { interactions: data } = await response.json();
+        setInteractions(data);
       } catch (err) {
         console.error('Error fetching interactions:', err);
         setError(err instanceof Error ? err.message : 'Failed to load interactions');

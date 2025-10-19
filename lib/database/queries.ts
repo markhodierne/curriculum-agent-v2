@@ -93,6 +93,40 @@ export async function createInteraction(
 }
 
 /**
+ * Updates an existing interaction record
+ *
+ * Used to update interaction with full details after streaming completes.
+ *
+ * @param interactionId - UUID of interaction to update
+ * @param params - Partial interaction data to update
+ * @throws Error if update fails
+ */
+export async function updateInteraction(
+  interactionId: string,
+  params: Partial<CreateInteractionParams>
+): Promise<void> {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from('interactions')
+    .update({
+      final_answer: params.finalAnswer,
+      confidence_overall: params.confidenceOverall,
+      grounding_rate: params.groundingRate,
+      cypher_queries: params.cypherQueries,
+      tool_calls: params.toolCalls,
+      latency_ms: params.latencyMs,
+      step_count: params.stepCount,
+      memory_id: params.memoryId,
+    })
+    .eq('id', interactionId);
+
+  if (error) {
+    throw new Error(`Failed to update interaction: ${error.message}`);
+  }
+}
+
+/**
  * Retrieves recent interactions for dashboard display
  *
  * Returns interactions in reverse chronological order.
