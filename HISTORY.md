@@ -800,16 +800,39 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 30: Test Queries Creation ✅ (Completed 2025-10-20)
+
+**Created File**: `docs/test-queries.md` (557 lines)
+
+**Implementation**: 20 curated test queries for acceptance testing, organized into 4 categories:
+1. **Basic Retrieval (5)**: Year-specific objectives, strand contents, concept lookup, subject overview, code lookup
+2. **Cross-Year Comparison (5)**: Progression paths, prerequisite chains, topic depth, concept introduction, cross-subject
+3. **Edge Cases (5)**: Non-existent year, ambiguous terms, broad queries, missing data, malformed input
+4. **Complex Multi-Turn (5)**: Natural conversations with pronouns and context building (3-turn dialogues)
+
+**Key Features**:
+- Real UK curriculum queries (Oak National Curriculum schema)
+- All answers from graph (no synthesis - confidence reflects query complexity)
+- Natural multi-turn conversations using pronouns ("those", "it")
+- For each query: expected behavior, success criteria, minimum confidence score
+- Testing workflow: pre-test setup, execution protocol, post-test analysis
+- Learning validation: baseline (1-10) vs final (41-50) for ≥20% improvement target
+
+**Targets**: ≥85% success rate (17/20), ≥95% grounding rate, ≥85% Cypher success
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-29 complete ✅
-**Next Task**: Task 30 - Test Queries Creation
+**Progress**: Tasks 1-30 complete ✅
+**Next Task**: Task 31 - Type Check & Cleanup
 
 **System Status**: ✅ Fully functional end-to-end
 **Three-Agent Learning Loop**: ✅ Working (Query → Reflection → Learning)
 **Frontend**: ✅ Home + Chat + Dashboard complete with navigation
 **Database**: ✅ Neo4j + Supabase integrated
 **Async Pipeline**: ✅ Inngest agents processing interactions
+**Testing**: ✅ 20 test queries documented for acceptance
 
 ---
 

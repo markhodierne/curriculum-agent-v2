@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 29.
+We are working through `TO-DO.md` and are on task 31.
 
 **Before implementing anything:**
 
@@ -86,41 +86,26 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 29: Integration Testing - End-to-End Flow**
+## **Task 31: Type Check & Cleanup**
 
-**Description**: Test complete flow from home → chat → dashboard with real interactions.
+**Description**: Final type check, lint, and code cleanup before demo.
 
 **Deliverables**:
-- [ ] Start dev server: `pnpm dev`
-- [ ] Test home page:
-  - Select model
-  - Set parameters
-  - Navigate to chat
-- [ ] Test chat:
-  - Send query
-  - Verify streaming works
-  - Check evidence panel
-  - Check agent trace
-  - Provide feedback
-- [ ] Verify async pipeline:
-  - Check Inngest dashboard for job completion
-  - Verify Supabase tables have data
-  - Verify Neo4j has Memory nodes
-- [ ] Test dashboard:
-  - Verify learning curve shows data
-  - Check stats cards
-  - View interactions table
-  - See pattern library
-- [ ] Run 5 test queries and document results
+- [ ] Run `pnpm tsc --noEmit` and fix all errors
+- [ ] Review all JSDoc comments for completeness
+- [ ] Check all imports use correct paths (@/ for absolute)
+- [ ] Verify naming conventions followed (see CLAUDE.md)
+- [ ] Remove any unused imports
+- [ ] Remove console.logs (except intentional logging)
+- [ ] Verify all error handling in place
 
-**Dependencies**: All previous tasks complete
+**Dependencies**: Task 30 (all features complete)
 
 **Definition of Done**:
-- Complete flow functional from home → chat → dashboard
-- Async agents processing interactions
-- Data visible in dashboard
-- No errors in console
-- 5 test queries completed successfully
+- TypeScript compiles with zero errors
+- All functions documented
+- Code follows CLAUDE.md standards
+- No unused code
 
 ```
 

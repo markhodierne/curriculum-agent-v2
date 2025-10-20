@@ -287,30 +287,9 @@ Populated `.env.local` with all 7 required environment variables: OpenAI API key
 
 ---
 
-## **Task 30: Test Queries Creation**
+## ✅ **Task 30: Test Queries Creation** (Completed 2025-10-20)
 
-**Description**: Create 20 curated test queries for acceptance testing.
-
-**Deliverables**:
-- [ ] Create `docs/test-queries.md`
-- [ ] Document 20 queries covering:
-  - Basic retrieval (5 queries)
-  - Cross-year comparison (5 queries)
-  - Edge cases (5 queries)
-  - Complex multi-turn (5 queries)
-- [ ] For each query, document:
-  - Expected behavior
-  - Success criteria
-  - Minimum confidence score
-- [ ] Reference FUNCTIONAL.md section 7.1 for examples
-
-**Dependencies**: Task 29 (system functional)
-
-**Definition of Done**:
-- 20 queries documented
-- Expected outcomes clear
-- Covers diverse scenarios
-- Can be used for acceptance testing
+Created `docs/test-queries.md` (557 lines) with 20 curated test queries for acceptance testing. See HISTORY.md.
 
 ---
 
