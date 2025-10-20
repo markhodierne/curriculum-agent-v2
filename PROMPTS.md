@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 31.
+We are working through `TO-DO.md` and are on task 32.
 
 **Before implementing anything:**
 
@@ -86,26 +86,30 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 31: Type Check & Cleanup**
+## **Task 32: Documentation - README Update**
 
-**Description**: Final type check, lint, and code cleanup before demo.
+**Description**: Update README.md with setup and usage instructions.
 
 **Deliverables**:
-- [ ] Run `pnpm tsc --noEmit` and fix all errors
-- [ ] Review all JSDoc comments for completeness
-- [ ] Check all imports use correct paths (@/ for absolute)
-- [ ] Verify naming conventions followed (see CLAUDE.md)
-- [ ] Remove any unused imports
-- [ ] Remove console.logs (except intentional logging)
-- [ ] Verify all error handling in place
+- [ ] Update `README.md` with:
+  - Project overview
+  - Prerequisites
+  - Installation steps
+  - Environment setup
+  - Running locally
+  - Running Inngest dev server
+  - Testing instructions
+  - Architecture overview (link to ARCHITECTURE.md)
+- [ ] Add screenshots of home, chat, dashboard
+- [ ] Document common issues and solutions
 
-**Dependencies**: Task 30 (all features complete)
+**Dependencies**: Task 31 (system complete)
 
 **Definition of Done**:
-- TypeScript compiles with zero errors
-- All functions documented
-- Code follows CLAUDE.md standards
-- No unused code
+- README complete and accurate
+- Developer can follow to set up project
+- Screenshots included
+- Links to other docs correct
 
 ```
 

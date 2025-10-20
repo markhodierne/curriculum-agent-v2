@@ -9,15 +9,19 @@ See `FUNCTIONAL.md` for requirements, `ARCHITECTURE.md` for technical architectu
 ## Commands
 
 ```bash
-pnpm dev              # Start development server (Next.js + Turbopack)
-pnpm build            # Production build
-pnpm start            # Production server
-pnpm tsc --noEmit     # Type check (REQUIRED before commits)
+pnpm dev                          # Start development server (Next.js + Turbopack)
+pnpm build                        # Production build
+pnpm start                        # Production server
+pnpm tsc --noEmit                 # Type check (REQUIRED before commits)
+pnpm reset-learning -- --dry-run  # Preview learning data reset (safe)
+pnpm reset-learning -- --confirm  # Reset all learning data (destructive)
 ```
 
 **CRITICAL**: Always run `pnpm tsc --noEmit` after writing/modifying code before considering task complete.
 
 **Package Manager**: Use **pnpm only**. Never npm or yarn.
+
+**Development Utility**: Use `pnpm reset-learning` to clear all learned memories, evaluations, and interactions while preserving the curriculum graph. See `scripts/README.md` for details.
 
 ---
 

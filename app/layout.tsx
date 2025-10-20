@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MCP Tools Agent",
-  description: "AI agent with MCP (Model Context Protocol) integration",
+  title: "Oak Curriculum Agent",
+  description: "Self-learning AI assistant for UK National Curriculum",
 };
 
 export default function RootLayout({
