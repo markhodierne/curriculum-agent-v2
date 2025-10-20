@@ -247,12 +247,17 @@ export const learningFunction = inngest.createFunction(
     // Step 3: Link to evidence nodes
     await step.run('link-evidence', async () => {
       try {
+        console.log('\n🔗 Starting evidence linking step...');
+        console.log('   evidenceNodeIds received:', event.data.evidenceNodeIds);
+        console.log('   evidenceNodeIds type:', typeof event.data.evidenceNodeIds);
+        console.log('   evidenceNodeIds length:', event.data.evidenceNodeIds?.length);
+
         if (!event.data.evidenceNodeIds || event.data.evidenceNodeIds.length === 0) {
-          console.log('No evidence nodes to link, skipping...');
+          console.log('❌ No evidence nodes to link, skipping...');
           return { linked: 0 };
         }
 
-        console.log(`Linking ${event.data.evidenceNodeIds.length} evidence nodes...`);
+        console.log(`✅ Linking ${event.data.evidenceNodeIds.length} evidence nodes...`);
 
         const mcpClient = getNeo4jMCPClient();
         await mcpClient.connect();
@@ -263,26 +268,44 @@ export const learningFunction = inngest.createFunction(
           throw new Error('No Cypher execution tool available from MCP');
         }
 
-        const evidenceIds = event.data.evidenceNodeIds.map((id: string) => `'${id}'`).join(', ');
+        // Convert string IDs to integers for matching (unitId, lessonId, etc. are integers)
+        const evidenceIds = event.data.evidenceNodeIds.map((id: string) => id).join(', ');
 
+        // Match nodes by their specific ID properties (e.g., unitId for Unit nodes)
+        // Try multiple property names since different node types use different ID properties
+        // Note: IDs are integers in Neo4j, so we convert the string nodeId to int
         const cypher = `
           MATCH (m:Memory {id: '${memoryId}'})
           UNWIND [${evidenceIds}] as nodeId
-          MATCH (n) WHERE n.id = nodeId
+          MATCH (n)
+          WHERE n.unitId = toInteger(nodeId)
+             OR n.lessonId = toInteger(nodeId)
+             OR n.objectiveId = toInteger(nodeId)
+             OR n.id = toString(nodeId)
           CREATE (m)-[:USED_EVIDENCE]->(n)
           RETURN count(*) as linkedCount
         `;
+
+        console.log('   Cypher query:', cypher);
 
         const result = await cypherTool.execute({
           query: cypher,
         });
 
+        console.log('   Raw result:', JSON.stringify(result).substring(0, 500));
+
         let linkedCount = 0;
         if (result && result.content && result.content.length > 0) {
-          const data = JSON.parse(result.content[0].text);
-          linkedCount = data[0]?.linkedCount || 0;
+          const resultText = result.content[0].text;
+          console.log('   Result text:', resultText);
+          const data = JSON.parse(resultText);
+          console.log('   Parsed data:', JSON.stringify(data));
+
+          // write_neo4j_cypher returns stats like {relationships_created: N}
+          // NOT query results like [{linkedCount: N}]
+          linkedCount = data.relationships_created || 0;
         }
-        console.log(`Linked ${linkedCount} evidence nodes`);
+        console.log(`   ✅ Linked ${linkedCount} evidence nodes`);
 
         return { linked: linkedCount };
       } catch (error) {

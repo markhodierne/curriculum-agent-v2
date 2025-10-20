@@ -75,7 +75,7 @@ const { messages: rawMessages, status, sendMessage } = useChat({
 
 Open `app/page.tsx` and ensure ChatAssistant is called with:
 ```typescript
-<ChatAssistant api="/api/chat" />
+<ChatAssistant api="/api/chat" /> 
 ```
 
 ### Step 3: First Interaction (Baseline - No Memory)
@@ -84,7 +84,7 @@ Open `app/page.tsx` and ensure ChatAssistant is called with:
 2. Ask: **"What fractions do Year 3 students learn?"**
 3. **Observe**:
    - Response streams in real-time
-   - Tool call indicator: "🔧 read_neo4j_cypher..."
+   -  : "🔧 read_neo4j_cypher..."
    - Response includes citations like `[Y3-F-001]`
 
 4. **Check console logs** (browser DevTools):
@@ -160,10 +160,12 @@ LIMIT 1
 
 ```cypher
 // Check for Evidence links
-MATCH (m:Memory)-[:USED_EVIDENCE]->(evidence)
-RETURN m.user_query, collect(evidence.id) as citations
+MATCH (m:Memory)
+WITH m
 ORDER BY m.created_at DESC
 LIMIT 1
+MATCH (m)-[:USED_EVIDENCE]->(evidence)
+RETURN m.user_query AS user_query, collect(evidence.id) AS citations;
 ```
 
 **Expected result:**

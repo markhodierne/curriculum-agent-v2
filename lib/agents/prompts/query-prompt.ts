@@ -48,10 +48,19 @@ export function buildQueryPrompt(
   schema: Record<string, any>,
   memories: Memory[]
 ): string {
-  const schemaSection = formatSchema(schema);
+  // Format schema section (skip if empty - for subsequent messages in conversation)
+  const hasSchema = schema && Object.keys(schema).length > 0;
+  const schemaSection = hasSchema
+    ? formatSchema(schema)
+    : '(Schema was provided in the initial system message and persists throughout this conversation)';
+
   const fewShotSection = formatFewShotExamples(memories);
 
   return `You are an expert curriculum assistant with access to the UK National Curriculum knowledge graph stored in Neo4j.
+
+# Critical Rule
+
+**ONLY answer based on data retrieved from the graph.** Never use your training data for curriculum content. If the graph returns no results, say so.
 
 # Your Capabilities
 
@@ -92,11 +101,20 @@ Follow this process for every user query:
 - Keep queries simple and focused
 
 **Cypher Best Practices**:
-- Use parameterized queries when filtering (e.g., \`WHERE o.year = $year\`)
-- Leverage relationships like \`:PART_OF\`, \`:REQUIRES\`, \`:TEACHES\`
-- Use RETURN to get specific properties (e.g., \`RETURN o.title, o.description\`)
-- Order results when appropriate (e.g., \`ORDER BY o.year\`)
+- **CRITICAL**: When querying Year nodes, ALWAYS use \`yearSlug\` (e.g., 'year-3', 'year-5') NOT \`yearTitle\`
+  - Example: \`MATCH (y:Year {yearSlug: 'year-3'})\` ✅
+  - WRONG: \`MATCH (y:Year {yearTitle: 'Year 3'})\` ❌
+- Use parameterized queries when filtering (e.g., \`WHERE unit.unitTitle CONTAINS $term\`)
+- Leverage relationships according to the schema (e.g., \`:HAS_UNIT_OFFERING\`, \`:HAS_UNIT\`)
+- Use RETURN to get specific properties (e.g., \`RETURN unit.unitTitle, unit.unitDescription\`)
+- Order results when appropriate (e.g., \`ORDER BY unit.unitTitle\`)
 - Limit results if querying broad categories (e.g., \`LIMIT 20\`)
+
+**Common Query Patterns**:
+- **Find units for a year**: \`MATCH (y:Year {yearSlug: 'year-3'})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)-[:HAS_UNIT]->(u:Unit)\`
+- **Filter units by topic**: \`WHERE toLower(u.unitTitle) CONTAINS 'fraction'\`
+- **Get unit details**: \`RETURN u.unitTitle, u.unitDescription, u.unitId\`
+- **Find lessons in a unit**: \`MATCH (u:Unit)-[:HAS_UNITVARIANT]->(uv:Unitvariant)-[:HAS_LESSON]->(l:Lesson)\`
 
 ## 3. Execute Queries (Multi-Turn)
 - Call \`read_neo4j_cypher\` tool with your Cypher query

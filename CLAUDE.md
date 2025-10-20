@@ -161,6 +161,8 @@ export async function POST(req: NextRequest) {
 **Key Points**:
 - **MCP Tools**: Use tools directly without schema conversion - AI SDK v5 handles MCP format automatically
 - **Multi-Step Execution**: Use `stopWhen: stepCountIs(N)` (NOT `maxSteps`) - allows model to generate final text response after tool calls
+- **Tool Choice**: Use `toolChoice: 'auto'` (NOT `'required'`) - prevents infinite loops by allowing agent to decide when to generate text vs use tools
+- **Tool Call Properties**: AI SDK v5 uses `toolCall.input` (NOT `toolCall.args`) - always check TypeScript definitions when in doubt
 - **Message Metadata**: Use `messageMetadata` callback in `toUIMessageStreamResponse()` to pass custom data (e.g., interaction IDs) to frontend
 - **Tool Tracking**: Use `onStepFinish()` to track tool calls and results for analytics
 - **Event Emission**: Use async IIFE for non-blocking event emission (doesn't block stream response)
@@ -280,10 +282,11 @@ const result = streamText({
 ```
 
 **Rules**:
-- ✅ Pre-fetch schema at conversation start
-- ✅ Schema persists in system prompt
+- ✅ Pre-fetch schema ONLY once per conversation (check `messages.length === 1`)
+- ✅ Schema persists in system prompt across all messages
 - ✅ Selective tool exposure (Query Agent = read-only)
 - ✅ Fresh schema per conversation
+- ❌ **NEVER** fetch schema on every message (wastes ~200ms per message)
 
 ---
 
@@ -319,7 +322,17 @@ export async function retrieveSimilarMemories(
 // In Query Agent
 const memories = await retrieveSimilarMemories(userQuery);
 const systemPrompt = buildQueryPrompt(schema, memories);  // Inject as few-shot
+
+// If agent answers from memory without querying, inherit Cypher queries for proper grounding
+if (cypherQueries.length === 0 && memories.length > 0) {
+  cypherQueries.push(...memories[0].cypherUsed);
+}
 ```
+
+**Key Points**:
+- Threshold: 0.25 for testing/bootstrapping, 0.75 for production
+- Embed values directly in query string (MCP doesn't support params well)
+- Memory inheritance: When answering from retrieved memory, inherit source Cypher queries for grounding tracking
 
 ---
 
@@ -656,20 +669,36 @@ pnpm tsc --noEmit
 
 ## Common Pitfalls
 
-❌ Disconnecting MCP client during `streamText()` streaming
-❌ Using `sendMessage("string")` instead of `sendMessage({ text: "..." })`
-❌ Accessing `message.content` instead of `message.parts`
-❌ Not pre-fetching schema (fetching per query is slow)
-❌ Creating new MCP client instances (breaks singleton)
-❌ Forgetting `pnpm tsc --noEmit` before commit
-❌ Using deprecated AI SDK patterns (always check docs)
-❌ Exposing write tools to Query Agent (security risk)
-❌ Not handling MCP tool errors gracefully
-❌ Blocking user interaction with async failures
+### AI SDK v5 Patterns
+❌ Using `toolCall.args` instead of `toolCall.input` (AI SDK v5 changed property name)
+❌ Using `toolChoice: 'required'` (causes infinite loops - agent can't generate final text)
 ❌ Using `maxSteps` instead of `stopWhen: stepCountIs(N)` (prevents final text response)
 ❌ Manually converting MCP schema to OpenAI format (AI SDK v5 handles automatically)
+❌ Using deprecated AI SDK patterns (always check docs first)
+
+### MCP Integration
+❌ Disconnecting MCP client during `streamText()` streaming
+❌ Creating new MCP client instances (breaks singleton)
+❌ Fetching schema on every message (only fetch when `messages.length === 1`)
+❌ Exposing write tools to Query Agent (security risk)
+❌ Not handling MCP tool errors gracefully
+
+### Neo4j & Cypher
+❌ Using `yearTitle: 'Year 3'` instead of `yearSlug: 'year-3'` for Year node queries
+❌ Treating integer properties as strings (use `toInteger()` for unitId, lessonId, objectiveId)
+❌ Parsing write operation results as query results (write returns `{relationships_created: N}` not `[{linkedCount: N}]`)
+❌ Not embedding values directly in Cypher (MCP doesn't support params well)
+
+### Frontend & UX
+❌ Using `sendMessage("string")` instead of `sendMessage({ text: "..." })`
+❌ Accessing `message.content` instead of `message.parts`
 ❌ Not using `messageMetadata` callback for passing custom data to frontend
 ❌ Using `toTextStreamResponse()` when you need `toUIMessageStreamResponse()` for useChat
+
+### Development Process
+❌ Forgetting `pnpm tsc --noEmit` before commit
+❌ Guessing API structures instead of checking documentation
+❌ Blocking user interaction with async failures
 
 ---
 
@@ -699,6 +728,6 @@ pnpm tsc --noEmit
 
 ---
 
-**Document Status**: Ready for Development
-**Last Updated**: 2025-10-17
+**Document Status**: Task 33 Pre-Demo Validation Complete
+**Last Updated**: 2025-10-20
 **Phase**: 1 (MVP - 4-6 weeks)

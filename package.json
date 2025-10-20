@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "reset-learning": "tsx scripts/reset-learning-data.ts"
+    "reset-learning": "tsx --env-file=.env.local scripts/reset-learning-data.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.52",

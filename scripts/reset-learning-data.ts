@@ -89,26 +89,27 @@ async function countNeo4jLearningData(): Promise<{
     throw new Error('read_neo4j_cypher tool not available');
   }
 
-  const cypher = `
-    MATCH (m:Memory)
-    WITH count(m) as memoryCount
-    MATCH (p:QueryPattern)
-    WITH memoryCount, count(p) as patternCount
-    MATCH ()-[r:USED_EVIDENCE|APPLIED_PATTERN|SIMILAR_TO]->()
-    RETURN memoryCount, patternCount, count(r) as relationshipCount
+  // Count each type independently to avoid zero results when one type is missing
+  const memoryCypher = `MATCH (m:Memory) RETURN count(m) as count`;
+  const patternCypher = `MATCH (p:QueryPattern) RETURN count(p) as count`;
+  const relationshipCypher = `
+    MATCH ()-[r]->()
+    WHERE type(r) IN ['USED_EVIDENCE', 'APPLIED_PATTERN', 'SIMILAR_TO']
+    RETURN count(r) as count
   `;
 
-  const result = await cypherTool.execute({ query: cypher });
-  const data = JSON.parse(result.content[0].text);
+  const memoryResult = await cypherTool.execute({ query: memoryCypher });
+  const patternResult = await cypherTool.execute({ query: patternCypher });
+  const relationshipResult = await cypherTool.execute({ query: relationshipCypher });
 
-  if (!data || data.length === 0) {
-    return { memories: 0, patterns: 0, relationships: 0 };
-  }
+  const memoryData = JSON.parse(memoryResult.content[0].text);
+  const patternData = JSON.parse(patternResult.content[0].text);
+  const relationshipData = JSON.parse(relationshipResult.content[0].text);
 
   return {
-    memories: data[0].memoryCount || 0,
-    patterns: data[0].patternCount || 0,
-    relationships: data[0].relationshipCount || 0,
+    memories: memoryData[0]?.count || 0,
+    patterns: patternData[0]?.count || 0,
+    relationships: relationshipData[0]?.count || 0,
   };
 }
 
@@ -316,7 +317,12 @@ async function main(): Promise<void> {
 }
 
 // Run the script
-main().catch((error) => {
-  console.error(`\n${colors.red}${colors.bold}Fatal error:${colors.reset}`, error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(`\n${colors.red}${colors.bold}Fatal error:${colors.reset}`, error);
+    process.exit(1);
+  })
+  .finally(() => {
+    // Force exit to close MCP connection
+    process.exit(0);
+  });

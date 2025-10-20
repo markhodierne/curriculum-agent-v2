@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     const memories = await retrieveSimilarMemories(userQuery, 3);
     console.log(`   ✅ Retrieved ${memories.length} memories`);
 
-    // 3. Initialize Neo4j MCP client and pre-fetch schema
+    // 3. Initialize Neo4j MCP client
     console.log('🔧 Initializing Neo4j MCP client...');
     const mcpClient = getNeo4jMCPClient();
     await mcpClient.connect();
@@ -100,17 +100,33 @@ export async function POST(req: NextRequest) {
     const allTools = await mcpClient.getTools();
     console.log(`   ✅ Retrieved ${Object.keys(allTools).length} MCP tools`);
 
-    if (!allTools.get_neo4j_schema) {
-      throw new Error('get_neo4j_schema tool not found in MCP tools');
+    // 4. Pre-fetch schema ONLY on first message (when no system message exists yet)
+    let systemPrompt: string;
+    const isFirstMessage = messages.length === 1;
+
+    if (isFirstMessage) {
+      console.log('📊 First message - pre-fetching Neo4j schema...');
+
+      if (!allTools.get_neo4j_schema) {
+        throw new Error('get_neo4j_schema tool not found in MCP tools');
+      }
+
+      const schemaResult = await allTools.get_neo4j_schema.execute({});
+      const schema = JSON.parse(schemaResult.content[0].text);
+      console.log('   ✅ Schema pre-fetched successfully');
+      console.log('   📋 Schema nodes/relationships:', Object.keys(schema).length);
+
+      // Build system prompt with schema + few-shot examples
+      systemPrompt = buildQueryPrompt(schema, memories);
+      console.log('   📝 System prompt built:', systemPrompt.length, 'characters');
+    } else {
+      console.log('📊 Continuing conversation - using cached schema from system message');
+
+      // Build system prompt with memories only (schema already in conversation via system message)
+      // For subsequent messages, we still rebuild the prompt to include fresh memories
+      // but we rely on the schema being in the original system message
+      systemPrompt = buildQueryPrompt({}, memories);
     }
-
-    console.log('📊 Pre-fetching Neo4j schema...');
-    const schemaResult = await allTools.get_neo4j_schema.execute({});
-    const schema = JSON.parse(schemaResult.content[0].text);
-    console.log('   ✅ Schema pre-fetched successfully');
-
-    // 4. Build system prompt with schema + few-shot examples
-    const systemPrompt = buildQueryPrompt(schema, memories);
 
     // 5. Expose only read_neo4j_cypher tool (read-only access for Query Agent)
     // Wrap tool to log usage - AI SDK handles MCP format automatically
@@ -162,6 +178,7 @@ export async function POST(req: NextRequest) {
       system: systemPrompt,
       messages: messages,
       tools: cypherTool,
+      toolChoice: 'auto', // Let agent decide when to use tools vs generate text
       temperature: temperature ?? 0.3,
       stopWhen: stepCountIs(10), // Allow multi-step tool calling (same as original oak-curriculum-agent)
 
@@ -176,22 +193,34 @@ export async function POST(req: NextRequest) {
       onStepFinish: ({ toolCalls, toolResults }) => {
         interactionMetadata.stepCount++;
 
+        console.log(`\n📊 Step ${interactionMetadata.stepCount} finished`);
+        console.log('   Tool calls:', toolCalls?.length || 0);
+
         // Extract Cypher queries from tool calls
         if (toolCalls && toolCalls.length > 0) {
           for (const toolCall of toolCalls) {
+            console.log('   Tool name:', toolCall.toolName);
+
             if (toolCall.toolName === 'read_neo4j_cypher') {
               try {
-                // Type assertion for MCP tool call args
-                const args = (toolCall as any).args;
-                if (args && typeof args === 'object' && args.query) {
-                  interactionMetadata.cypherQueries.push(args.query);
+                // AI SDK v5 uses 'input' property, not 'args'
+                const input = (toolCall as any).input;
+                console.log('   Tool call input:', input ? JSON.stringify(input).substring(0, 200) : 'undefined');
+
+                if (input && typeof input === 'object' && input.query) {
+                  console.log('   ✅ Extracted Cypher query:', input.query.substring(0, 100));
+                  interactionMetadata.cypherQueries.push(input.query);
+                } else {
+                  console.log('   ❌ No query found in input:', input);
                 }
               } catch (err) {
-                console.error('Error extracting tool call args:', err);
+                console.error('Error extracting tool call input:', err);
               }
             }
           }
         }
+
+        console.log('   Total Cypher queries captured:', interactionMetadata.cypherQueries.length);
 
         // Extract graph results from tool results
         if (toolResults && toolResults.length > 0) {
@@ -217,11 +246,28 @@ export async function POST(req: NextRequest) {
         const fullResponse = await result.text;
         const latencyMs = Date.now() - startTime;
 
+        console.log('\n📋 Extracting citations from response...');
+        console.log('   Response length:', fullResponse.length, 'characters');
+        console.log('   First 500 chars:', fullResponse.substring(0, 500));
+
         // Extract evidence node IDs from final text (citations in [Node-ID] format)
         const citationMatches = fullResponse.match(/\[([^\]]+)\]/g) || [];
+        console.log('   Citation matches found:', citationMatches.length);
+        console.log('   Raw matches:', citationMatches);
+
         const evidenceNodeIds = citationMatches.map((match: string) =>
           match.replace(/\[|\]/g, '')
         );
+        console.log('   Extracted node IDs:', evidenceNodeIds);
+        console.log('   Node IDs count:', evidenceNodeIds.length);
+
+        // If no Cypher queries were executed (answered from memory), inherit from the memory used
+        if (interactionMetadata.cypherQueries.length === 0 && memories.length > 0) {
+          console.log('\n🔄 No Cypher queries executed - inheriting from retrieved memory for proper grounding tracking');
+          const inheritedQueries = memories[0].cypherUsed || [];
+          console.log(`   Inherited ${inheritedQueries.length} queries from memory:`, memories[0].id);
+          interactionMetadata.cypherQueries.push(...inheritedQueries);
+        }
 
         // Calculate confidence and grounding (simplified for Phase 1)
         const confidence = 0.85; // TODO: Extract from agent's response

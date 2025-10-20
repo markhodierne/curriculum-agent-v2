@@ -59,32 +59,48 @@ export async function retrieveSimilarMemories(
 
     // Step 4: Execute vector similarity search
     // Uses Neo4j's native vector index for cosine similarity search
+    // Note: Lowered threshold to 0.25 for testing/bootstrapping (production should be 0.75)
+    // IMPORTANT: Embed values directly in query string (MCP doesn't support params well)
     const cypher = `
-      CALL db.index.vector.queryNodes('memory_embeddings', $limit, $embedding)
+      CALL db.index.vector.queryNodes('memory_embeddings', ${limit}, ${JSON.stringify(embedding)})
       YIELD node, score
-      WHERE node.overall_score > 0.75
+      WHERE node.overall_score > 0.25
       RETURN node, score
       ORDER BY score DESC
     `;
 
+    console.log('🔍 Executing vector search...');
+    console.log('   Embedding dimensions:', embedding.length);
+    console.log('   Limit:', limit);
+
     const result = await cypherTool.execute({
       query: cypher,
-      params: {
-        embedding,
-        limit,
-      },
     });
 
-    // Step 5: Check if query succeeded
-    if (!result || result.success === false) {
-      console.error('Memory retrieval Cypher query failed:', result?.error || 'Unknown error');
+    console.log('   Raw result:', JSON.stringify(result).substring(0, 500));
+
+    // Step 5: Parse MCP result format
+    if (!result || !result.content || result.content.length === 0) {
+      console.error('Memory retrieval returned no content');
+      return [];
+    }
+
+    // MCP returns results in content[0].text as JSON string
+    const resultText = result.content[0].text;
+    console.log('   Result text preview:', resultText.substring(0, 300));
+
+    let data;
+    try {
+      data = JSON.parse(resultText);
+    } catch (err) {
+      console.error('Failed to parse result JSON:', err);
       return [];
     }
 
     // Step 6: Parse results into Memory objects
-    const memories = parseMemories(result.data || []);
+    const memories = parseMemories(data);
 
-    console.log(`✅ Retrieved ${memories.length} similar memories (score > 0.75)`);
+    console.log(`✅ Retrieved ${memories.length} similar memories (score > 0.25)`);
     return memories;
   } catch (error) {
     // Log error but don't throw - Query Agent should continue without memories

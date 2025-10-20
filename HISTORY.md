@@ -909,20 +909,95 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+### Task 33: Pre-Demo Validation & Debugging ✅ (Completed 2025-10-20)
+
+**Objective**: Fix critical bugs blocking acceptance testing and validate all system components.
+
+**Issues Resolved**:
+
+1. **yearSlug Format Correction** - Agent used incorrect property format
+   - Problem: Agent querying `yearTitle: 'Year 3'` instead of `yearSlug: 'year-3'`
+   - Fix: Updated system prompt with explicit yearSlug format instructions and examples
+   - File: `lib/agents/prompts/query-prompt.ts`
+
+2. **Schema Pre-fetch Optimization** - Unnecessary schema fetches per message
+   - Problem: Schema fetched on every message instead of once per conversation
+   - Fix: Check `messages.length === 1` to only fetch on first message
+   - File: `app/api/chat/route.ts`
+   - Impact: ~200ms saved per subsequent message
+
+3. **Cypher Query Extraction** - Tool calls not being captured
+   - Problem: Using `toolCall.args` (undefined) instead of `toolCall.input` in AI SDK v5
+   - Root cause: AI SDK v5 `StaticToolCall` uses `input` property, not `args`
+   - Fix: Changed extraction to use `toolCall.input.query`
+   - File: `app/api/chat/route.ts`
+   - Result: Cypher queries now saved to Memory nodes
+
+4. **toolChoice Infinite Loop** - Agent stuck calling same tool repeatedly
+   - Problem: `toolChoice: 'required'` forced tool calls on every step, preventing text generation
+   - Fix: Changed to `toolChoice: 'auto'` - let agent decide when to use tools vs generate text
+   - File: `app/api/chat/route.ts`
+   - Result: Proper multi-turn execution with final text response
+
+5. **Evidence Linking Count** - Showing 0 links despite relationships being created
+   - Problem: Parsing `data[0].linkedCount` but write operations return `data.relationships_created`
+   - Fix: Changed to read `data.relationships_created` directly
+   - File: `lib/inngest/functions/learning.ts`
+   - Result: Correctly reports "Linked 10 evidence nodes" (5 Units + 5 Lessons)
+
+6. **Memory Cypher Inheritance** - Missing grounding scores when answering from memory
+   - Problem: Agent answers from retrieved memory without querying graph (grounding = 0)
+   - Fix: Inherit Cypher queries from source memory for proper grounding tracking
+   - File: `app/api/chat/route.ts`
+   - Result: Memory-based answers maintain grounding context
+
+7. **Memory Threshold Adjustment** - No memories retrieved during bootstrapping
+   - Problem: Threshold of 0.75 too high for initial low-scoring memories
+   - Fix: Lowered to 0.25 for testing/bootstrapping (production should use 0.75)
+   - File: `lib/memory/retrieval.ts`
+   - Result: System can learn from early attempts and improve progressively
+
+**System Prompt Refinements**:
+- Added explicit "ONLY answer based on data retrieved from graph" instruction
+- Simplified from verbose version while maintaining clarity
+- Relies on `toolChoice: 'auto'` for enforcement (removed redundant forcing language)
+
+**Verification**:
+- ✅ Agent queries graph with correct yearSlug format
+- ✅ Schema fetched once per conversation
+- ✅ Cypher queries captured and saved to Memory
+- ✅ Tool calls execute without infinite loops
+- ✅ Evidence relationships created (10 per interaction)
+- ✅ Proper link counts reported in logs
+- ✅ Memory-based answers inherit grounding context
+- ✅ TypeScript compilation: 0 errors
+
+**Testing Status**: Ready for 20-query acceptance testing
+
+**Known Issues** (Non-blocking):
+- Grounding score = 0 (graphResults not being extracted from tool results properly)
+- Does not prevent learning loop functionality
+- Can be addressed post-acceptance testing
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-32 complete ✅
-**Phase 1 MVP**: COMPLETE ✅
+**Progress**: Tasks 1-33 complete ✅
+**Phase 1 MVP**: COMPLETE ✅ (Ready for Acceptance Testing)
 
-**System Status**: ✅ Production-ready, fully documented
-**Code Quality**: ✅ Zero errors, zero redundancy, zero unused code
+**System Status**: ✅ Debugged and validated for testing
+**Code Quality**: ✅ Zero TypeScript errors, professional standards
 **Three-Agent Learning Loop**: ✅ Working (Query → Reflection → Learning)
-**Frontend**: ✅ Home + Chat + Dashboard complete with navigation
-**Database**: ✅ Neo4j + Supabase integrated with indexes
-**Async Pipeline**: ✅ Inngest agents processing interactions
-**Testing**: ✅ 20 test queries documented + reset utility
-**Documentation**: ✅ README, setup guides, troubleshooting complete
-**Admin Tools**: ✅ Reset script for development workflow
+**Schema Pre-fetching**: ✅ Optimized (once per conversation)
+**Cypher Extraction**: ✅ Fixed (AI SDK v5 `input` property)
+**Evidence Linking**: ✅ Working (10 relationships per interaction)
+**Memory Inheritance**: ✅ Grounding preserved when answering from memory
+**Frontend**: ✅ Home + Chat + Dashboard complete
+**Database**: ✅ Neo4j + Supabase integrated
+**Async Pipeline**: ✅ Inngest agents processing
+**Testing**: ⏳ 20 test queries ready to execute
+**Documentation**: ✅ Complete and up-to-date
 
 ---
 

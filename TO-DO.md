@@ -339,24 +339,47 @@ Created `docs/test-queries.md` (557 lines) with 20 curated test queries for acce
 
 ---
 
-## **Task 33: Pre-Demo Validation**
+## **Task 33: Pre-Demo Validation** (In Progress - 2025-10-20)
 
 **Description**: Run all 20 test queries and validate acceptance criteria before stakeholder demo.
 
-**Deliverables**:
+**Phase 1 - Debugging & Fixes (Completed 2025-10-20)**:
+- [x] Fixed Year 3 data connection (yearSlug format)
+- [x] Fixed schema pre-fetching (only once per conversation)
+- [x] Fixed Cypher query extraction (AI SDK v5 `input` property)
+- [x] Fixed toolChoice infinite loop (changed to 'auto')
+- [x] Fixed evidence node linking (integer type conversion)
+- [x] Fixed evidence linking count parsing (write operations format)
+- [x] Fixed memory inheritance (for memory-based answers)
+- [x] Lowered memory threshold for bootstrapping (0.25)
+- [x] Updated system prompt with yearSlug guidance
+- [x] Updated documentation (HISTORY.md, CLAUDE.md)
+
+**Phase 2 - Test Queries (Pending)**:
 - [ ] Run all 20 test queries from `docs/test-queries.md`
+  - [ ] Basic Retrieval (5 queries)
+  - [ ] Cross-Year Comparison (5 queries)
+  - [ ] Edge Cases (5 queries)
+  - [ ] Complex Multi-Turn (5 queries)
 - [ ] Verify ≥85% success rate (at least 17/20 queries successful)
 - [ ] Check learning improvement:
   - First 10 interactions: baseline score
   - Last 10 interactions: improved score
   - Target: ≥20% improvement
+
+**Phase 3 - Validation (Pending)**:
 - [ ] Validate dashboard metrics accuracy
 - [ ] Test feedback controls on all message types
 - [ ] Verify p95 latency ≤4s (use Vercel Analytics or console logs)
 - [ ] Check Inngest dashboard for job health
-- [ ] Document any issues found
+- [ ] Validate Neo4j Memory nodes created correctly
+- [ ] Validate Supabase database updates (interactions, feedback, metrics)
+- [ ] Document all issues found
 
 **Dependencies**: Task 30 (test queries), Task 32 (docs)
+
+**Known Issues**:
+- Grounding score = 0 in evaluations (graphResults extraction issue - non-blocking)
 
 **Definition of Done**:
 - All 20 queries tested
@@ -366,7 +389,7 @@ Created `docs/test-queries.md` (557 lines) with 20 curated test queries for acce
 - Performance targets met
 - Issues documented (if any)
 
----
+--- 
 
 ## **Task 34: Demo Preparation**
 
@@ -430,6 +453,14 @@ After Task 13 (Query Agent) is complete, these can be done in parallel:
 
 ---
 
-**Document Status**: Ready for Implementation
-**Last Updated**: 2025-10-17
+**Document Status**: Phase 1 Debugging Complete - Test Queries Next
+**Last Updated**: 2025-10-20
 **Phase**: 1 (MVP)
+
+---
+
+## Summary
+
+**Completed**: Tasks 1-32 + Task 33 Phase 1 (Debugging)
+**In Progress**: Task 33 Phase 2 (Test Queries)
+**Remaining**: Task 33 Phase 3 (Validation) + Task 34 (Demo Prep)
