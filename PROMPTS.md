@@ -70,7 +70,7 @@ Each to-do task should be numbered sequentially, and include:
 
 Then refresh your memory by checking `HISTORY.md`. Review the `ARCHITECTURE.md` and `FUNCTIONAL.md` to understand what we are building.
 
-We are working through `TO-DO.md` and are on task 32.
+We are working through `TO-DO.md` and are on task 33.
 
 **Before implementing anything:**
 
@@ -86,30 +86,32 @@ As you implement, explain:
 
 Now, here is the next task to complete:
 
-## **Task 32: Documentation - README Update**
+## **Task 33: Pre-Demo Validation**
 
-**Description**: Update README.md with setup and usage instructions.
+**Description**: Run all 20 test queries and validate acceptance criteria before stakeholder demo.
 
 **Deliverables**:
-- [ ] Update `README.md` with:
-  - Project overview
-  - Prerequisites
-  - Installation steps
-  - Environment setup
-  - Running locally
-  - Running Inngest dev server
-  - Testing instructions
-  - Architecture overview (link to ARCHITECTURE.md)
-- [ ] Add screenshots of home, chat, dashboard
-- [ ] Document common issues and solutions
+- [ ] Run all 20 test queries from `docs/test-queries.md`
+- [ ] Verify ≥85% success rate (at least 17/20 queries successful)
+- [ ] Check learning improvement:
+  - First 10 interactions: baseline score
+  - Last 10 interactions: improved score
+  - Target: ≥20% improvement
+- [ ] Validate dashboard metrics accuracy
+- [ ] Test feedback controls on all message types
+- [ ] Verify p95 latency ≤4s (use Vercel Analytics or console logs)
+- [ ] Check Inngest dashboard for job health
+- [ ] Document any issues found
 
-**Dependencies**: Task 31 (system complete)
+**Dependencies**: Task 30 (test queries), Task 32 (docs)
 
 **Definition of Done**:
-- README complete and accurate
-- Developer can follow to set up project
-- Screenshots included
-- Links to other docs correct
+- All 20 queries tested
+- ≥85% success rate achieved
+- Learning improvement demonstrated
+- Dashboard metrics accurate
+- Performance targets met
+- Issues documented (if any)
 
 ```
 
