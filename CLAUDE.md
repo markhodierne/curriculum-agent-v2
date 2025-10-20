@@ -89,7 +89,7 @@ lib/
 
 ```typescript
 // app/api/chat/route.ts
-import { streamText } from 'ai';
+import { streamText, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 
 export async function POST(req: NextRequest) {
@@ -101,16 +101,33 @@ export async function POST(req: NextRequest) {
   // 2. Build system prompt with schema + memories
   const systemPrompt = buildQueryPrompt(schema, memories);
 
-  // 3. Get MCP tools
-  const tools = await getMCPTools();
+  // 3. Get MCP tools - use directly, AI SDK v5 handles schema automatically
+  const mcpClient = getNeo4jMCPClient();
+  await mcpClient.connect();
+  const allTools = await mcpClient.getTools();
 
-  // 4. Stream response
+  // Wrap for logging (optional)
+  const cypherTool = {
+    read_neo4j_cypher: {
+      ...allTools.read_neo4j_cypher,
+      execute: async (args: any) => {
+        console.log('🔧 Tool called:', args.query?.substring(0, 200));
+        return await allTools.read_neo4j_cypher.execute(args);
+      },
+    },
+  };
+
+  // 4. Create interaction record first to get UUID
+  const interactionId = await createInteraction({ /* ... */ });
+
+  // 5. Stream response
   const result = await streamText({
     model: openai(model),             // 'gpt-4o' | 'gpt-4o-mini' | 'gpt-5'
     system: systemPrompt,
     messages,
-    tools,
+    tools: cypherTool,                // MCP tools work directly!
     temperature,
+    stopWhen: stepCountIs(10),        // CRITICAL: Use stopWhen, not maxSteps
     // Note: maxTokens not supported in AI SDK v5.0.76
 
     // Track tool calls with onStepFinish
@@ -119,7 +136,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // 5. Emit event after completion (non-blocking)
+  // 6. Emit event after completion (non-blocking)
   (async () => {
     const fullResponse = await result.text;
     await inngest.send({
@@ -128,16 +145,22 @@ export async function POST(req: NextRequest) {
     });
   })();
 
-  return result.toTextStreamResponse();
+  // 7. Return with messageMetadata for passing custom data to frontend
+  return result.toUIMessageStreamResponse({
+    messageMetadata: () => ({
+      interactionId: interactionId,  // Accessible via message.metadata on frontend
+    }),
+  });
 }
 ```
 
 **Key Points**:
-- `streamText()` handles multi-turn tool calling automatically
-- Agent can call `read_neo4j_cypher` multiple times per query
-- Use `onStepFinish()` to track tool calls and results
-- Event emission in async IIFE (non-blocking, doesn't await)
-- Use `toTextStreamResponse()` for streaming compatibility
+- **MCP Tools**: Use tools directly without schema conversion - AI SDK v5 handles MCP format automatically
+- **Multi-Step Execution**: Use `stopWhen: stepCountIs(N)` (NOT `maxSteps`) - allows model to generate final text response after tool calls
+- **Message Metadata**: Use `messageMetadata` callback in `toUIMessageStreamResponse()` to pass custom data (e.g., interaction IDs) to frontend
+- **Tool Tracking**: Use `onStepFinish()` to track tool calls and results for analytics
+- **Event Emission**: Use async IIFE for non-blocking event emission (doesn't block stream response)
+- **Return Method**: Use `toUIMessageStreamResponse()` for compatibility with useChat hook
 - `maxTokens` parameter removed (not in AI SDK v5.0.76)
 
 ### Reflection Agent (Async)
@@ -303,15 +326,21 @@ const systemPrompt = buildQueryPrompt(schema, memories);  // Inject as few-shot
 ```typescript
 // components/chat/chat-interface.tsx
 import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 
-const { messages, sendMessage, isLoading } = useChat({
-  api: '/api/chat',
-  body: {
-    model: selectedModel,      // From home page config
-    temperature: 0.3,
-    maxTokens: 2000,
-  },
+const { messages, sendMessage, status } = useChat({
+  transport: new DefaultChatTransport({
+    api: '/api/chat',
+    body: {
+      model: selectedModel,      // From home page config
+      temperature: 0.3,
+      maxTokens: 2000,
+    },
+  }),
 });
+
+// Access message metadata sent from backend
+const interactionId = (message.metadata as any)?.interactionId || message.id;
 ```
 
 **CRITICAL**:
@@ -319,6 +348,7 @@ const { messages, sendMessage, isLoading } = useChat({
 - ❌ `sendMessage("string")` - DOES NOT work
 - ✅ Access `message.parts` (NOT `message.content`)
 - ✅ Tool results: `message.parts?.filter(p => p.type === "tool")`
+- ✅ Custom metadata: Access via `message.metadata` (set by backend's `messageMetadata` callback)
 
 ---
 
@@ -632,6 +662,10 @@ pnpm tsc --noEmit
 ❌ Exposing write tools to Query Agent (security risk)
 ❌ Not handling MCP tool errors gracefully
 ❌ Blocking user interaction with async failures
+❌ Using `maxSteps` instead of `stopWhen: stepCountIs(N)` (prevents final text response)
+❌ Manually converting MCP schema to OpenAI format (AI SDK v5 handles automatically)
+❌ Not using `messageMetadata` callback for passing custom data to frontend
+❌ Using `toTextStreamResponse()` when you need `toUIMessageStreamResponse()` for useChat
 
 ---
 

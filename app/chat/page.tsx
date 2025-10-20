@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ChatAssistant from '@/components/chat/chat-assistant';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BarChart3 } from 'lucide-react';
 
 /**
  * Chat page component
@@ -47,6 +47,14 @@ export default function ChatPage(): React.ReactElement {
     router.push('/');
   };
 
+  /**
+   * Handles "Dashboard" button click
+   * Navigates to analytics/learning dashboard
+   */
+  const handleGoToDashboard = (): void => {
+    router.push('/dashboard');
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header with logo, title, and back button */}
@@ -65,16 +73,27 @@ export default function ChatPage(): React.ReactElement {
               <h1 className="text-xl font-semibold">Oak Curriculum Agent</h1>
             </div>
 
-            {/* Right: Back to Home button */}
-            <Button
-              onClick={handleBackToHome}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
+            {/* Right: Navigation buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleGoToDashboard}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Dashboard
+              </Button>
+              <Button
+                onClick={handleBackToHome}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </div>
           </div>
         </div>
       </header>

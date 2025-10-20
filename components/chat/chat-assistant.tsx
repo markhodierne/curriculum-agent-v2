@@ -22,7 +22,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type ToolUIPart } from "ai";
+import { type ToolUIPart, DefaultChatTransport } from "ai";
 import { useState, useEffect, useRef, memo } from "react";
 import {
   Conversation,
@@ -216,7 +216,7 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
 
   /**
    * Initialize useChat hook with config from sessionStorage
-   * Config is passed to API route via body parameter
+   * Config is passed to API route via body parameter via ChatInit transport
    */
   const { messages: rawMessages, status, sendMessage } = useChat({
     transport: new DefaultChatTransport({
@@ -294,6 +294,7 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
       form.reset();
     }
 
+    // Use sendMessage from AI SDK v5 - sends user message and triggers the API call
     sendMessage({ text: message.text });
     setInput("");
   };
@@ -503,7 +504,9 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
                         )}
 
                         {/* Feedback Controls */}
-                        <FeedbackControls messageId={message.id} />
+                        <FeedbackControls
+                          messageId={(message.metadata as any)?.interactionId || message.id}
+                        />
                       </div>
                     );
                   })();

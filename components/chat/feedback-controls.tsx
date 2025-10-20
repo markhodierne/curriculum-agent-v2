@@ -67,10 +67,23 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
   const [error, setError] = useState<string | null>(null);
 
   /**
+   * Validates if a string is a valid UUID format
+   */
+  const isValidUUID = (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
+  /**
    * Load existing feedback on mount via API route
    */
   useEffect(() => {
     async function loadFeedback(): Promise<void> {
+      // Skip if messageId is not a valid UUID (shouldn't happen with proper integration)
+      if (!isValidUUID(messageId)) {
+        return;
+      }
+
       try {
         const response = await fetch(`/api/feedback?interactionId=${messageId}`);
 
@@ -107,6 +120,11 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
    * Retries if interaction hasn't been saved yet
    */
   async function saveFeedback(updates: Partial<FeedbackState>, retryCount = 0): Promise<void> {
+    // Skip if messageId is not a valid UUID (shouldn't happen with proper integration)
+    if (!isValidUUID(messageId)) {
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 

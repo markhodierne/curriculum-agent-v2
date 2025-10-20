@@ -19,7 +19,7 @@
  */
 
 import { openai } from '@ai-sdk/openai';
-import { streamText, convertToCoreMessages } from 'ai';
+import { streamText, convertToCoreMessages, stepCountIs } from 'ai';
 import { NextRequest } from 'next/server';
 import { retrieveSimilarMemories } from '@/lib/memory/retrieval';
 import { buildQueryPrompt } from '@/lib/agents/prompts/query-prompt';
@@ -113,10 +113,10 @@ export async function POST(req: NextRequest) {
     const systemPrompt = buildQueryPrompt(schema, memories);
 
     // 5. Expose only read_neo4j_cypher tool (read-only access for Query Agent)
+    // Wrap tool to log usage - AI SDK handles MCP format automatically
     const cypherTool = {
       read_neo4j_cypher: {
         ...allTools.read_neo4j_cypher,
-        // Wrap tool to log usage
         execute: async (args: any) => {
           console.log(`\n🔧 Tool called: read_neo4j_cypher`);
           console.log(`   Query:`, args.query?.substring(0, 200));
@@ -163,6 +163,14 @@ export async function POST(req: NextRequest) {
       messages: messages,
       tools: cypherTool,
       temperature: temperature ?? 0.3,
+      stopWhen: stepCountIs(10), // Allow multi-step tool calling (same as original oak-curriculum-agent)
+
+      // Send interaction ID to frontend via experimental metadata
+      experimental_telemetry: {
+        metadata: {
+          interactionId: interactionId,
+        },
+      },
 
       // Track tool calls for event emission
       onStepFinish: ({ toolCalls, toolResults }) => {
@@ -267,9 +275,13 @@ export async function POST(req: NextRequest) {
       }
     })();
 
-    // Return streaming response (compatible with AI SDK useChat hook)
-    // Use toUIMessageStreamResponse() - this is the correct method for AI SDK v5 useChat
-    return result.toUIMessageStreamResponse();
+    // Return streaming response with interaction ID in message metadata
+    // AI SDK v5: messageMetadata is sent to client and accessible via message.metadata
+    return result.toUIMessageStreamResponse({
+      messageMetadata: () => ({
+        interactionId: interactionId,
+      }),
+    });
   } catch (error) {
     console.error('💥 Query Agent API error:', error);
 
