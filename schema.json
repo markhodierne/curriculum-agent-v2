@@ -1,0 +1,305 @@
+[
+  {
+    "type": "node",
+    "name": "Programme",
+    "count": 258,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "lastUpdated",
+      "programmeSlug"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Unit",
+    "count": 1578,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "lastUpdated",
+      "unitSlug",
+      "unitTitle",
+      "unitId",
+      "unitDescription",
+      "whyThisWhyNow",
+      "nullUnitVariantId",
+      "priorKnowledge",
+      "subjectCategory"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Year",
+    "count": 11,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "yearSlug",
+      "lastUpdated",
+      "yearTitle",
+      "yearId",
+      "yearDescription"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Subject",
+    "count": 22,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "subjectSlug",
+      "lastUpdated",
+      "subjectTitle",
+      "subjectId",
+      "subjectParentTitle",
+      "subjectParentId",
+      "subjectDescription"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Unitvariant",
+    "count": 2084,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "unitVariantId",
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Unitoffering",
+    "count": 183,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "lastUpdated",
+      "unitOfferingSlug"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Phase",
+    "count": 2,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "lastUpdated",
+      "phaseSlug",
+      "phaseId",
+      "phaseTitle",
+      "phaseDescription"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Keystage",
+    "count": 4,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "lastUpdated",
+      "keyStageSlug",
+      "keyStageDescription",
+      "keyStageId",
+      "keyStageTitle"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Examboard",
+    "count": 5,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "lastUpdated",
+      "examBoardSlug",
+      "examBoardDescription",
+      "examBoardTitle",
+      "examBoardId"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Tier",
+    "count": 2,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "displayOrder",
+      "lastUpdated",
+      "tierSlug",
+      "tierId",
+      "tierTitle",
+      "tierDescription"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Lesson",
+    "count": 12631,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "lastUpdated",
+      "lessonSlug",
+      "lessonTitle",
+      "lessonId",
+      "keyLearningPoints",
+      "equipmentResources",
+      "pupilLessonOutcome",
+      "teacherTips",
+      "keywords",
+      "misconceptionsMistakes",
+      "lessonOutline",
+      "quizStarterId",
+      "quizExitId",
+      "contentGuidanceDetails"
+    ]
+  },
+  {
+    "type": "node",
+    "name": "Thread",
+    "count": 166,
+    "from_node": null,
+    "to_node": null,
+    "properties": [
+      "lastUpdated",
+      "thread_slug",
+      "threadId",
+      "threadTitle"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_UNIT",
+    "count": 1605,
+    "from_node": "Unitoffering",
+    "to_node": "Unit",
+    "properties": [
+      "lastUpdated",
+      "unitOrder"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_UNIT_OFFERING",
+    "count": 183,
+    "from_node": "Subject",
+    "to_node": "Unitoffering",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_UNIT_OFFERING",
+    "count": 183,
+    "from_node": "Year",
+    "to_node": "Unitoffering",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_YEAR",
+    "count": 11,
+    "from_node": "Keystage",
+    "to_node": "Year",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_KEY_STAGE",
+    "count": 4,
+    "from_node": "Phase",
+    "to_node": "Keystage",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_PROGRAMME",
+    "count": 258,
+    "from_node": "Unitoffering",
+    "to_node": "Programme",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_PROGRAMME",
+    "count": 95,
+    "from_node": "Examboard",
+    "to_node": "Programme",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_PROGRAMME",
+    "count": 52,
+    "from_node": "Tier",
+    "to_node": "Programme",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_UNITVARIANT",
+    "count": 2084,
+    "from_node": "Unit",
+    "to_node": "Unitvariant",
+    "properties": [
+      "lastUpdated"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_UNITVARIANT",
+    "count": 2514,
+    "from_node": "Programme",
+    "to_node": "Unitvariant",
+    "properties": [
+      "lastUpdated",
+      “unitVariantOrder”,
+      “isOptional”
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_LESSON",
+    "count": 15495,
+    "from_node": "Unitvariant",
+    "to_node": "Lesson",
+    "properties": [
+      "lastUpdated",
+      "lessonOrder"
+    ]
+  },
+  {
+    "type": "relationship",
+    "name": "HAS_THREAD",
+    "count": 3324,
+    "from_node": "Unit",
+    "to_node": "Thread",
+    "properties": [
+      "lastUpdated"
+    ]
+  }
+]

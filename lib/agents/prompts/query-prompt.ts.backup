@@ -463,84 +463,84 @@ ORDER BY s.displayOrder
 \`\`\`
 
 **Q2: "List all year groups in Key Stage 3"**
-\`\`\`cypher
+```cypher
 MATCH (ks:Keystage {keyStageTitle: "KS3"})-[:HAS_YEAR]->(y:Year)
 RETURN y.yearTitle
 ORDER BY y.displayOrder
-\`\`\`
+```
 
 **Q3: "What units are taught in Year 8 Maths?"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "8"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject {subjectTitle:"Maths"})
 MATCH (uo)-[:HAS_UNIT]->(u:Unit)
 RETURN u.unitTitle, u.unitDescription
 ORDER BY u.unitOrder
-\`\`\`
+```
 
 **Q4: "Show me the first 3 units for Year 10 English"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "10"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject {subjectTitle:"English"})
 MATCH (uo)-[r:HAS_UNIT]->(u:Unit)
 RETURN u.unitTitle, u.unitDescription, r.unitOrder
 ORDER BY r.unitOrder
 LIMIT 3
-\`\`\`
+```
 
 ### Counting & Aggregations
 
 **Q5: "How many units are there in total across all subjects?"**
-\`\`\`cypher
+```cypher
 MATCH (u:Unit)
 RETURN count(u) as totalUnits
-\`\`\`
+```
 
 **Q6: "How many lessons are in each Year 9 subject?"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "9"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject)
 MATCH (uo)-[:HAS_PROGRAMME]->(p:Programme)-[:HAS_UNITVARIANT]->(v:Unitvariant)-[:HAS_LESSON]->(l:Lesson)
 RETURN s.subjectTitle, count(DISTINCT l) as lessonCount
 ORDER BY lessonCount DESC
-\`\`\`
+```
 
 **Q7: "Count how many programmes are available for each exam board"**
-\`\`\`cypher
+```cypher
 MATCH (eb:Examboard)-[:HAS_PROGRAMME]->(p:Programme)
 RETURN eb.examBoardTitle, count(p) as programmeCount
 ORDER BY programmeCount DESC
-\`\`\`
+```
 
 **Q8: "What's the average number of lessons per unit variant?"**
-\`\`\`cypher
+```cypher
 MATCH (uv:Unitvariant)-[:HAS_LESSON]->(l:Lesson)
 WITH uv, count(l) as lessonCount
 RETURN avg(lessonCount) as avgLessonsPerVariant, 
        min(lessonCount) as minLessons,
        max(lessonCount) as maxLessons
-\`\`\`
+```
 
 ### Complex Multi-Hop Traversals
 
 **Q9: "Find all lessons for the AQA Higher Biology programme in Year 11"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "11"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject {subjectTitle: "Biology"})
 MATCH (uo)-[:HAS_PROGRAMME]->(p:Programme)
 MATCH (e:Examboard {examBoardTitle: "AQA"})-[:HAS_PROGRAMME]->(p)<-[:HAS_PROGRAMME]-(t:Tier {tierTitle: "higher"})
 MATCH (p)-[r:HAS_UNITVARIANT]-(uv:Unitvariant)-[o:HAS_LESSON]->(l:Lesson)
 RETURN uv.unitVariantId, l.lessonTitle, o.lessonOrder
 ORDER BY r.unitVariantOrder, o.lessonOrder
-\`\`\`
+```
 
 **Q10: "What are the learning threads that run through Year 7 History?"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "7"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject {subjectTitle: "History"})
 MATCH (uo)-[:HAS_UNIT]->(u:Unit)-[:HAS_THREAD]->(t:Thread)
 RETURN DISTINCT t.threadTitle, 
        collect(DISTINCT u.unitTitle) as unitsInThread
 ORDER BY t.threadTitle
-\`\`\`
+```
 
 **Q11: "Show me all units across all years that connect to the 'Invasion, migration and settlement' thread"**
-\`\`\`cypher
+```cypher
 MATCH (t:Thread {threadTitle: "Invasion, migration and settlement"})
       <-[:HAS_THREAD]-(u:Unit)
       <-[:HAS_UNIT]-(uo:Unitoffering)
@@ -551,10 +551,10 @@ RETURN y.yearTitle,
        u.unitTitle,
        u.unitDescription
 ORDER BY y.displayOrder, s.subjectTitle
-\`\`\`
+```
 
 **Q12: "Find all Foundation tier programmes and their associated units"**
-\`\`\`cypher
+```cypher
 MATCH (t:Tier {tierTitle: "foundation"})-[:HAS_PROGRAMME]->(p:Programme)
       -[:HAS_UNITVARIANT]->(uv:Unitvariant)
       <-[:HAS_UNITVARIANT]-(u:Unit)
@@ -566,38 +566,38 @@ RETURN y.yearTitle,
        p.programmeSlug,
        collect(DISTINCT u.unitTitle) as units
 ORDER BY y.yearTitle, s.subjectTitle
-\`\`\`
+```
 
 ### Advanced Pattern Matching & Filtering
 
 **Q13: "Which lessons mention 'chromatography' in their title?"**
-\`\`\`cypher
+```cypher
 MATCH (l:Lesson)
 WHERE toLower(l.lessonTitle) CONTAINS toLower("chromatography")
 RETURN l.lessonTitle, l.keyLearningPoints
 ORDER BY l.lessonTitle
-\`\`\`
+```
 
 **Q14: "Find units that require specific prior knowledge (non-empty priorKnowledge)"**
-\`\`\`cypher
+```cypher
 MATCH (u:Unit)
 WHERE u.priorKnowledge IS NOT NULL AND size(u.priorKnowledge) > 0
 RETURN u.unitTitle, u.priorKnowledge
 LIMIT 10
-\`\`\`
+```
 
 **Q15: "Show me all Secondary phase subjects and their unit counts"**
-\`\`\`cypher
+```cypher
 MATCH (ph:Phase {phaseTitle: "secondary"})-[:HAS_KEY_STAGE]->(ks:Keystage)
       -[:HAS_YEAR]->(y:Year)
       -[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject)
 MATCH (uo)-[:HAS_UNIT]->(u:Unit)
 RETURN s.subjectTitle, count(DISTINCT u) as unitCount
 ORDER BY unitCount DESC
-\`\`\`
+```
 
 **Q16: "Find optional unit variants in Year 10 programmes"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "10"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)
       -[:HAS_PROGRAMME]->(p:Programme)
 MATCH (p)-[r:HAS_UNITVARIANT]->(uv:Unitvariant)
@@ -605,12 +605,12 @@ WHERE r.isOptional = true
 MATCH (uv)<-[:HAS_UNITVARIANT]-(u:Unit)
 RETURN p.programmeSlug, u.unitTitle, r.unitVariantOrder
 ORDER BY p.programmeSlug, r.unitVariantOrder
-\`\`\`
+```
 
 ### Sophisticated Analysis Queries
 
 **Q17: "Compare the number of lessons between Foundation and Higher tier for Year 11 Combined Science"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "11"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject {subjectTitle: "Combined science"})
 MATCH (uo)-[:HAS_PROGRAMME]->(p:Programme)<-[:HAS_PROGRAMME]-(t:Tier)
 MATCH (p)-[:HAS_UNITVARIANT]->(uv:Unitvariant)-[:HAS_LESSON]->(l:Lesson)
@@ -618,10 +618,10 @@ RETURN t.tierTitle,
        count(DISTINCT l) as lessonCount,
        count(DISTINCT uv) as unitVariantCount
 ORDER BY t.tierTitle
-\`\`\`
+```
 
 **Q18: "Find all lesson titles and their misconceptions for a specific unit"**
-\`\`\`cypher
+```cypher
 MATCH (u:Unit {unitTitle: "Living organisms and their environments"})
       -[:HAS_UNITVARIANT]->(uv:Unitvariant)
       -[r:HAS_LESSON]->(l:Lesson)
@@ -631,10 +631,10 @@ RETURN l.lessonTitle,
        l.teacherTips,
        r.lessonOrder
 ORDER BY r.lessonOrder
-\`\`\`
+```
 
 **Q19: "Show the curriculum pathway: Phase → KeyStage → Year → Subject → Unit for a specific unit"**
-\`\`\`cypher
+```cypher
 MATCH path = (ph:Phase)-[:HAS_KEY_STAGE]->(ks:Keystage)
              -[:HAS_YEAR]->(y:Year)
              -[:HAS_UNIT_OFFERING]->(uo:Unitoffering)
@@ -647,10 +647,10 @@ RETURN ph.phaseTitle as phase,
        s.subjectTitle as subject,
        u.unitTitle as unit,
        u.unitDescription as description
-\`\`\`
+```
 
 **Q20: "Find all exam boards offering programmes for Year 10 Science subjects, with programme counts"**
-\`\`\`cypher
+```cypher
 MATCH (y:Year {yearTitle: "10"})-[:HAS_UNIT_OFFERING]->(uo:Unitoffering)<-[:HAS_UNIT_OFFERING]-(s:Subject)
 WHERE toLower(s.subjectTitle) CONTAINS toLower("science")
 MATCH (uo)-[:HAS_PROGRAMME]->(p:Programme)
@@ -661,7 +661,7 @@ WITH s.subjectTitle as subject,
 WHERE examBoard IS NOT NULL
 RETURN subject, examBoard, programmeCount
 ORDER BY subject, programmeCount DESC
-\`\`\`
+```
 
 ---
 
@@ -670,44 +670,44 @@ ORDER BY subject, programmeCount DESC
 ### Property Matching Rules
 
 1. **Always use human-readable titles for matching:**
-   - ✅ {yearTitle: "8"} not {yearId: 8}
-   - ✅ {subjectTitle: "Maths"} not {subjectId: 123}
-   - ✅ {keyStageTitle: "KS3"} not internal IDs
+   - ✅ `{yearTitle: "8"}` not `{yearId: 8}`
+   - ✅ `{subjectTitle: "Maths"}` not `{subjectId: 123}`
+   - ✅ `{keyStageTitle: "KS3"}` not internal IDs
 
 2. **Use case-insensitive matching for user input:**
-\`\`\`cypher
+```cypher
    WHERE toLower(s.subjectTitle) = toLower("maths")
    // or for partial matches:
    WHERE toLower(s.subjectTitle) CONTAINS toLower("science")
-\`\`\`
+```
 
 3. **Handle variations in subject names:**
    - Users might say "Math" or "Maths"
-   - Use CONTAINS for subjects like "Combined science" vs "Science"
+   - Use `CONTAINS` for subjects like "Combined science" vs "Science"
 
 4. **Properties to ignore in queries:**
-   - lastUpdated - Internal audit field
-   - Most *Id fields - Use title/slug fields instead
-   - displayOrder - Only use for sorting results
+   - `lastUpdated` - Internal audit field
+   - Most `*Id` fields - Use title/slug fields instead
+   - `displayOrder` - Only use for sorting results
 
 ### Critical Query Patterns
 
 1. **Finding lessons requires going through UnitVariant:**
-\`\`\`cypher
+```cypher
    // ❌ WRONG - this won't work:
    (Unit)-[:HAS_LESSON]->(Lesson)
    
    // ✅ CORRECT:
    (Unit)-[:HAS_UNITVARIANT]->(Unitvariant)-[:HAS_LESSON]->(Lesson)
-\`\`\`
+```
 
 2. **Year + Subject creates a UnitOffering (both connect to same node):**
-\`\`\`cypher
+```cypher
    (Year)-[:HAS_UNIT_OFFERING]->(Unitoffering)<-[:HAS_UNIT_OFFERING]-(Subject)
-\`\`\`
+```
 
 3. **Programmes are defined by UnitOffering + optional ExamBoard + optional Tier:**
-\`\`\`cypher
+```cypher
    // Basic programme:
    (Unitoffering)-[:HAS_PROGRAMME]->(Programme)
    
@@ -715,13 +715,13 @@ ORDER BY subject, programmeCount DESC
    (Unitoffering)-[:HAS_PROGRAMME]->(p:Programme)
    (Examboard)-[:HAS_PROGRAMME]->(p)
    (Tier)-[:HAS_PROGRAMME]->(p)
-\`\`\`
+```
 
 4. **Use relationship properties for ordering:**
-\`\`\`cypher
+```cypher
    MATCH (uo)-[r:HAS_UNIT]->(u:Unit)
    ORDER BY r.unitOrder  // Not u.order
-\`\`\`
+```
 
 ### Common Pitfalls to Avoid
 
@@ -734,34 +734,34 @@ ORDER BY subject, programmeCount DESC
    - Must traverse through UnitVariant
 
 3. **❌ Don't forget DISTINCT when collecting:**
-\`\`\`cypher
+```cypher
    RETURN collect(DISTINCT u.unitTitle)  // Not collect(u.unitTitle)
-\`\`\`
+```
 
 4. **❌ Don't use exact string matching without toLower():**
-\`\`\`cypher
+```cypher
    // Fragile:
    WHERE s.subjectTitle = "Maths"
    
    // Robust:
    WHERE toLower(s.subjectTitle) = toLower("maths")
-\`\`\`
+```
 
 5. **❌ Don't forget to handle optional relationships:**
-\`\`\`cypher
+```cypher
    OPTIONAL MATCH (p)<-[:HAS_PROGRAMME]-(eb:Examboard)
-\`\`\`
+```
 
 ### Best Practices
 
 1. **Always order results meaningfully:**
-   - Use displayOrder for curriculum entities
-   - Use relationship properties like unitOrder, lessonOrder
+   - Use `displayOrder` for curriculum entities
+   - Use relationship properties like `unitOrder`, `lessonOrder`
    - Alphabetical for titles when no order exists
 
 2. **Be explicit with RETURN statements:**
    - Return specific properties, not entire nodes
-   - Use aliases for clarity: RETURN s.subjectTitle as subject
+   - Use aliases for clarity: `RETURN s.subjectTitle as subject`
 
 3. **Use WITH for complex queries:**
    - Break down multi-stage aggregations
@@ -769,7 +769,7 @@ ORDER BY subject, programmeCount DESC
 
 4. **Leverage OPTIONAL MATCH when relationships might not exist:**
    - ExamBoard and Tier connections to Programme are optional
-   - Some properties like misconceptionsMistakes may be null
+   - Some properties like `misconceptionsMistakes` may be null
 
 ---
 
