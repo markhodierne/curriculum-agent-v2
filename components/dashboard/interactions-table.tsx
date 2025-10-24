@@ -1,7 +1,7 @@
 /**
  * Interactions Table Component
  *
- * Displays last 20 interactions with key metrics in a sortable table.
+ * Displays last 5 interactions with key metrics in a sortable table.
  * Clicking a row opens a modal with full interaction details.
  *
  * Features:
@@ -59,7 +59,7 @@ type SortDirection = 'asc' | 'desc';
 /**
  * InteractionsTable Component
  *
- * Fetches and displays last 20 interactions from Supabase with evaluation metrics.
+ * Fetches and displays last 5 interactions from Supabase with evaluation metrics.
  * Provides sortable columns and modal details view.
  */
 export default function InteractionsTable() {
@@ -73,7 +73,7 @@ export default function InteractionsTable() {
   /**
    * Fetches interactions with evaluation metrics from API route
    *
-   * Calls /api/dashboard/interactions to get last 20 interactions
+   * Calls /api/dashboard/interactions to get last 5 interactions
    * with evaluation scores already joined.
    */
   useEffect(() => {

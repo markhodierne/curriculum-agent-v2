@@ -7,7 +7,7 @@
  * Components Rendered:
  * - Learning Curve Chart: Shows evaluation score improvement over time
  * - Stats Cards: Display total interactions, average confidence, memories created
- * - Interactions Table: Last 20 interactions with sortable columns and details
+ * - Interactions Table: Last 5 interactions with sortable columns and details
  * - Pattern Library: Discovered query patterns from Neo4j
  *
  * Features:
@@ -118,7 +118,7 @@ export default function DashboardPage(): React.ReactElement {
             <StatsCards />
           </section>
 
-          {/* Interactions Table - Last 20 interactions with details */}
+          {/* Interactions Table - Last 5 interactions with details */}
           <section>
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-foreground">

@@ -31,7 +31,7 @@ export async function GET() {
       `
       )
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(5);
 
     if (error) {
       throw new Error(`Failed to fetch interactions: ${error.message}`);
