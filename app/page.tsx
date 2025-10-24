@@ -1,7 +1,7 @@
 /**
  * Home Page (/)
  *
- * Landing page for the Oak Curriculum Agent where users configure their model preferences
+ * Landing page for the Curriculum Query Agent where users configure their model preferences
  * before starting a chat session. Displays:
  * - Application description (what the agent does, how it learns)
  * - Model selector (GPT-4o, gpt-4o-mini, GPT-5)
@@ -18,7 +18,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { AppDescription } from '@/components/home/app-description';
 import { ModelSelector } from '@/components/home/model-selector';
 import { ModelParams } from '@/components/home/model-params';
@@ -79,19 +78,10 @@ export default function Home(): React.ReactElement {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with logo and title */}
+      {/* Header with title */}
       <header className="border-b">
         <div className="max-w-4xl mx-auto p-4">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/oak-logo-transparent.png"
-              alt="Oak Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-            <h1 className="text-xl font-semibold">Oak Curriculum Agent</h1>
-          </div>
+          <h1 className="text-xl font-semibold">Curriculum Query Agent</h1>
         </div>
       </header>
 

@@ -21,10 +21,9 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import ChatAssistant from '@/components/chat/chat-assistant';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { ArrowLeft, BarChart3, Trash2 } from 'lucide-react';
 
 /**
  * Chat page component
@@ -55,26 +54,35 @@ export default function ChatPage(): React.ReactElement {
     router.push('/dashboard');
   };
 
+  /**
+   * Handles "Clear Conversation" button click
+   * Triggers a custom event that ChatAssistant component listens for
+   */
+  const handleClearConversation = (): void => {
+    // Emit custom event that ChatAssistant will listen for
+    window.dispatchEvent(new CustomEvent('clearConversation'));
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header with logo, title, and back button */}
       <header className="border-b flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center gap-3">
-              <Image
-                src="/oak-logo-transparent.png"
-                alt="Oak Logo"
-                width={32}
-                height={32}
-                className="object-contain"
-              />
-              <h1 className="text-xl font-semibold">Oak Curriculum Agent</h1>
-            </div>
+            {/* Left: Title */}
+            <h1 className="text-xl font-semibold">Curriculum Query Agent</h1>
 
             {/* Right: Navigation buttons */}
             <div className="flex items-center gap-2">
+              <Button
+                onClick={handleClearConversation}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear Conversation
+              </Button>
               <Button
                 onClick={handleGoToDashboard}
                 variant="outline"

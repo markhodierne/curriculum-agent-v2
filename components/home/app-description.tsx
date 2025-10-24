@@ -2,7 +2,7 @@
  * AppDescription Component
  *
  * Displays the application title and description on the home page.
- * Explains what the Oak Curriculum Agent does and how it learns from interactions.
+ * Explains what the Curriculum Query Agent does and how it learns from interactions.
  *
  * @component
  * @see FUNCTIONAL.md section 4.1 - Home Page specifications
@@ -22,7 +22,7 @@ export function AppDescription(): React.ReactElement {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">
-          Oak Curriculum Agent - Self-Learning AI Assistant
+          Curriculum Query Agent - Self-Learning AI Assistant
         </CardTitle>
         <CardDescription className="text-base">
           An intelligent curriculum assistant that gets smarter with every conversation
@@ -33,7 +33,7 @@ export function AppDescription(): React.ReactElement {
           <h3 className="font-semibold text-lg mb-2">What This Agent Does</h3>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
             <li>
-              <strong>Answers curriculum questions</strong> using a Neo4j knowledge graph of the UK National Curriculum
+              <strong>Answers curriculum questions</strong> using a Neo4j knowledge graph of the UK schools curriculum
             </li>
             <li>
               <strong>Grounds all answers in evidence</strong> with confidence-scored citations from the graph
@@ -51,7 +51,7 @@ export function AppDescription(): React.ReactElement {
               <strong>Three-agent learning loop</strong>: Query → Reflection → Learning
             </li>
             <li>
-              <strong>Evaluates every interaction</strong> on grounding, accuracy, completeness, pedagogy, and clarity
+              <strong>Evaluates every interaction</strong> on accuracy, completeness, pedagogy, and clarity
             </li>
             <li>
               <strong>Creates memories</strong> of successful interactions to improve future responses

@@ -57,6 +57,7 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { AgentTracePanel } from "@/components/chat/agent-trace-panel";
 import FeedbackControls from "@/components/chat/feedback-controls";
+import { Loader2 } from "lucide-react";
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -215,7 +216,7 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
    * Initialize useChat hook with config from sessionStorage
    * Config is passed to API route via body parameter via ChatInit transport
    */
-  const { messages: rawMessages, status, sendMessage } = useChat({
+  const { messages: rawMessages, status, sendMessage, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: api || '/api/chat',
       body: {
@@ -225,6 +226,65 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
       },
     }),
   });
+
+  /**
+   * Load initial messages from sessionStorage on mount
+   * This allows conversation to persist across page navigation
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedMessages = sessionStorage.getItem('chatMessages');
+      if (savedMessages) {
+        try {
+          const parsed = JSON.parse(savedMessages);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        } catch (err) {
+          console.error('Failed to parse saved messages:', err);
+        }
+      }
+    }
+  }, [setMessages]);
+
+  /**
+   * Save messages to sessionStorage whenever they change
+   * This allows conversation to persist across page navigation
+   */
+  useEffect(() => {
+    if (rawMessages.length > 0) {
+      try {
+        sessionStorage.setItem('chatMessages', JSON.stringify(rawMessages));
+      } catch (err) {
+        console.error('Failed to save messages to sessionStorage:', err);
+      }
+    }
+  }, [rawMessages]);
+
+  /**
+   * Listen for clear conversation event from parent component
+   * Clears both in-memory messages and sessionStorage
+   */
+  useEffect(() => {
+    const handleClearConversation = () => {
+      // Clear messages in useChat hook
+      setMessages([]);
+
+      // Clear from sessionStorage
+      try {
+        sessionStorage.removeItem('chatMessages');
+        console.log('Conversation cleared');
+      } catch (err) {
+        console.error('Failed to clear conversation from sessionStorage:', err);
+      }
+    };
+
+    window.addEventListener('clearConversation', handleClearConversation);
+
+    return () => {
+      window.removeEventListener('clearConversation', handleClearConversation);
+    };
+  }, [setMessages]);
 
   // Debounced messages for performance - update every 30ms instead of every token
   const [debouncedMessages, setDebouncedMessages] = useState(rawMessages);
@@ -508,6 +568,14 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
                 }
               });
             })()
+          )}
+
+          {/* Loading spinner when agent is thinking */}
+          {isLoading && (
+            <div className="flex items-center gap-2 text-muted-foreground py-4 px-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Thinking...</span>
+            </div>
           )}
         </ConversationContent>
       </Conversation>
