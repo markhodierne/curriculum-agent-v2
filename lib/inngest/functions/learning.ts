@@ -17,7 +17,7 @@
  * Memory Node Properties:
  * - Query text and embedding (for retrieval)
  * - Answer text and Cypher queries used
- * - All 5 evaluation scores + overall score
+ * - All 4 evaluation scores + overall score
  * - Evaluator feedback notes
  * - Timestamp metadata
  *
@@ -193,8 +193,6 @@ export const learningFunction = inngest.createFunction(
             user_query: '${escapeString(event.data.query)}',
             final_answer: '${escapeString(event.data.answer)}',
             cypher_used: ${escapeArray(event.data.cypherQueries)},
-            confidence_overall: ${event.data.confidence},
-            grounding_score: ${event.data.evaluation.grounding},
             accuracy_score: ${event.data.evaluation.accuracy},
             completeness_score: ${event.data.evaluation.completeness},
             pedagogy_score: ${event.data.evaluation.pedagogy},
@@ -450,9 +448,9 @@ export const learningFunction = inngest.createFunction(
         // Query Neo4j for current stats
         const cypher = `
           MATCH (m:Memory)
-          WITH count(m) as memoryCount, avg(m.confidence_overall) as avgConfidence, avg(m.overall_score) as avgScore
+          WITH count(m) as memoryCount, avg(m.overall_score) as avgScore
           MATCH (p:QueryPattern)
-          RETURN memoryCount, avgConfidence, avgScore, count(p) as patternCount
+          RETURN memoryCount, avgScore, count(p) as patternCount
         `;
 
         const result = await cypherTool.execute({
@@ -466,7 +464,7 @@ export const learningFunction = inngest.createFunction(
 
             await updateMemoryStats({
               totalMemories: stats.memoryCount || 0,
-              avgConfidence: stats.avgConfidence || 0,
+              avgConfidence: stats.avgScore || 0, // Use overall score as confidence metric
               avgOverallScore: stats.avgScore || 0,
               totalPatterns: stats.patternCount || 0,
             });

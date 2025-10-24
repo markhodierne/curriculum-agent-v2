@@ -64,7 +64,7 @@ USER QUERY
 │  1. Retrieve 3 similar memories (vector)    │
 │  2. Build system prompt with few-shot       │
 │  3. streamText() with MCP tools             │
-│  4. Generate answer + confidence scores     │
+│  4. Generate answer from curriculum data    │
 │  5. Stream response to user                 │
 │  6. Emit "interaction.complete" event ──────┼──┐
 └─────────────────────────────────────────────┘  │
@@ -181,8 +181,7 @@ curriculum-agent-v2/
 │   │   ├── message-list.tsx         # Scrollable messages
 │   │   ├── message-item.tsx         # Single message
 │   │   ├── agent-trace-panel.tsx    # Collapsible trace
-│   │   ├── evidence-panel.tsx       # Citations with confidence
-│   │   ├── feedback-controls.tsx    # 👍/👎, grounded, note
+│   │   ├── feedback-controls.tsx    # 👍/👎, note (auto-save)
 │   │   └── prompt-input.tsx         # Message input (existing)
 │   ├── dashboard/
 │   │   ├── learning-curve.tsx       # Tremor line chart
@@ -284,14 +283,12 @@ curriculum-agent-v2/
   user_query: string,            // Original user question
   final_answer: string,          // Agent's response
   cypher_used: string[],         // Array of Cypher queries
-  confidence_overall: float,     // 0.0-1.0
 
-  // Evaluation scores (from Reflection Agent)
-  grounding_score: float,        // 0.0-1.0
-  accuracy_score: float,         // 0.0-1.0
-  completeness_score: float,     // 0.0-1.0
-  pedagogy_score: float,         // 0.0-1.0
-  clarity_score: float,          // 0.0-1.0
+  // Evaluation scores (from Reflection Agent) - 4 dimensions
+  accuracy_score: float,         // 0.0-1.0 (40% weight)
+  completeness_score: float,     // 0.0-1.0 (30% weight)
+  pedagogy_score: float,         // 0.0-1.0 (20% weight)
+  clarity_score: float,          // 0.0-1.0 (10% weight)
   overall_score: float,          // Weighted average
 
   evaluator_notes: string,       // LLM-as-judge feedback
@@ -355,8 +352,6 @@ CREATE TABLE interactions (
   final_answer TEXT NOT NULL,
   model_used VARCHAR(50) NOT NULL,           -- e.g., 'gpt-4o'
   temperature FLOAT NOT NULL,
-  confidence_overall FLOAT,                   -- 0.0-1.0
-  grounding_rate FLOAT,                       -- % claims with citations
   cypher_queries JSONB,                       -- Array of queries used
   tool_calls JSONB,                           -- Full tool call log
   latency_ms INTEGER,                         -- Response time
@@ -375,8 +370,7 @@ CREATE TABLE feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   interaction_id UUID REFERENCES interactions(id) ON DELETE CASCADE,
   thumbs_up BOOLEAN,                          -- TRUE=👍, FALSE=👎, NULL=none
-  well_grounded BOOLEAN,                      -- Checkbox value
-  note TEXT,                                  -- Optional user note
+  note TEXT,                                  -- Optional user note (max 500 chars)
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -388,12 +382,11 @@ CREATE INDEX idx_feedback_interaction ON feedback(interaction_id);
 CREATE TABLE evaluation_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   interaction_id UUID REFERENCES interactions(id) ON DELETE CASCADE,
-  grounding_score FLOAT NOT NULL,
-  accuracy_score FLOAT NOT NULL,
-  completeness_score FLOAT NOT NULL,
-  pedagogy_score FLOAT NOT NULL,
-  clarity_score FLOAT NOT NULL,
-  overall_score FLOAT NOT NULL,
+  accuracy_score FLOAT NOT NULL,              -- 40% weight
+  completeness_score FLOAT NOT NULL,          -- 30% weight
+  pedagogy_score FLOAT NOT NULL,              -- 20% weight
+  clarity_score FLOAT NOT NULL,               -- 10% weight
+  overall_score FLOAT NOT NULL,               -- Weighted average
   evaluator_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -407,7 +400,6 @@ CREATE INDEX idx_metrics_overall ON evaluation_metrics(overall_score);
 CREATE TABLE memory_stats (
   id SERIAL PRIMARY KEY,
   total_memories INTEGER NOT NULL,
-  avg_confidence FLOAT NOT NULL,
   avg_overall_score FLOAT NOT NULL,
   total_patterns INTEGER NOT NULL,
   last_updated TIMESTAMPTZ DEFAULT NOW()
@@ -431,19 +423,9 @@ export interface AgentContext {
 
 export interface QueryAgentResult {
   answer: string;
-  confidence: number;
-  citations: Citation[];
   cypherQueries: string[];
   stepCount: number;
   latencyMs: number;
-}
-
-export interface Citation {
-  nodeId: string;
-  nodeType: string;
-  text: string;
-  confidence: number;
-  reason: string;
 }
 ```
 
@@ -455,8 +437,6 @@ export interface Memory {
   userQuery: string;
   finalAnswer: string;
   cypherUsed: string[];
-  confidenceOverall: number;
-  groundingScore: number;
   accuracyScore: number;
   completenessScore: number;
   pedagogyScore: number;
@@ -483,11 +463,10 @@ export interface QueryPattern {
 import { z } from 'zod';
 
 export const EvaluationSchema = z.object({
-  grounding: z.number().min(0).max(1),
-  accuracy: z.number().min(0).max(1),
-  completeness: z.number().min(0).max(1),
-  pedagogy: z.number().min(0).max(1),
-  clarity: z.number().min(0).max(1),
+  accuracy: z.number().min(0).max(1),       // 40% weight
+  completeness: z.number().min(0).max(1),   // 30% weight
+  pedagogy: z.number().min(0).max(1),       // 20% weight
+  clarity: z.number().min(0).max(1),        // 10% weight
   overall: z.number().min(0).max(1),
   strengths: z.array(z.string()),
   weaknesses: z.array(z.string()),
@@ -637,8 +616,6 @@ You are an expert curriculum assistant with access to the UK National Curriculum
 - Query the Neo4j graph using the read_neo4j_cypher tool
 - You can call the tool multiple times to explore different parts of the graph
 - Always ground your answers in graph data
-- Provide confidence scores for each claim (0.0-1.0)
-- Cite specific graph nodes [Node-ID] for evidence
 
 # Graph Schema
 ${formatSchema(schema)}
@@ -652,13 +629,6 @@ ${formatFewShotExamples(memories)}
 3. Generate appropriate Cypher queries
 4. Execute queries using the read_neo4j_cypher tool (call multiple times if needed)
 5. Synthesize the results into a clear answer
-6. Assign confidence scores to each claim based on evidence strength:
-   - 0.90-1.00: Direct graph match
-   - 0.75-0.89: Inferred from relationship
-   - 0.60-0.74: Synthesized from multiple nodes
-   - 0.40-0.59: Weak support
-   - 0.00-0.39: No clear support (avoid making such claims)
-7. Cite every claim with [Node-ID] format
 
 Always prioritize accuracy over completeness. If you're unsure, say so.
 `;
@@ -737,17 +707,15 @@ export const reflectionFunction = inngest.createFunction(
 
     // Step 2: Calculate overall score (weighted)
     const overallScore =
-      evaluation.grounding * 0.30 +
-      evaluation.accuracy * 0.30 +
-      evaluation.completeness * 0.20 +
-      evaluation.pedagogy * 0.10 +
+      evaluation.accuracy * 0.40 +
+      evaluation.completeness * 0.30 +
+      evaluation.pedagogy * 0.20 +
       evaluation.clarity * 0.10;
 
     // Step 3: Save to Supabase
     await step.run('save-evaluation', async () => {
       await supabase.from('evaluation_metrics').insert({
         interaction_id: event.data.interactionId,
-        grounding_score: evaluation.grounding,
         accuracy_score: evaluation.accuracy,
         completeness_score: evaluation.completeness,
         pedagogy_score: evaluation.pedagogy,
@@ -800,29 +768,23 @@ ${JSON.stringify(graphResults, null, 2)}
 
 # Evaluation Rubric (score 0.0-1.0 for each)
 
-## Grounding (30% weight)
-- 1.0: Every claim has clear graph support
-- 0.7: Most claims supported, minor unsupported details
-- 0.4: Significant unsupported claims
-- 0.0: Mostly hallucinated content
-
-## Accuracy (30% weight)
-- 1.0: Completely accurate per curriculum
+## Accuracy (40% weight)
+- 1.0: Completely accurate per curriculum data
 - 0.7: Minor inaccuracies that don't affect core message
 - 0.4: Significant factual errors
 - 0.0: Fundamentally incorrect information
 
-## Completeness (20% weight)
-- 1.0: Comprehensive, addresses all aspects
+## Completeness (30% weight)
+- 1.0: Comprehensive, addresses all aspects of the query
 - 0.7: Answers main question, some gaps
-- 0.4: Partial answer, missing elements
+- 0.4: Partial answer, missing key elements
 - 0.0: Doesn't answer the question
 
-## Pedagogy (10% weight)
-- 1.0: Excellent pedagogical framing
-- 0.7: Good, appropriate for educators
-- 0.4: Lacks curriculum context
-- 0.0: Inappropriate or misleading
+## Pedagogy (20% weight)
+- 1.0: Excellent pedagogical framing for educators
+- 0.7: Good, appropriate for curriculum context
+- 0.4: Lacks proper curriculum context
+- 0.0: Inappropriate or misleading for educators
 
 ## Clarity (10% weight)
 - 1.0: Crystal clear, well-structured
@@ -875,8 +837,6 @@ export const learningFunction = inngest.createFunction(
           user_query: $query,
           final_answer: $answer,
           cypher_used: $cypherQueries,
-          confidence_overall: $confidenceOverall,
-          grounding_score: $evaluation.grounding,
           accuracy_score: $evaluation.accuracy,
           completeness_score: $evaluation.completeness,
           pedagogy_score: $evaluation.pedagogy,
@@ -895,7 +855,6 @@ export const learningFunction = inngest.createFunction(
         query,
         answer,
         cypherQueries,
-        confidenceOverall: event.data.confidence,
         evaluation: evaluation,
         evaluatorNotes: JSON.stringify(evaluation),
         embedding,
@@ -1112,7 +1071,6 @@ export const reflectionFunction = inngest.createFunction(
 
 function getDefaultEvaluation(): Evaluation {
   return {
-    grounding: 0.5,
     accuracy: 0.5,
     completeness: 0.5,
     pedagogy: 0.5,
@@ -1354,7 +1312,6 @@ NODE_ENV=development
 - Response latency (p50, p95, p99)
 - Cypher success rate
 - Step count per query
-- Confidence score distribution
 
 **Async Agents**:
 - Reflection completion time
@@ -1370,6 +1327,6 @@ NODE_ENV=development
 
 ---
 
-**Document Status**: Ready for Implementation
-**Last Updated**: 2025-10-17
+**Document Status**: Task 34 Complete - Simplified System (4-Dimension Rubric)
+**Last Updated**: 2025-10-24
 **Dependencies**: FUNCTIONAL.md, CLAUDE.md, BRIEF.md

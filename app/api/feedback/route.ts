@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    let { interactionId, feedbackId, thumbsUp, wellGrounded, note } = body;
+    let { interactionId, feedbackId, thumbsUp, note } = body;
 
     if (!interactionId) {
       return NextResponse.json(
@@ -86,7 +86,6 @@ export async function POST(req: NextRequest) {
       // Update existing feedback
       await updateFeedback(feedbackId, {
         thumbsUp,
-        wellGrounded,
         note,
       });
       result = { feedbackId, updated: true };
@@ -96,7 +95,6 @@ export async function POST(req: NextRequest) {
         const newFeedbackId = await createFeedback({
           interactionId,
           thumbsUp,
-          wellGrounded,
           note,
         });
         result = { feedbackId: newFeedbackId, created: true };

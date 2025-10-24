@@ -18,8 +18,6 @@ export interface CreateInteractionParams {
   finalAnswer: string;
   modelUsed: string;
   temperature: number;
-  confidenceOverall?: number;
-  groundingRate?: number;
   cypherQueries?: Record<string, unknown>[];
   toolCalls?: Record<string, unknown>[];
   latencyMs?: number;
@@ -30,13 +28,11 @@ export interface CreateInteractionParams {
 export interface CreateFeedbackParams {
   interactionId: string;
   thumbsUp?: boolean | null;
-  wellGrounded?: boolean | null;
   note?: string | null;
 }
 
 export interface CreateEvaluationMetricsParams {
   interactionId: string;
-  groundingScore: number;
   accuracyScore: number;
   completenessScore: number;
   pedagogyScore: number;
@@ -74,8 +70,6 @@ export async function createInteraction(
       final_answer: params.finalAnswer,
       model_used: params.modelUsed,
       temperature: params.temperature,
-      confidence_overall: params.confidenceOverall ?? null,
-      grounding_rate: params.groundingRate ?? null,
       cypher_queries: params.cypherQueries ?? null,
       tool_calls: params.toolCalls ?? null,
       latency_ms: params.latencyMs ?? null,
@@ -111,8 +105,6 @@ export async function updateInteraction(
     .from('interactions')
     .update({
       final_answer: params.finalAnswer,
-      confidence_overall: params.confidenceOverall,
-      grounding_rate: params.groundingRate,
       cypher_queries: params.cypherQueries,
       tool_calls: params.toolCalls,
       latency_ms: params.latencyMs,
@@ -223,12 +215,11 @@ export async function createFeedback(
 ): Promise<string> {
   const supabase = getSupabaseClient();
 
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('feedback')
     .insert({
       interaction_id: params.interactionId,
       thumbs_up: params.thumbsUp ?? null,
-      well_grounded: params.wellGrounded ?? null,
       note: params.note ?? null,
     })
     .select('id')
@@ -261,7 +252,6 @@ export async function updateFeedback(
     .from('feedback')
     .update({
       thumbs_up: params.thumbsUp ?? undefined,
-      well_grounded: params.wellGrounded ?? undefined,
       note: params.note ?? undefined,
     })
     .eq('id', feedbackId);
@@ -324,7 +314,6 @@ export async function createEvaluationMetrics(
     .from('evaluation_metrics')
     .insert({
       interaction_id: params.interactionId,
-      grounding_score: params.groundingScore,
       accuracy_score: params.accuracyScore,
       completeness_score: params.completenessScore,
       pedagogy_score: params.pedagogyScore,
@@ -355,7 +344,6 @@ export async function getAllEvaluationMetrics(): Promise<
   Array<{
     id: string;
     interaction_id: string;
-    grounding_score: number;
     accuracy_score: number;
     completeness_score: number;
     pedagogy_score: number;

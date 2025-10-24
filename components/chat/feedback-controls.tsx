@@ -2,11 +2,10 @@
  * Feedback Controls Component
  *
  * User feedback controls for chat assistant messages.
- * Allows users to provide thumbs up/down, grounding assessment, and optional notes.
+ * Allows users to provide thumbs up/down and optional notes.
  *
  * Features:
  * - Thumbs up/down buttons (mutually exclusive)
- * - "Well grounded?" checkbox
  * - "Add note" button that reveals textarea (max 500 chars)
  * - Auto-saves to Supabase on interaction
  *
@@ -24,7 +23,6 @@
 import { useState, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 
 /**
@@ -41,7 +39,6 @@ interface FeedbackControlsProps {
 interface FeedbackState {
   feedbackId: string | null;
   thumbsUp: boolean | null;
-  wellGrounded: boolean | null;
   note: string;
   showNoteInput: boolean;
 }
@@ -58,7 +55,6 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
   const [state, setState] = useState<FeedbackState>({
     feedbackId: null,
     thumbsUp: null,
-    wellGrounded: null,
     note: '',
     showNoteInput: false,
   });
@@ -101,7 +97,6 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
           setState({
             feedbackId: feedback.id,
             thumbsUp: feedback.thumbs_up,
-            wellGrounded: feedback.well_grounded,
             note: feedback.note || '',
             showNoteInput: !!feedback.note,
           });
@@ -138,7 +133,6 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
           interactionId: messageId,
           feedbackId: state.feedbackId,
           thumbsUp: newState.thumbsUp,
-          wellGrounded: newState.wellGrounded,
           note: newState.note || null,
         }),
       });
@@ -197,13 +191,6 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
   }
 
   /**
-   * Handles "Well grounded?" checkbox toggle
-   */
-  function handleWellGroundedChange(checked: boolean): void {
-    saveFeedback({ wellGrounded: checked });
-  }
-
-  /**
    * Handles note textarea change
    */
   function handleNoteChange(value: string): void {
@@ -252,22 +239,6 @@ export default function FeedbackControls({ messageId }: FeedbackControlsProps) {
           >
             <ThumbsDown className="h-4 w-4" />
           </Button>
-        </div>
-
-        {/* Well grounded checkbox */}
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id={`grounded-${messageId}`}
-            checked={state.wellGrounded === true}
-            onCheckedChange={handleWellGroundedChange}
-            disabled={isSaving}
-          />
-          <label
-            htmlFor={`grounded-${messageId}`}
-            className="text-sm font-medium cursor-pointer select-none"
-          >
-            Well grounded?
-          </label>
         </div>
 
         {/* Add note button */}

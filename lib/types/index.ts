@@ -6,7 +6,7 @@
  */
 
 // Agent types
-export type { AgentContext, QueryAgentResult, Citation } from './agent';
+export type { AgentContext, QueryAgentResult } from './agent';
 
 // Memory types
 export type { Memory, QueryPattern } from './memory';

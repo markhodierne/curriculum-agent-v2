@@ -214,7 +214,7 @@ export const learningFunction = inngest.createFunction(
     });
 
     await step.run('link-evidence', async () => {
-      return await linkEvidenceNodes(memoryId, event.data.evidenceNodeIds);
+      return await linkEvidenceNodes(memoryId, evidenceNodeIds);
     });
 
     // Optional: Extract patterns
@@ -323,7 +323,7 @@ export async function retrieveSimilarMemories(
 const memories = await retrieveSimilarMemories(userQuery);
 const systemPrompt = buildQueryPrompt(schema, memories);  // Inject as few-shot
 
-// If agent answers from memory without querying, inherit Cypher queries for proper grounding
+// If agent answers from memory without querying, inherit Cypher queries for tracking
 if (cypherQueries.length === 0 && memories.length > 0) {
   cypherQueries.push(...memories[0].cypherUsed);
 }
@@ -332,7 +332,7 @@ if (cypherQueries.length === 0 && memories.length > 0) {
 **Key Points**:
 - Threshold: 0.25 for testing/bootstrapping, 0.75 for production
 - Embed values directly in query string (MCP doesn't support params well)
-- Memory inheritance: When answering from retrieved memory, inherit source Cypher queries for grounding tracking
+- Memory inheritance: When answering from retrieved memory, inherit source Cypher queries for tracking
 
 ---
 

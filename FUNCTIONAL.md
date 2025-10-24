@@ -23,7 +23,6 @@ The agent learns from every interaction by:
 
 ### 1.3 Success Criteria (Phase 1 MVP)
 - ≥20% improvement in evaluation scores (interactions 1-10 vs 41-50)
-- ≥95% grounding rate (claims with valid citations)
 - ≥85% Cypher query success rate
 - ≤4s p95 user-facing response latency
 - ≤30s async processing (reflection + learning)
@@ -38,8 +37,7 @@ The agent learns from every interaction by:
 - Three-agent learning loop (Query, Reflection, Learning)
 - Memory system in Neo4j with vector search
 - Dashboard showing learning metrics
-- User feedback mechanism (👍/👎, grounded checkbox)
-- Confidence-scored citations for all claims
+- User feedback mechanism (👍/👎, optional notes)
 - Agent trace visibility (collapsible)
 
 ### 2.2 Out of Scope (Future Phases)
@@ -63,7 +61,7 @@ The agent learns from every interaction by:
 2. Description explains:
    - Agent answers curriculum questions using Neo4j knowledge graph
    - Learns from every interaction to improve over time
-   - Grounds all answers in graph evidence with citations
+   - Grounds all answers in graph evidence
 3. Configuration panel:
    - **Model selector**: Dropdown with GPT-4o (default), gpt-4o-mini, GPT-5 (experimental)
    - **Advanced settings** (collapsible): Temperature slider (0-1, default 0.3), Max tokens (default 2000)
@@ -78,9 +76,8 @@ The agent learns from every interaction by:
    - Tool call indicators: "🔧 Querying curriculum graph..."
 5. Response includes:
    - Answer text
-   - Collapsible Evidence panel with citations
-   - Collapsible Agent Trace panel
-   - Feedback controls
+   - Collapsible Agent Trace panel (reasoning steps)
+   - Feedback controls (thumbs + notes)
 6. User can continue conversation with follow-up questions
 
 ### 3.2 Chat Interaction Details
@@ -93,32 +90,12 @@ User: What fractions do Year 3 students learn?
   ↓
 Assistant: Year 3 students learn the following fraction concepts:
 
-1. Recognizing unit fractions (1/2, 1/3, 1/4) [Y3-F-001]★★★★★
-2. Finding fractions of amounts [Y3-F-002]★★★★☆
-3. Comparing fractions with same denominator [Y3-F-003]★★★★★
+1. Recognizing unit fractions (1/2, 1/3, 1/4)
+2. Finding fractions of amounts
+3. Comparing fractions with same denominator
 
-[▼ Evidence (3 citations) - Overall confidence: 0.92]
 [▼ Agent Trace (4 steps)]
-[👍] [👎] [☑ Well grounded?] [💬 Add note]
-```
-
-**Evidence Panel (Expanded)**
-```
-▼ Evidence (3 citations) - Overall confidence: 0.92
-
-Citation 1: [Y3-F-001] Objective Node ★★★★★ 0.97
-"Recognise, find and write fractions of a discrete set of objects"
-Confidence: Direct graph match
-
-Citation 2: [Y3-F-002] Objective Node ★★★★☆ 0.85
-"Recognise and use fractions as numbers"
-Confidence: Inferred from relationship
-
-Citation 3: [Y3-F-003] Objective Node ★★★★★ 0.94
-"Compare and order unit fractions"
-Confidence: Direct graph match
-
-[Click any citation to view full node details]
+[👍] [👎] [💬 Add note]
 ```
 
 **Agent Trace Panel (Expanded)**
@@ -141,17 +118,15 @@ Step 3: Graph Query Execution
 Found 12 objectives in 0.3s
 
 Step 4: Answer Synthesis
-Generated answer with 3 claims, all grounded in graph results
-Overall confidence: 0.92
+Generated answer from graph results
 ```
 
 **Feedback Controls**
-- **👍 / 👎**: Simple reaction (stored immediately)
-- **☑ Well grounded?**: Checkbox for grounding quality
-- **💬 Add note**: Optional textarea appears on click
+- **👍 / 👎**: Simple reaction (auto-saves on click)
+- **💬 Add note**: Optional textarea (toggle with button)
   - Placeholder: "What could be improved?"
   - Character limit: 500
-  - Submit saves to Supabase
+  - Auto-saves on blur
 
 ### 3.3 Dashboard Experience
 
@@ -179,10 +154,10 @@ Overall confidence: 0.92
 │                                                     │
 │  Recent Interactions                                │
 │  ┌───────────────────────────────────────────┐    │
-│  │ Query         | Conf | Ground | Score | Time│   │
-│  │ What fractions| 0.92 | 0.98   | 0.87  | 2.1s│   │
-│  │ Compare Y3... | 0.85 | 0.95   | 0.82  | 3.4s│   │
-│  │ ...           | ...  | ...    | ...   | ... │   │
+│  │ Query         | Steps | Score | Time      │    │
+│  │ What fractions| 4     | 0.87  | 2.1s      │    │
+│  │ Compare Y3... | 3     | 0.82  | 1.4s      │    │
+│  │ ...           | ...   | ...   | ...       │    │
 │  └───────────────────────────────────────────┘    │
 │                                                     │
 │  Pattern Library                                    │
@@ -235,45 +210,23 @@ Overall confidence: 0.92
 - Tool call status messages: "🔧 Querying curriculum graph..."
 - Smooth scrolling to latest message
 
-**B. Evidence Panel (Collapsible)**
-- Default: Collapsed with summary "Evidence (3 citations) ★★★★☆ 0.87"
-- Expanded: Shows all citations with:
-  - Node ID (e.g., [Y3-F-001])
-  - Node type (Objective, Strand, Concept)
-  - Text snippet
-  - Star rating (★★★★★)
-  - Confidence score (0.00-1.00)
-  - Confidence reason ("Direct graph match", "Inferred from relationship")
-- Click citation → modal with full node properties
-
-**C. Agent Trace Panel (Collapsible)**
+**B. Agent Trace Panel (Collapsible)**
 - Default: Collapsed with summary "Agent Trace (4 steps)"
 - Expanded: Shows reasoning steps:
   - Memory retrieval (count, similarity scores)
   - Cypher generation (query pattern used)
   - Graph query execution (result count, latency)
-  - Answer synthesis (claim count, grounding rate)
+  - Answer synthesis
 - Useful for debugging and transparency
 
-**D. Feedback Controls**
+**C. Feedback Controls**
 - Always visible below each assistant message
-- 👍 / 👎 buttons (mutually exclusive, saves immediately)
-- "Well grounded?" checkbox (independent, saves immediately)
-- "Add note" button → reveals textarea
+- 👍 / 👎 buttons (mutually exclusive, auto-saves on click)
+- "Add note" button → reveals textarea (toggles visibility)
   - Placeholder: "What could be improved?"
   - Max 500 characters
-  - Submit button saves to Supabase
+  - Auto-saves on blur
   - Optional, not required
-
-**E. Confidence Scoring**
-- Each claim in answer has individual confidence score
-- Star rating visualization:
-  - ★★★★★ = 0.90-1.00 (Direct graph match)
-  - ★★★★☆ = 0.75-0.89 (Inferred from traversal)
-  - ★★★☆☆ = 0.60-0.74 (Synthesized from multiple nodes)
-  - ★★☆☆☆ = 0.40-0.59 (Weak support)
-  - ★☆☆☆☆ = 0.00-0.39 (No clear support)
-- Overall confidence: Weighted average displayed prominently
 
 **Message History**
 - Scrollable area with all conversation messages
@@ -300,8 +253,8 @@ Overall confidence: 0.92
 1. **Total Interactions**
    - Count of all queries processed
    - Icon: 💬
-2. **Average Confidence**
-   - Mean confidence score across all interactions
+2. **Average Score**
+   - Mean overall evaluation score across all interactions
    - Icon: ⭐
 3. **Memories Created**
    - Count of `:Memory` nodes in Neo4j
@@ -311,8 +264,7 @@ Overall confidence: 0.92
 - Last 20 interactions
 - Columns:
   - Query (truncated to 50 chars)
-  - Confidence (0.00-1.00)
-  - Grounding (0.00-1.00)
+  - Steps (number of tool calls)
   - Overall Score (0.00-1.00)
   - Latency (seconds)
   - Timestamp
@@ -342,7 +294,7 @@ Overall confidence: 0.92
 2. Loading indicator appears
 3. Tool call status: "🔧 Querying curriculum graph..."
 4. Response streams in real-time
-5. Evidence and trace panels appear when complete
+5. Agent trace panel appears when complete
 6. Feedback controls enabled
 
 **What happens internally:**
@@ -350,8 +302,7 @@ Overall confidence: 0.92
 - Injects memories as few-shot examples in system prompt
 - Uses AI SDK `streamText()` with `read_neo4j_cypher` tool
 - Agent can call tool multiple times to explore graph
-- Generates answer with claim-level confidence scores
-- Verifies all claims have citations
+- Generates answer from curriculum data
 - Emits `interaction.complete` event (non-blocking)
 - Returns stream to user
 
@@ -369,11 +320,10 @@ Overall confidence: 0.92
 
 **What happens internally:**
 - Triggered by `interaction.complete` event
-- Evaluates interaction on 5-dimension rubric:
-  - Grounding (30%): Claims supported by evidence?
-  - Accuracy (30%): Information correct per curriculum?
-  - Completeness (20%): Fully answers question?
-  - Pedagogy (10%): Appropriate for curriculum context?
+- Evaluates interaction on 4-dimension rubric:
+  - Accuracy (40%): Information correct per curriculum?
+  - Completeness (30%): Fully answers question?
+  - Pedagogy (20%): Appropriate for curriculum context?
   - Clarity (10%): Well-explained?
 - Uses AI SDK `generateObject()` for structured output
 - Produces JSON with scores (0-1) + qualitative feedback
@@ -539,12 +489,11 @@ Overall confidence: 0.92
 
 Before demo, validate:
 - [ ] All 20 test queries succeed (≥85% success rate)
-- [ ] All answers include confidence scores + citations
 - [ ] Memory created for every interaction (check Neo4j)
 - [ ] Reflection completes within 30s (check Inngest dashboard)
 - [ ] Learning improvement visible in dashboard (≥20%)
 - [ ] Dashboard loads without errors
-- [ ] Feedback controls functional
+- [ ] Feedback controls functional (thumbs up/down, note)
 - [ ] p95 latency ≤4s (check logs)
 
 ---
@@ -568,6 +517,6 @@ See `BRIEF.md` sections 5-8 for full roadmap.
 
 ---
 
-**Document Status**: Ready for Development
-**Last Updated**: 2025-10-17
+**Document Status**: Task 34 Complete - Simplified System (4-Dimension Rubric)
+**Last Updated**: 2025-10-24
 **Next Review**: After Phase 1 completion

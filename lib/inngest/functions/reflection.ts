@@ -6,16 +6,15 @@
  *
  * Workflow:
  * 1. Triggered by `interaction.complete` event from Query Agent
- * 2. Evaluates interaction on 5-dimension rubric using GPT-4o
+ * 2. Evaluates interaction on 4-dimension rubric using GPT-4o
  * 3. Calculates weighted overall score
  * 4. Saves evaluation metrics to Supabase
  * 5. Emits `reflection.complete` event to trigger Learning Agent
  *
  * Rubric Dimensions (0.0-1.0):
- * - Grounding (30%): Claims supported by graph evidence
- * - Accuracy (30%): Information correct per curriculum
- * - Completeness (20%): Fully answers the question
- * - Pedagogy (10%): Appropriate curriculum context
+ * - Accuracy (40%): Information correct per curriculum
+ * - Completeness (30%): Fully answers the question
+ * - Pedagogy (20%): Appropriate curriculum context
  * - Clarity (10%): Well-structured and clear
  *
  * Performance Target: Complete within 30s of interaction
@@ -48,7 +47,6 @@ import { createEvaluationMetrics } from '@/lib/database/queries';
  */
 function getDefaultEvaluation(): Evaluation {
   return {
-    grounding: 0.5,
     accuracy: 0.5,
     completeness: 0.5,
     pedagogy: 0.5,
@@ -138,8 +136,8 @@ export const reflectionFunction = inngest.createFunction(
         });
 
         console.log('Evaluation complete:', {
-          grounding: result.object.grounding,
           accuracy: result.object.accuracy,
+          completeness: result.object.completeness,
           overall: result.object.overall,
         });
 
@@ -154,10 +152,9 @@ export const reflectionFunction = inngest.createFunction(
     // Step 2: Calculate overall score (weighted average)
     const overallScore = await step.run('calculate-overall-score', async () => {
       const weighted =
-        evaluation.grounding * 0.30 +
-        evaluation.accuracy * 0.30 +
-        evaluation.completeness * 0.20 +
-        evaluation.pedagogy * 0.10 +
+        evaluation.accuracy * 0.40 +
+        evaluation.completeness * 0.30 +
+        evaluation.pedagogy * 0.20 +
         evaluation.clarity * 0.10;
 
       console.log(`Calculated overall score: ${weighted.toFixed(3)}`);
@@ -170,7 +167,6 @@ export const reflectionFunction = inngest.createFunction(
       try {
         const evaluationId = await createEvaluationMetrics({
           interactionId: event.data.interactionId,
-          groundingScore: evaluation.grounding,
           accuracyScore: evaluation.accuracy,
           completenessScore: evaluation.completeness,
           pedagogyScore: evaluation.pedagogy,

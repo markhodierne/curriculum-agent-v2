@@ -146,8 +146,6 @@ function parseMemories(results: any[]): Memory[] {
           userQuery: node.user_query,
           finalAnswer: node.final_answer || '',
           cypherUsed: Array.isArray(node.cypher_used) ? node.cypher_used : [],
-          confidenceOverall: node.confidence_overall || 0,
-          groundingScore: node.grounding_score || 0,
           accuracyScore: node.accuracy_score || 0,
           completenessScore: node.completeness_score || 0,
           pedagogyScore: node.pedagogy_score || 0,

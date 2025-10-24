@@ -28,8 +28,6 @@ CREATE TABLE IF NOT EXISTS interactions (
   final_answer TEXT NOT NULL,
   model_used VARCHAR(50) NOT NULL,
   temperature FLOAT NOT NULL,
-  confidence_overall FLOAT,
-  grounding_rate FLOAT,
   cypher_queries JSONB,
   tool_calls JSONB,
   latency_ms INTEGER,
@@ -52,8 +50,6 @@ COMMENT ON COLUMN interactions.user_query IS 'User''s original question';
 COMMENT ON COLUMN interactions.final_answer IS 'Agent''s complete response';
 COMMENT ON COLUMN interactions.model_used IS 'LLM model name (e.g., gpt-4o)';
 COMMENT ON COLUMN interactions.temperature IS 'Model temperature setting (0.0-1.0)';
-COMMENT ON COLUMN interactions.confidence_overall IS 'Weighted average confidence score (0.0-1.0)';
-COMMENT ON COLUMN interactions.grounding_rate IS 'Percentage of claims with citations (0.0-1.0)';
 COMMENT ON COLUMN interactions.cypher_queries IS 'Array of Cypher queries executed';
 COMMENT ON COLUMN interactions.tool_calls IS 'Full tool call log from AI SDK';
 COMMENT ON COLUMN interactions.latency_ms IS 'Response time in milliseconds';
@@ -65,14 +61,13 @@ COMMENT ON COLUMN interactions.memory_id IS 'Corresponding Neo4j :Memory node UU
  * feedback table
  *
  * Stores user feedback for each interaction.
- * Supports thumbs up/down, grounded checkbox, and optional notes.
+ * Supports thumbs up/down and optional notes.
  */
 export const FEEDBACK_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   interaction_id UUID REFERENCES interactions(id) ON DELETE CASCADE,
   thumbs_up BOOLEAN,
-  well_grounded BOOLEAN,
   note TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -82,12 +77,10 @@ CREATE INDEX IF NOT EXISTS idx_feedback_interaction ON feedback(interaction_id);
 
 -- Index for feedback analysis
 CREATE INDEX IF NOT EXISTS idx_feedback_thumbs ON feedback(thumbs_up) WHERE thumbs_up IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_feedback_grounded ON feedback(well_grounded) WHERE well_grounded IS NOT NULL;
 
-COMMENT ON TABLE feedback IS 'User feedback (thumbs, grounded checkbox, notes)';
+COMMENT ON TABLE feedback IS 'User feedback (thumbs and notes)';
 COMMENT ON COLUMN feedback.interaction_id IS 'References interactions.id';
 COMMENT ON COLUMN feedback.thumbs_up IS 'TRUE=👍, FALSE=👎, NULL=no feedback';
-COMMENT ON COLUMN feedback.well_grounded IS 'User assessment of grounding quality';
 COMMENT ON COLUMN feedback.note IS 'Optional user note (max 500 chars)';
 `;
 
@@ -101,7 +94,6 @@ export const EVALUATION_METRICS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS evaluation_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   interaction_id UUID REFERENCES interactions(id) ON DELETE CASCADE,
-  grounding_score FLOAT NOT NULL,
   accuracy_score FLOAT NOT NULL,
   completeness_score FLOAT NOT NULL,
   pedagogy_score FLOAT NOT NULL,
@@ -120,12 +112,11 @@ CREATE INDEX IF NOT EXISTS idx_metrics_overall ON evaluation_metrics(overall_sco
 -- Index for chronological queries
 CREATE INDEX IF NOT EXISTS idx_metrics_created ON evaluation_metrics(created_at DESC);
 
-COMMENT ON TABLE evaluation_metrics IS 'Reflection Agent evaluation scores (5-dimension rubric)';
+COMMENT ON TABLE evaluation_metrics IS 'Reflection Agent evaluation scores (4-dimension rubric)';
 COMMENT ON COLUMN evaluation_metrics.interaction_id IS 'References interactions.id';
-COMMENT ON COLUMN evaluation_metrics.grounding_score IS 'Claims supported by evidence (0.0-1.0, 30% weight)';
-COMMENT ON COLUMN evaluation_metrics.accuracy_score IS 'Information correct per curriculum (0.0-1.0, 30% weight)';
-COMMENT ON COLUMN evaluation_metrics.completeness_score IS 'Fully answers question (0.0-1.0, 20% weight)';
-COMMENT ON COLUMN evaluation_metrics.pedagogy_score IS 'Appropriate for curriculum context (0.0-1.0, 10% weight)';
+COMMENT ON COLUMN evaluation_metrics.accuracy_score IS 'Information correct per curriculum (0.0-1.0, 40% weight)';
+COMMENT ON COLUMN evaluation_metrics.completeness_score IS 'Fully answers question (0.0-1.0, 30% weight)';
+COMMENT ON COLUMN evaluation_metrics.pedagogy_score IS 'Appropriate for curriculum context (0.0-1.0, 20% weight)';
 COMMENT ON COLUMN evaluation_metrics.clarity_score IS 'Well-explained (0.0-1.0, 10% weight)';
 COMMENT ON COLUMN evaluation_metrics.overall_score IS 'Weighted average of all scores';
 COMMENT ON COLUMN evaluation_metrics.evaluator_notes IS 'JSON with strengths, weaknesses, suggestions';

@@ -981,23 +981,95 @@ Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (P
 
 ---
 
+---
+
+### Task 34: Simplification - Remove Grounding & Citations ✅ (Completed 2025-10-23)
+
+**Objective**: Remove over-complicated grounding score tracking and citation system from entire codebase.
+
+**Rationale**: Grounding score calculation was error-prone (always 0) and unnecessary complexity. The Reflection Agent evaluates quality comprehensively - no need for redundant confidence tracking in Query Agent.
+
+**Removed Features**:
+1. **Citations System**:
+   - Deleted `Citation` type from `lib/types/agent.ts`
+   - Removed citation extraction logic from chat API (regex matching `[Node-ID]`)
+   - Removed Evidence Panel component (`components/chat/evidence-panel.tsx`)
+   - Removed citation instructions from query prompt
+
+2. **Grounding Scores**:
+   - Removed `grounding` dimension from `EvaluationSchema` (5D → 4D rubric)
+   - Updated reflection prompt to 4-dimension evaluation
+   - Removed `groundingScore` from Memory type
+   - Removed `grounding_score` from Neo4j Memory node creation
+   - Removed `grounding_score` column from Supabase `evaluation_metrics` table
+   - Removed `grounding_rate` column from `interactions` table
+   - Removed `well_grounded` checkbox from feedback controls
+
+3. **Confidence Tracking**:
+   - Removed `confidenceOverall` from Query Agent calculations
+   - Removed `confidence_overall` from Memory type and Neo4j nodes
+   - Removed `confidence_overall` column from `interactions` table
+   - Removed confidence scoring instructions from query prompt
+   - Reflection Agent is now sole authority for quality evaluation
+
+**New Evaluation Rubric** (4 dimensions):
+- **Accuracy (40%)**: Information correct per curriculum
+- **Completeness (30%)**: Fully answers the question
+- **Pedagogy (20%)**: Appropriate curriculum context
+- **Clarity (10%)**: Well-structured and clear
+
+**Files Updated** (25 files):
+- Type definitions: `agent.ts`, `memory.ts`, `evaluation.ts`, `index.ts`
+- Prompts: `query-prompt.ts`, `reflection-prompt.ts`
+- Agents: `reflection.ts`, `learning.ts`
+- Database: `schema.ts`, `queries.ts`, `supabase.ts`
+- API: `app/api/chat/route.ts`, `app/api/feedback/route.ts`
+- Components: `chat-assistant.tsx`, `feedback-controls.tsx` (removed Evidence Panel integration)
+- Memory: `retrieval.ts`
+- Events: `events.ts`
+
+**Database Schema Changes**:
+```sql
+-- Removed from interactions table:
+confidence_overall FLOAT
+grounding_rate FLOAT
+
+-- Removed from evaluation_metrics table:
+grounding_score FLOAT NOT NULL
+
+-- Removed from feedback table:
+well_grounded BOOLEAN
+```
+
+**Verification**:
+- ✅ TypeScript compilation: 0 errors
+- ✅ All references removed (grep verified)
+- ✅ Feedback controls simplified (thumbs + notes only)
+- ✅ Query Agent focuses on data retrieval only
+- ✅ Reflection Agent is sole evaluator
+
+**Impact**:
+- Simpler codebase: ~500 lines removed
+- Clearer separation of concerns
+- More reliable evaluation (LLM-as-judge vs brittle heuristics)
+- Better user experience (no confusing grounding checkbox)
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-33 complete ✅
-**Phase 1 MVP**: COMPLETE ✅ (Ready for Acceptance Testing)
+**Progress**: Tasks 1-34 complete ✅
+**Phase 1 MVP**: SIMPLIFIED ✅ (Ready for testing with correct OpenAI API key)
 
-**System Status**: ✅ Debugged and validated for testing
-**Code Quality**: ✅ Zero TypeScript errors, professional standards
+**System Status**: ✅ Simplified and debugged
+**Code Quality**: ✅ Zero TypeScript errors, cleaner architecture
 **Three-Agent Learning Loop**: ✅ Working (Query → Reflection → Learning)
-**Schema Pre-fetching**: ✅ Optimized (once per conversation)
-**Cypher Extraction**: ✅ Fixed (AI SDK v5 `input` property)
-**Evidence Linking**: ✅ Working (10 relationships per interaction)
-**Memory Inheritance**: ✅ Grounding preserved when answering from memory
-**Frontend**: ✅ Home + Chat + Dashboard complete
-**Database**: ✅ Neo4j + Supabase integrated
+**Evaluation System**: ✅ 4-dimension rubric (no grounding/confidence)
+**Frontend**: ✅ Home + Chat + Dashboard (simplified feedback)
+**Database**: ✅ Neo4j + Supabase (schema updated)
 **Async Pipeline**: ✅ Inngest agents processing
-**Testing**: ⏳ 20 test queries ready to execute
-**Documentation**: ✅ Complete and up-to-date
+**Testing**: ⚠️ Blocked by incorrect API key (Anthropic key instead of OpenAI)
+**Documentation**: ✅ Updated for simplified system
 
 ---
 

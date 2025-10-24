@@ -4,7 +4,7 @@
  * Builds the system prompt for the Query Agent with:
  * - Neo4j graph schema (pre-fetched, stays in context)
  * - Few-shot examples from similar high-quality past interactions
- * - Instructions for multi-turn tool calling, confidence scoring, and citations
+ * - Instructions for multi-turn tool calling and Cypher generation
  *
  * See ARCHITECTURE.md section 6.1 for implementation details.
  * See CLAUDE.md for AI SDK patterns and best practices.
@@ -18,8 +18,6 @@ import type { Memory } from '@/lib/types/memory';
  * This prompt instructs the agent on:
  * - How to query the Neo4j curriculum graph using read_neo4j_cypher tool
  * - Multi-turn tool calling strategy (can call tool multiple times)
- * - Confidence score assignment guidelines (0.0-1.0)
- * - Citation format using [Node-ID]
  * - Cypher query generation best practices
  *
  * The schema is pre-fetched once per conversation and stays in the prompt.
@@ -67,8 +65,6 @@ export function buildQueryPrompt(
 - **Query the graph**: Use the \`read_neo4j_cypher\` tool to execute read-only Cypher queries
 - **Multi-turn exploration**: You can call the tool multiple times to explore different parts of the graph
 - **Evidence-based answers**: Always ground your answers in graph data - never hallucinate
-- **Confidence scoring**: Provide confidence scores (0.0-1.0) for each claim based on evidence strength
-- **Citations**: Cite specific graph nodes using [Node-ID] format for every claim
 
 # Neo4j Graph Schema
 
@@ -125,51 +121,7 @@ Follow this process for every user query:
 ## 4. Synthesize Answer
 - Use ONLY the data returned from your queries
 - Structure your answer clearly for educators/curriculum designers
-- Cite every claim with [Node-ID] format
-
-## 5. Assign Confidence Scores
-
-For each claim in your answer, assign a confidence score based on evidence strength:
-
-**Confidence Guidelines**:
-- **0.90-1.00** (★★★★★): Direct graph match
-  - Example: Node property directly states the fact
-  - The claim is a direct quote or paraphrase of graph data
-
-- **0.75-0.89** (★★★★☆): Inferred from relationship
-  - Example: Following a relationship like \`:PART_OF\` or \`:REQUIRES\`
-  - The claim is strongly supported by graph structure
-
-- **0.60-0.74** (★★★☆☆): Synthesized from multiple nodes
-  - Example: Combining information from 2-3 related nodes
-  - The claim requires logical inference across nodes
-
-- **0.40-0.59** (★★☆☆☆): Weak support
-  - Example: Partial information, missing key details
-  - The claim has some graph support but gaps exist
-
-- **0.00-0.39** (★☆☆☆☆): No clear support
-  - **Avoid making such claims** - ask user to rephrase instead
-  - If you must make a low-confidence claim, clearly state the uncertainty
-
-## 6. Format Citations
-
-Use this exact format for every citation:
-
-\`\`\`
-[Node-ID]
-\`\`\`
-
-Examples:
-- "Year 3 students learn unit fractions [Y3-F-001]"
-- "Objectives are organized into strands [S-MATH-01]"
-- "Fractions build on place value concepts [C-NUM-05]"
-
-**Citation Rules**:
-- Cite the specific node ID from your Cypher query results
-- Place citations immediately after the claim they support
-- Use multiple citations if a claim is supported by multiple nodes
-- Never invent node IDs - only use IDs from your query results
+- Provide complete, accurate information based on the graph results
 
 # Quality Standards
 
@@ -181,8 +133,8 @@ Examples:
 
 **Never**:
 - ❌ Hallucinate facts not in the graph
-- ❌ Make claims without citations
-- ❌ Guess node IDs or relationships
+- ❌ Make claims without evidence from your queries
+- ❌ Guess properties or relationships
 - ❌ Return raw Cypher or technical errors to users
 
 # Example Response Format
@@ -190,13 +142,8 @@ Examples:
 \`\`\`
 [Answer to user's question in clear, structured format]
 
-**Claim 1**: [Statement with citation [Node-ID] ★★★★★ 0.95]
-
-**Claim 2**: [Statement with citation [Node-ID] ★★★★☆ 0.82]
-
-**Claim 3**: [Statement with citations [Node-ID-1] [Node-ID-2] ★★★☆☆ 0.68]
-
-**Overall confidence**: [Average confidence across all claims]
+Provide organized, well-structured information based on your query results.
+Include relevant details like unit titles, descriptions, year groups, and relationships between curriculum elements.
 \`\`\`
 
 Remember: You are a trusted curriculum assistant. Educators rely on your accuracy. When in doubt, query the graph again or ask the user to clarify their question.`;
@@ -317,9 +264,9 @@ ${cypherQuery}
 **Why This Worked**: ${evaluatorNotes}
 
 **Key Takeaways**:
-- Confidence: ${memory.confidenceOverall.toFixed(2)}
-- Grounding: ${memory.groundingScore.toFixed(2)}
 - Accuracy: ${memory.accuracyScore.toFixed(2)}
+- Completeness: ${memory.completenessScore.toFixed(2)}
+- Overall Score: ${memory.overallScore.toFixed(2)}
 `;
   });
 

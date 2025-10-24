@@ -22,28 +22,10 @@ export interface QueryAgentResult {
   answer: string;
   /** Overall confidence score (0.0-1.0) */
   confidence: number;
-  /** Array of citations supporting the answer */
-  citations: Citation[];
   /** Cypher queries executed during answer generation */
   cypherQueries: string[];
   /** Number of agent steps taken */
   stepCount: number;
   /** Total response latency in milliseconds */
   latencyMs: number;
-}
-
-/**
- * Citation linking a claim in the answer to evidence in the knowledge graph
- */
-export interface Citation {
-  /** Neo4j node ID (e.g., 'Y3-F-001') */
-  nodeId: string;
-  /** Type of node (e.g., 'Objective', 'Strand', 'Concept') */
-  nodeType: string;
-  /** Text content or description from the node */
-  text: string;
-  /** Confidence score for this citation (0.0-1.0) */
-  confidence: number;
-  /** Explanation of confidence level (e.g., 'Direct graph match', 'Inferred from relationship') */
-  reason: string;
 }

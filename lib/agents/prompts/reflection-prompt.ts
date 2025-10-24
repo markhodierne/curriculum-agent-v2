@@ -3,10 +3,10 @@
  *
  * Creates evaluation prompts for the Reflection Agent (async background processing).
  * The Reflection Agent acts as an "LLM-as-judge" to evaluate Query Agent interactions
- * on a 5-dimension rubric, producing structured feedback for learning.
+ * on a 4-dimension rubric, producing structured feedback for learning.
  *
  * Key Features:
- * - 5-dimension evaluation rubric (grounding, accuracy, completeness, pedagogy, clarity)
+ * - 4-dimension evaluation rubric (accuracy, completeness, pedagogy, clarity)
  * - Weighted scoring system (0.0-1.0 per dimension)
  * - Structured output (scores + qualitative feedback)
  * - Evidence-based evaluation (compares answer to actual graph results)
@@ -26,16 +26,14 @@
  * guides the learning process by identifying high-quality interactions to store as memories.
  *
  * Evaluation Rubric (0.0-1.0 per dimension):
- * - Grounding (30%): Claims supported by graph evidence
- * - Accuracy (30%): Information correct per curriculum
- * - Completeness (20%): Fully answers the question
- * - Pedagogy (10%): Appropriate curriculum context
+ * - Accuracy (40%): Information correct per curriculum
+ * - Completeness (30%): Fully answers the question
+ * - Pedagogy (20%): Appropriate curriculum context
  * - Clarity (10%): Well-structured and clear
  *
  * Output Format:
  * The prompt requests structured JSON matching EvaluationSchema:
  * {
- *   grounding: number,
  *   accuracy: number,
  *   completeness: number,
  *   pedagogy: number,
@@ -92,32 +90,10 @@ ${formatGraphResults(graphResults)}
 
 # Evaluation Instructions
 
-You must evaluate the assistant's answer on 5 dimensions, scoring each from 0.0 to 1.0.
+You must evaluate the assistant's answer on 4 dimensions, scoring each from 0.0 to 1.0.
 Your evaluation should be **evidence-based**: Compare the answer directly to the graph results provided.
 
-## 1. Grounding (30% weight)
-
-**Definition**: How well are the assistant's claims supported by the graph results?
-
-**Scoring Guidelines**:
-- **1.0 (Perfect)**: Every claim in the answer has clear, direct support in the graph results. All citations are accurate.
-- **0.9**: Nearly all claims supported, citations accurate, perhaps one minor detail without explicit graph support but reasonably inferred.
-- **0.8**: Most major claims supported, but some minor details lack direct evidence.
-- **0.7**: Most claims supported, but a few unsupported details or weak inferences.
-- **0.6**: Several claims lack clear graph support, some speculation present.
-- **0.5**: About half the claims are well-grounded, half are unsupported or weakly supported.
-- **0.4**: Significant unsupported claims, more speculation than evidence.
-- **0.3**: Mostly unsupported claims, heavy reliance on assumptions.
-- **0.2**: Very little graph support, mostly fabricated or assumed information.
-- **0.1**: Almost entirely hallucinated, minimal connection to graph results.
-- **0.0**: Completely fabricated answer with no relation to graph data.
-
-**Key Questions**:
-- Can I trace each claim back to specific graph results?
-- Are node IDs and properties cited accurately?
-- Are inferences reasonable given the graph structure?
-
-## 2. Accuracy (30% weight)
+## 1. Accuracy (40% weight)
 
 **Definition**: Is the information provided factually correct according to the UK National Curriculum as represented in the graph?
 
@@ -139,7 +115,7 @@ Your evaluation should be **evidence-based**: Compare the answer directly to the
 - Are relationships (prerequisites, strands, concepts) accurately described?
 - Would an educator trust this information?
 
-## 3. Completeness (20% weight)
+## 2. Completeness (30% weight)
 
 **Definition**: How fully does the answer address all aspects of the user's question?
 
@@ -161,7 +137,7 @@ Your evaluation should be **evidence-based**: Compare the answer directly to the
 - Are there obvious follow-up questions left unanswered?
 - Is the level of detail appropriate for the question's scope?
 
-## 4. Pedagogy (10% weight)
+## 3. Pedagogy (20% weight)
 
 **Definition**: Is the answer framed appropriately for educators working with curriculum materials?
 
@@ -183,7 +159,7 @@ Your evaluation should be **evidence-based**: Compare the answer directly to the
 - Is progression (year-to-year development) acknowledged where relevant?
 - Does it use appropriate educational terminology?
 
-## 5. Clarity (10% weight)
+## 4. Clarity (10% weight)
 
 **Definition**: How clear, well-structured, and easy to understand is the answer?
 
@@ -208,7 +184,7 @@ Your evaluation should be **evidence-based**: Compare the answer directly to the
 ## Overall Score
 
 The overall score should be calculated as a weighted average:
-- Overall = (Grounding × 0.30) + (Accuracy × 0.30) + (Completeness × 0.20) + (Pedagogy × 0.10) + (Clarity × 0.10)
+- Overall = (Accuracy × 0.40) + (Completeness × 0.30) + (Pedagogy × 0.20) + (Clarity × 0.10)
 
 ## Qualitative Feedback
 
@@ -232,7 +208,6 @@ In addition to scores, provide:
 Provide your evaluation as a JSON object with this exact structure:
 
 {
-  "grounding": <score 0.0-1.0>,
   "accuracy": <score 0.0-1.0>,
   "completeness": <score 0.0-1.0>,
   "pedagogy": <score 0.0-1.0>,

@@ -7,9 +7,8 @@
  * Features:
  * - Streaming responses with AI SDK v5 useChat hook
  * - Model configuration from sessionStorage (set by home page)
- * - Evidence Panel with citations and confidence scores
  * - Agent Trace Panel showing reasoning steps
- * - Feedback Controls for user feedback (👍/👎, grounded, notes)
+ * - Feedback Controls for user feedback (👍/👎, notes)
  * - Performance optimizations (debouncing, memoization)
  * - Neo4j tool calls with human-readable display names
  *
@@ -56,10 +55,8 @@ import {
   ReasoningContent,
 } from "@/components/ai-elements/reasoning";
 import { Response } from "@/components/ai-elements/response";
-import { EvidencePanel } from "@/components/chat/evidence-panel";
 import { AgentTracePanel } from "@/components/chat/agent-trace-panel";
 import FeedbackControls from "@/components/chat/feedback-controls";
-import type { Citation } from "@/lib/types/agent";
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -478,26 +475,16 @@ export default function ChatAssistant({ api }: ChatAssistantProps) {
 
                   /**
                    * Phase 1 MVP panels for assistant messages
-                   * - Evidence Panel: Citations with confidence scores
                    * - Agent Trace Panel: Reasoning steps
-                   * - Feedback Controls: User feedback (👍/👎, grounded, notes)
+                   * - Feedback Controls: User feedback (👍/👎, notes)
                    */
                   const assistantPanels = message.role === 'assistant' && (() => {
-                    // Extract citations from message metadata
-                    // TODO: Parse citations from message parts when backend provides them
-                    const citations: Citation[] = [];
-
                     // Extract agent trace steps from message metadata
                     // TODO: Parse trace steps from message parts when backend provides them
                     const traceSteps: string[] = [];
 
                     return (
                       <div className="mt-4 space-y-3">
-                        {/* Evidence Panel */}
-                        {citations.length > 0 && (
-                          <EvidencePanel citations={citations} />
-                        )}
-
                         {/* Agent Trace Panel */}
                         {traceSteps.length > 0 && (
                           <AgentTracePanel steps={traceSteps} />

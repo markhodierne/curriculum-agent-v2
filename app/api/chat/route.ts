@@ -162,8 +162,6 @@ export async function POST(req: NextRequest) {
       finalAnswer: '', // Will update after streaming
       modelUsed: model || 'gpt-4o',
       temperature: temperature ?? 0.3,
-      confidenceOverall: 0,
-      groundingRate: 0,
       cypherQueries: [],
       toolCalls: [],
       latencyMs: 0,
@@ -246,20 +244,8 @@ export async function POST(req: NextRequest) {
         const fullResponse = await result.text;
         const latencyMs = Date.now() - startTime;
 
-        console.log('\n📋 Extracting citations from response...');
+        console.log('\n📋 Response complete');
         console.log('   Response length:', fullResponse.length, 'characters');
-        console.log('   First 500 chars:', fullResponse.substring(0, 500));
-
-        // Extract evidence node IDs from final text (citations in [Node-ID] format)
-        const citationMatches = fullResponse.match(/\[([^\]]+)\]/g) || [];
-        console.log('   Citation matches found:', citationMatches.length);
-        console.log('   Raw matches:', citationMatches);
-
-        const evidenceNodeIds = citationMatches.map((match: string) =>
-          match.replace(/\[|\]/g, '')
-        );
-        console.log('   Extracted node IDs:', evidenceNodeIds);
-        console.log('   Node IDs count:', evidenceNodeIds.length);
 
         // If no Cypher queries were executed (answered from memory), inherit from the memory used
         if (interactionMetadata.cypherQueries.length === 0 && memories.length > 0) {
@@ -269,21 +255,12 @@ export async function POST(req: NextRequest) {
           interactionMetadata.cypherQueries.push(...inheritedQueries);
         }
 
-        // Calculate confidence and grounding (simplified for Phase 1)
-        const confidence = 0.85; // TODO: Extract from agent's response
-        const groundingRate =
-          interactionMetadata.cypherQueries.length > 0
-            ? Math.min(evidenceNodeIds.length / 10, 1.0)
-            : 0.0;
-
         // Update interaction with full details after streaming completes
         await updateInteraction(interactionId, {
           userQuery: userQuery,
           finalAnswer: fullResponse,
           modelUsed: model || 'gpt-4o',
           temperature: temperature ?? 0.3,
-          confidenceOverall: confidence,
-          groundingRate: groundingRate,
           cypherQueries: interactionMetadata.cypherQueries.map((q) => ({
             query: q,
           })),
@@ -304,9 +281,6 @@ export async function POST(req: NextRequest) {
             temperature: temperature ?? 0.3,
             cypherQueries: interactionMetadata.cypherQueries,
             graphResults: interactionMetadata.graphResults,
-            evidenceNodeIds: evidenceNodeIds,
-            confidence: confidence,
-            groundingRate: groundingRate,
             stepCount: interactionMetadata.stepCount,
             latencyMs: latencyMs,
             memoriesUsed: memories.map((m) => m.id),

@@ -13,10 +13,6 @@ export interface Memory {
   finalAnswer: string;
   /** Array of Cypher queries executed */
   cypherUsed: string[];
-  /** Overall confidence score (0.0-1.0) */
-  confidenceOverall: number;
-  /** Grounding evaluation score (0.0-1.0) */
-  groundingScore: number;
   /** Accuracy evaluation score (0.0-1.0) */
   accuracyScore: number;
   /** Completeness evaluation score (0.0-1.0) */

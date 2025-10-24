@@ -5,13 +5,11 @@ import { z } from 'zod';
  * Used with AI SDK generateObject() for type-safe LLM responses
  */
 export const EvaluationSchema = z.object({
-  /** Grounding score: How well claims are supported by graph evidence (0.0-1.0, 30% weight) */
-  grounding: z.number().min(0).max(1),
-  /** Accuracy score: Correctness of information per curriculum (0.0-1.0, 30% weight) */
+  /** Accuracy score: Correctness of information per curriculum (0.0-1.0, 40% weight) */
   accuracy: z.number().min(0).max(1),
-  /** Completeness score: How fully the question was answered (0.0-1.0, 20% weight) */
+  /** Completeness score: How fully the question was answered (0.0-1.0, 30% weight) */
   completeness: z.number().min(0).max(1),
-  /** Pedagogy score: Appropriateness of pedagogical framing (0.0-1.0, 10% weight) */
+  /** Pedagogy score: Appropriateness of pedagogical framing (0.0-1.0, 20% weight) */
   pedagogy: z.number().min(0).max(1),
   /** Clarity score: How clear and well-structured the answer is (0.0-1.0, 10% weight) */
   clarity: z.number().min(0).max(1),
