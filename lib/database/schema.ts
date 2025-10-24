@@ -144,7 +144,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_stats_singleton ON memory_stats(id)
 
 COMMENT ON TABLE memory_stats IS 'Cached statistics for dashboard (single-row table)';
 COMMENT ON COLUMN memory_stats.total_memories IS 'Count of :Memory nodes in Neo4j';
-COMMENT ON COLUMN memory_stats.avg_confidence IS 'Average confidence_overall across all memories';
+COMMENT ON COLUMN memory_stats.avg_confidence IS 'Deprecated - no longer used (kept for backward compatibility)';
 COMMENT ON COLUMN memory_stats.avg_overall_score IS 'Average overall_score from evaluations';
 COMMENT ON COLUMN memory_stats.total_patterns IS 'Count of :QueryPattern nodes in Neo4j';
 COMMENT ON COLUMN memory_stats.last_updated IS 'Last update timestamp (by Learning Agent)';

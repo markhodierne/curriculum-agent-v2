@@ -5,7 +5,7 @@
  * Clicking a row opens a modal with full interaction details.
  *
  * Features:
- * - Sortable columns (query, confidence, grounding, overall score, latency, timestamp)
+ * - Sortable columns (query, overall score, latency, timestamp)
  * - Truncated query text (50 chars max)
  * - Modal view for complete interaction details
  * - Loading/error states
@@ -44,8 +44,6 @@ interface InteractionRow {
   user_query: string;
   final_answer: string;
   model_used: string;
-  confidence_overall: number | null;
-  grounding_rate: number | null;
   latency_ms: number | null;
   created_at: string;
   overall_score: number | null;
@@ -55,7 +53,7 @@ interface InteractionRow {
   step_count?: number | null;
 }
 
-type SortColumn = 'query' | 'confidence' | 'grounding' | 'score' | 'latency' | 'timestamp';
+type SortColumn = 'query' | 'score' | 'latency' | 'timestamp';
 type SortDirection = 'asc' | 'desc';
 
 /**
@@ -135,14 +133,6 @@ export default function InteractionsTable() {
         case 'query':
           aValue = a.user_query.toLowerCase();
           bValue = b.user_query.toLowerCase();
-          break;
-        case 'confidence':
-          aValue = a.confidence_overall ?? -1;
-          bValue = b.confidence_overall ?? -1;
-          break;
-        case 'grounding':
-          aValue = a.grounding_rate ?? -1;
-          bValue = b.grounding_rate ?? -1;
           break;
         case 'score':
           aValue = a.overall_score ?? -1;
@@ -272,18 +262,6 @@ export default function InteractionsTable() {
               </TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50 text-right"
-                onClick={() => handleSort('confidence')}
-              >
-                Confidence{getSortIndicator('confidence')}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-muted/50 text-right"
-                onClick={() => handleSort('grounding')}
-              >
-                Grounding{getSortIndicator('grounding')}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-muted/50 text-right"
                 onClick={() => handleSort('score')}
               >
                 Overall Score{getSortIndicator('score')}
@@ -311,12 +289,6 @@ export default function InteractionsTable() {
               >
                 <TableCell className="font-medium">
                   {truncateQuery(interaction.user_query)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatScore(interaction.confidence_overall)}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatScore(interaction.grounding_rate)}
                 </TableCell>
                 <TableCell className="text-right">
                   {formatScore(interaction.overall_score)}
@@ -368,14 +340,6 @@ export default function InteractionsTable() {
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Temperature</p>
                   <p className="text-sm">{selectedInteraction.temperature ?? 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">Confidence</p>
-                  <p className="text-sm">{formatScore(selectedInteraction.confidence_overall)}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">Grounding</p>
-                  <p className="text-sm">{formatScore(selectedInteraction.grounding_rate)}</p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">Overall Score</p>

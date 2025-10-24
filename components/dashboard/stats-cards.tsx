@@ -3,7 +3,7 @@
  *
  * Displays three key metrics in card format:
  * - Total Interactions: Count of all queries processed
- * - Average Confidence: Mean confidence score across all interactions
+ * - Average Overall Score: Mean evaluation score across all interactions
  * - Memories Created: Count of :Memory nodes in Neo4j
  *
  * Data fetched from Supabase on component mount.
@@ -27,7 +27,7 @@ import { MessageSquare, Star, Brain } from 'lucide-react';
  */
 interface Stats {
   totalInteractions: number;
-  avgConfidence: number;
+  avgOverallScore: number;
   memoriesCreated: number;
 }
 
@@ -68,7 +68,7 @@ export function StatsCards(): React.ReactElement {
 
       setStats({
         totalInteractions: data.totalInteractions,
-        avgConfidence: data.avgConfidence,
+        avgOverallScore: data.avgOverallScore,
         memoriesCreated: data.totalMemories,
       });
     } catch (err) {
@@ -136,13 +136,13 @@ export function StatsCards(): React.ReactElement {
         </p>
       </Card>
 
-      {/* Average Confidence Card */}
+      {/* Average Overall Score Card */}
       <Card decoration="top" decorationColor="amber">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Average Confidence</p>
+            <p className="text-sm font-medium text-gray-600">Average Overall Score</p>
             <p className="mt-2 text-3xl font-semibold text-gray-900">
-              {formatConfidence(stats.avgConfidence)}
+              {formatScore(stats.avgOverallScore)}
             </p>
           </div>
           <div className="rounded-full bg-amber-100 p-3">
@@ -150,7 +150,7 @@ export function StatsCards(): React.ReactElement {
           </div>
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          {getStarRating(stats.avgConfidence)} Mean confidence across all interactions
+          {getStarRating(stats.avgOverallScore)} Mean eval score across all interactions
         </p>
       </Card>
 
@@ -176,37 +176,37 @@ export function StatsCards(): React.ReactElement {
 }
 
 /**
- * Formats confidence score for display
+ * Formats overall score for display
  *
- * Converts 0.0-1.0 float to percentage or two decimal places.
+ * Converts 0.0-1.0 float to two decimal places.
  *
- * @param confidence - Confidence score (0.0-1.0)
- * @returns Formatted string (e.g., "0.85" or "85%")
+ * @param score - Overall score (0.0-1.0)
+ * @returns Formatted string (e.g., "0.85")
  */
-function formatConfidence(confidence: number): string {
-  if (confidence === 0) {
+function formatScore(score: number): string {
+  if (score === 0) {
     return '0.00';
   }
-  return confidence.toFixed(2);
+  return score.toFixed(2);
 }
 
 /**
- * Converts confidence score to star rating
+ * Converts overall score to star rating
  *
- * Uses 5-tier system from FUNCTIONAL.md section 4.2.E:
- * - ★★★★★ = 0.90-1.00 (Direct graph match)
- * - ★★★★☆ = 0.75-0.89 (Inferred from traversal)
- * - ★★★☆☆ = 0.60-0.74 (Synthesized from multiple nodes)
- * - ★★☆☆☆ = 0.40-0.59 (Weak support)
- * - ★☆☆☆☆ = 0.00-0.39 (No clear support)
+ * Uses 5-tier system for quality visualization:
+ * - ★★★★★ = 0.90-1.00 (Excellent quality)
+ * - ★★★★☆ = 0.75-0.89 (High quality)
+ * - ★★★☆☆ = 0.60-0.74 (Good quality)
+ * - ★★☆☆☆ = 0.40-0.59 (Fair quality)
+ * - ★☆☆☆☆ = 0.00-0.39 (Poor quality)
  *
- * @param confidence - Confidence score (0.0-1.0)
+ * @param score - Overall score (0.0-1.0)
  * @returns Star rating string
  */
-function getStarRating(confidence: number): string {
-  if (confidence >= 0.9) return '★★★★★';
-  if (confidence >= 0.75) return '★★★★☆';
-  if (confidence >= 0.6) return '★★★☆☆';
-  if (confidence >= 0.4) return '★★☆☆☆';
+function getStarRating(score: number): string {
+  if (score >= 0.9) return '★★★★★';
+  if (score >= 0.75) return '★★★★☆';
+  if (score >= 0.6) return '★★★☆☆';
+  if (score >= 0.4) return '★★☆☆☆';
   return '★☆☆☆☆';
 }

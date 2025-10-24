@@ -222,16 +222,29 @@ export async function POST(req: NextRequest) {
 
         // Extract graph results from tool results
         if (toolResults && toolResults.length > 0) {
+          console.log('   Processing', toolResults.length, 'tool results...');
           for (const toolResult of toolResults) {
             try {
-              const resultData = (toolResult as any).result;
-              if (resultData && typeof resultData === 'object') {
-                interactionMetadata.graphResults.push(resultData);
+              // AI SDK v5 structure: toolResult.output.content[0].text contains JSON string
+              const output = (toolResult as any).output;
+              if (output && output.content && output.content.length > 0) {
+                const textContent = output.content[0].text;
+                if (textContent) {
+                  // Parse the JSON string to get actual data
+                  const parsedData = JSON.parse(textContent);
+                  console.log('   ✓ Extracted graph result:', JSON.stringify(parsedData).substring(0, 200));
+                  interactionMetadata.graphResults.push(parsedData);
+                } else {
+                  console.log('   ✗ No text content in tool result');
+                }
+              } else {
+                console.log('   ✗ No output.content in tool result');
               }
             } catch (err) {
-              console.error('Error extracting tool result:', err);
+              console.error('   Error extracting tool result:', err);
             }
           }
+          console.log('   Total graph results captured:', interactionMetadata.graphResults.length);
         }
       },
     });

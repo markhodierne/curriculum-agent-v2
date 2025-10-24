@@ -27,6 +27,7 @@ interface QueryPattern {
   id: string;
   name: string;
   description: string;
+  cypherTemplate: string;
   successCount: number;
   failureCount: number;
   totalUsage: number;
@@ -126,10 +127,10 @@ export function PatternLibrary(): React.ReactElement {
           return (
             <Card key={pattern.id} decoration="left" decorationColor={getDecorationColor(pattern.successRate)}>
               <div className="space-y-2">
-                {/* Pattern name and success rate */}
+                {/* Success rate badge */}
                 <div className="flex items-start justify-between">
-                  <h3 className="font-semibold text-gray-900 text-base">
-                    {pattern.name}
+                  <h3 className="font-mono text-xs text-gray-500">
+                    Pattern: {pattern.name}
                   </h3>
                   <div className="flex items-center gap-2">
                     <span className={`text-sm font-medium ${getSuccessRateColor(pattern.successRate)}`}>
@@ -138,10 +139,12 @@ export function PatternLibrary(): React.ReactElement {
                   </div>
                 </div>
 
-                {/* Pattern description */}
-                <p className="text-sm text-gray-600">
-                  {pattern.description || 'No description available'}
-                </p>
+                {/* Cypher query template - the useful part! */}
+                <div className="bg-gray-50 rounded p-3 border border-gray-200">
+                  <pre className="text-xs font-mono text-gray-800 whitespace-pre-wrap break-words">
+                    {pattern.cypherTemplate || pattern.description || 'No query template available'}
+                  </pre>
+                </div>
 
                 {/* Usage stats */}
                 <div className="flex items-center gap-4 text-sm text-gray-500">

@@ -62,8 +62,6 @@ export interface Database {
           final_answer: string;
           model_used: string;
           temperature: number;
-          confidence_overall: number | null;
-          grounding_rate: number | null;
           cypher_queries: Record<string, unknown>[] | null;
           tool_calls: Record<string, unknown>[] | null;
           latency_ms: number | null;
@@ -77,8 +75,6 @@ export interface Database {
           final_answer: string;
           model_used: string;
           temperature: number;
-          confidence_overall?: number | null;
-          grounding_rate?: number | null;
           cypher_queries?: Record<string, unknown>[] | null;
           tool_calls?: Record<string, unknown>[] | null;
           latency_ms?: number | null;
@@ -92,8 +88,6 @@ export interface Database {
           final_answer?: string;
           model_used?: string;
           temperature?: number;
-          confidence_overall?: number | null;
-          grounding_rate?: number | null;
           cypher_queries?: Record<string, unknown>[] | null;
           tool_calls?: Record<string, unknown>[] | null;
           latency_ms?: number | null;
@@ -132,7 +126,6 @@ export interface Database {
         Row: {
           id: string;
           interaction_id: string;
-          grounding_score: number;
           accuracy_score: number;
           completeness_score: number;
           pedagogy_score: number;
@@ -144,7 +137,6 @@ export interface Database {
         Insert: {
           id?: string;
           interaction_id: string;
-          grounding_score: number;
           accuracy_score: number;
           completeness_score: number;
           pedagogy_score: number;
@@ -156,7 +148,6 @@ export interface Database {
         Update: {
           id?: string;
           interaction_id?: string;
-          grounding_score?: number;
           accuracy_score?: number;
           completeness_score?: number;
           pedagogy_score?: number;

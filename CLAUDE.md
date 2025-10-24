@@ -671,6 +671,7 @@ pnpm tsc --noEmit
 
 ### AI SDK v5 Patterns
 ❌ Using `toolCall.args` instead of `toolCall.input` (AI SDK v5 changed property name)
+❌ Using `toolResult.result` instead of `toolResult.output.content[0].text` (AI SDK v5 stores results as JSON strings)
 ❌ Using `toolChoice: 'required'` (causes infinite loops - agent can't generate final text)
 ❌ Using `maxSteps` instead of `stopWhen: stepCountIs(N)` (prevents final text response)
 ❌ Manually converting MCP schema to OpenAI format (AI SDK v5 handles automatically)

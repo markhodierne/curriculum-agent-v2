@@ -219,7 +219,7 @@ Generated answer from graph results
   - Answer synthesis
 - Useful for debugging and transparency
 
-**C. Feedback Controls**
+**C. Feedback Controls** (Task 34 simplification)
 - Always visible below each assistant message
 - 👍 / 👎 buttons (mutually exclusive, auto-saves on click)
 - "Add note" button → reveals textarea (toggles visibility)
@@ -227,6 +227,7 @@ Generated answer from graph results
   - Max 500 characters
   - Auto-saves on blur
   - Optional, not required
+- Note: Grounding checkbox removed in Task 34 (redundant with Reflection Agent evaluation)
 
 **Message History**
 - Scrollable area with all conversation messages
@@ -260,25 +261,27 @@ Generated answer from graph results
    - Count of `:Memory` nodes in Neo4j
    - Icon: 🧠
 
-**C. Recent Interactions Table**
+**C. Recent Interactions Table** (Task 35 updated)
 - Last 20 interactions
 - Columns:
   - Query (truncated to 50 chars)
-  - Steps (number of tool calls)
   - Overall Score (0.00-1.00)
-  - Latency (seconds)
+  - Latency (milliseconds)
   - Timestamp
 - Sortable by any column
 - Click row → modal with full interaction details
+- Note: Confidence and Grounding columns removed in Task 34/35 cleanup
 
-**D. Pattern Library**
-- Lists discovered `:QueryPattern` nodes
+**D. Pattern Library** (Task 35 updated)
+- Lists discovered `:QueryPattern` nodes from Neo4j
 - Shows for each pattern:
-  - Pattern name (e.g., "objectives_by_year")
-  - Description
-  - Usage count
+  - Pattern name (e.g., "s:subject")
+  - Full Cypher query in code block (actual successful query used)
+  - Usage count (total uses)
   - Success rate (%)
 - Sorted by usage count descending
+- Color-coded by success rate (green/blue/amber/red)
+- Note: Patterns store complete queries with values, not parameterized templates (Phase 1 design)
 
 **Data Refresh**
 - Dashboard queries Supabase on page load
@@ -320,15 +323,16 @@ Generated answer from graph results
 
 **What happens internally:**
 - Triggered by `interaction.complete` event
-- Evaluates interaction on 4-dimension rubric:
-  - Accuracy (40%): Information correct per curriculum?
-  - Completeness (30%): Fully answers question?
-  - Pedagogy (20%): Appropriate for curriculum context?
-  - Clarity (10%): Well-explained?
+- Evaluates interaction using 4-dimension rubric (Task 34 simplification):
+  - **Accuracy (40%)**: Information correct per curriculum data?
+  - **Completeness (30%)**: Fully answers the question?
+  - **Pedagogy (20%)**: Appropriate for curriculum context?
+  - **Clarity (10%)**: Well-explained and structured?
 - Uses AI SDK `generateObject()` for structured output
-- Produces JSON with scores (0-1) + qualitative feedback
+- Produces JSON with scores (0-1) + qualitative feedback (strengths/weaknesses/suggestions)
+- Overall score = weighted average: (A×0.4) + (C×0.3) + (P×0.2) + (Cl×0.1)
 - Emits `reflection.complete` event
-- Stores evaluation in Supabase
+- Stores evaluation in Supabase `evaluation_metrics` table
 
 **Performance target:**
 - Complete within 30s of interaction
@@ -517,6 +521,6 @@ See `BRIEF.md` sections 5-8 for full roadmap.
 
 ---
 
-**Document Status**: Task 34 Complete - Simplified System (4-Dimension Rubric)
+**Document Status**: Task 35 Complete - Dashboard Polish & Pattern Clarification
 **Last Updated**: 2025-10-24
-**Next Review**: After Phase 1 completion
+**Next Review**: After acceptance testing

@@ -23,7 +23,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { LineChart } from '@tremor/react';
+import { LineChart, AreaChart } from '@tremor/react';
 
 // Type for chart data points
 interface ChartDataPoint {
@@ -74,6 +74,13 @@ export function LearningCurve() {
           'Evaluation Score': metric.overall_score,
           'Target (0.70)': 0.7, // Constant target line
         }));
+
+        console.log('[Learning Curve] Chart data prepared:', data);
+        console.log('[Learning Curve] Number of data points:', data.length);
+        if (data.length > 0) {
+          console.log('[Learning Curve] First data point:', data[0]);
+          console.log('[Learning Curve] Last data point:', data[data.length - 1]);
+        }
 
         setChartData(data);
       } catch (err) {
@@ -178,7 +185,7 @@ export function LearningCurve() {
         )}
       </div>
 
-      <LineChart
+      <AreaChart
         className="h-64"
         data={chartData}
         index="interaction"
@@ -186,11 +193,8 @@ export function LearningCurve() {
         colors={['blue', 'gray']}
         valueFormatter={valueFormatter}
         yAxisWidth={48}
-        showAnimation={true}
         showLegend={true}
         showGridLines={true}
-        showXAxis={true}
-        showYAxis={true}
         minValue={0}
         maxValue={1}
       />

@@ -14,7 +14,7 @@ export async function GET() {
   } catch (error) {
     console.error('Failed to fetch evaluations:', error);
     return NextResponse.json(
-      { error: 'Failed to load evaluations' },
+      { error: error instanceof Error ? error.message : 'Failed to load evaluations' },
       { status: 500 }
     );
   }

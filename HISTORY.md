@@ -1056,20 +1056,77 @@ well_grounded BOOLEAN
 
 ---
 
+### Task 35: Dashboard Polish & Pattern Template Issues ✅ (Completed 2025-10-24)
+
+**Objective**: Fix dashboard display issues and clarify pattern extraction behavior.
+
+**Actions Taken**:
+1. **Stats Cards Update**:
+   - Changed "Average Confidence" to "Average Overall Score"
+   - Updated to use `avgOverallScore` from Supabase `memory_stats`
+   - Changed description from "Mean confidence" to "Mean eval score"
+   - File: `components/dashboard/stats-cards.tsx`
+
+2. **Dashboard API Cleanup** - Removed deprecated columns from Task 34:
+   - Fixed `app/api/dashboard/interactions/route.ts` - removed `confidence_overall`, `grounding_rate` from SELECT
+   - Fixed `app/api/dashboard/stats/route.ts` - removed `avgConfidence` from response
+   - Fixed `components/dashboard/interactions-table.tsx` - removed Confidence/Grounding columns
+   - Fixed `lib/database/queries.ts` - removed `grounding_score` from queries, removed 3 unused functions
+   - Fixed `lib/database/supabase.ts` - removed deprecated columns from TypeScript types
+   - Result: Dashboard APIs now work correctly after Task 34 schema changes
+
+3. **Graph Results Extraction Fix** - Accuracy scores were always 0:
+   - Problem: `graphResults` array empty in `interaction.complete` event
+   - Root cause: Tool result extraction using wrong path (`toolResult.result` vs `toolResult.output.content[0].text`)
+   - Fix: Updated `app/api/chat/route.ts` to correctly parse AI SDK v5 structure
+   - Result: Reflection Agent now receives graph data, accuracy scores calculated properly (0.9-1.0)
+
+4. **Learning Curve Chart Visibility**:
+   - Changed from LineChart to AreaChart for better visibility
+   - Attempted color customization (Tremor v3 has limited color control)
+   - User accepted gray tones as adequate for MVP
+   - File: `components/dashboard/learning-curve.tsx`
+
+5. **Pattern Library Display Improvement**:
+   - Changed from showing just pattern name ("s:subject") to full Cypher query
+   - Added `cypherTemplate` field to display in code block
+   - Updated API to include template in response
+   - Files: `components/dashboard/pattern-library.tsx`, `app/api/dashboard/patterns/route.ts`
+
+**Pattern Template Design Clarification**:
+- Current behavior: `hashCypherPattern()` extracts pattern names but stores complete original query including hard-coded values (e.g., `CONTAINS 'cells'`)
+- This is **working as designed** for Phase 1 - patterns track "what worked" not reusable templates
+- True template extraction (parameter normalization) would be Phase 2+ feature
+- Pattern Library shows successful query examples for debugging and analytics
+
+**Verification**:
+- ✅ TypeScript compilation: 0 errors
+- ✅ Dashboard APIs functional
+- ✅ Accuracy scores calculated correctly
+- ✅ Pattern Library shows useful query information
+- ✅ Chart functional despite low-contrast colors
+
+**Key Learning**:
+- AI SDK v5 tool results stored as `toolResult.output.content[0].text` (JSON string), not `toolResult.result`
+- Tremor v3 uses CSS-in-JS with limited color customization
+- Pattern naming in codebase misleading - `cypherTemplate` really means "successful query example"
+
+---
+
 ## Current State
 
-**Progress**: Tasks 1-34 complete ✅
-**Phase 1 MVP**: SIMPLIFIED ✅ (Ready for testing with correct OpenAI API key)
+**Progress**: Tasks 1-35 complete ✅
+**Phase 1 MVP**: COMPLETE ✅ (Ready for acceptance testing)
 
-**System Status**: ✅ Simplified and debugged
-**Code Quality**: ✅ Zero TypeScript errors, cleaner architecture
-**Three-Agent Learning Loop**: ✅ Working (Query → Reflection → Learning)
-**Evaluation System**: ✅ 4-dimension rubric (no grounding/confidence)
-**Frontend**: ✅ Home + Chat + Dashboard (simplified feedback)
-**Database**: ✅ Neo4j + Supabase (schema updated)
-**Async Pipeline**: ✅ Inngest agents processing
-**Testing**: ⚠️ Blocked by incorrect API key (Anthropic key instead of OpenAI)
-**Documentation**: ✅ Updated for simplified system
+**System Status**: ✅ All known issues resolved
+**Code Quality**: ✅ Zero TypeScript errors, clean architecture
+**Three-Agent Learning Loop**: ✅ Fully functional (Query → Reflection → Learning)
+**Evaluation System**: ✅ 4-dimension rubric with proper accuracy tracking
+**Frontend**: ✅ Home + Chat + Dashboard (all working)
+**Database**: ✅ Neo4j + Supabase (schemas aligned with simplified system)
+**Async Pipeline**: ✅ Inngest agents processing correctly
+**Testing**: ✅ Ready for 20-query acceptance testing
+**Documentation**: ✅ Updated for all system changes
 
 ---
 

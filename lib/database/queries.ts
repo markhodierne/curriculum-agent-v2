@@ -134,8 +134,6 @@ export async function getRecentInteractions(limit: number = 20): Promise<
     user_query: string;
     final_answer: string;
     model_used: string;
-    confidence_overall: number | null;
-    grounding_rate: number | null;
     latency_ms: number | null;
     created_at: string;
   }>
@@ -145,7 +143,7 @@ export async function getRecentInteractions(limit: number = 20): Promise<
   const { data, error } = await supabase
     .from('interactions')
     .select(
-      'id, user_query, final_answer, model_used, confidence_overall, grounding_rate, latency_ms, created_at'
+      'id, user_query, final_answer, model_used, latency_ms, created_at'
     )
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -172,8 +170,6 @@ export async function getInteractionById(interactionId: string): Promise<{
   final_answer: string;
   model_used: string;
   temperature: number;
-  confidence_overall: number | null;
-  grounding_rate: number | null;
   cypher_queries: Record<string, unknown>[] | null;
   tool_calls: Record<string, unknown>[] | null;
   latency_ms: number | null;
@@ -357,7 +353,7 @@ export async function getAllEvaluationMetrics(): Promise<
   const { data, error } = await supabase
     .from('evaluation_metrics')
     .select(
-      'id, interaction_id, grounding_score, accuracy_score, completeness_score, pedagogy_score, clarity_score, overall_score, created_at'
+      'id, interaction_id, accuracy_score, completeness_score, pedagogy_score, clarity_score, overall_score, created_at'
     )
     .order('created_at', { ascending: true });
 
@@ -366,46 +362,6 @@ export async function getAllEvaluationMetrics(): Promise<
   }
 
   return data || [];
-}
-
-/**
- * Retrieves evaluation metrics for a specific interaction
- *
- * @param interactionId - UUID of interaction
- * @returns Evaluation metrics record or null if not found
- * @throws Error if query fails
- */
-export async function getEvaluationMetricsByInteractionId(
-  interactionId: string
-): Promise<{
-  id: string;
-  interaction_id: string;
-  grounding_score: number;
-  accuracy_score: number;
-  completeness_score: number;
-  pedagogy_score: number;
-  clarity_score: number;
-  overall_score: number;
-  evaluator_notes: string | null;
-  created_at: string;
-} | null> {
-  const supabase = getSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('evaluation_metrics')
-    .select('*')
-    .eq('interaction_id', interactionId)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // Not found
-      return null;
-    }
-    throw new Error(`Failed to retrieve evaluation metrics: ${error.message}`);
-  }
-
-  return data;
 }
 
 /**
@@ -501,103 +457,3 @@ export async function countInteractions(): Promise<number> {
   return count || 0;
 }
 
-/**
- * Calculates average confidence across all interactions
- *
- * Used for dashboard stats card.
- * Only includes interactions with non-null confidence values.
- *
- * @returns Average confidence score (0.0-1.0) or 0 if no data
- * @throws Error if query fails
- */
-export async function getAverageConfidence(): Promise<number> {
-  const supabase = getSupabaseClient();
-
-  const { data, error } = await supabase.rpc('avg_confidence_overall');
-
-  if (error) {
-    // If RPC doesn't exist, calculate manually
-    const { data: interactions, error: selectError } = await supabase
-      .from('interactions')
-      .select('confidence_overall')
-      .not('confidence_overall', 'is', null);
-
-    if (selectError) {
-      throw new Error(`Failed to calculate average confidence: ${selectError.message}`);
-    }
-
-    if (!interactions || interactions.length === 0) {
-      return 0;
-    }
-
-    const sum = interactions.reduce(
-      (acc, i) => acc + (i.confidence_overall || 0),
-      0
-    );
-    return sum / interactions.length;
-  }
-
-  return data || 0;
-}
-
-/**
- * Retrieves interactions with evaluation metrics for analysis
- *
- * Joins interactions with their evaluation metrics.
- * Used for dashboard learning curve and detailed analysis.
- *
- * @param limit - Maximum number of records to retrieve
- * @returns Array of interactions with evaluation metrics
- * @throws Error if query fails
- */
-export async function getInteractionsWithEvaluations(limit?: number): Promise<
-  Array<{
-    interaction_id: string;
-    user_query: string;
-    model_used: string;
-    confidence_overall: number | null;
-    grounding_rate: number | null;
-    overall_score: number;
-    created_at: string;
-  }>
-> {
-  const supabase = getSupabaseClient();
-
-  let query = supabase
-    .from('evaluation_metrics')
-    .select(
-      `
-      interaction_id,
-      overall_score,
-      created_at,
-      interactions!inner (
-        user_query,
-        model_used,
-        confidence_overall,
-        grounding_rate
-      )
-    `
-    )
-    .order('created_at', { ascending: true });
-
-  if (limit) {
-    query = query.limit(limit);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to retrieve interactions with evaluations: ${error.message}`);
-  }
-
-  // Flatten the nested structure
-  return (data || []).map((record: any) => ({
-    interaction_id: record.interaction_id,
-    user_query: record.interactions.user_query,
-    model_used: record.interactions.model_used,
-    confidence_overall: record.interactions.confidence_overall,
-    grounding_rate: record.interactions.grounding_rate,
-    overall_score: record.overall_score,
-    created_at: record.created_at,
-  }));
-}

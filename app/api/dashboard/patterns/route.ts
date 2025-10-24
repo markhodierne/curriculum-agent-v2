@@ -36,6 +36,7 @@ export async function GET() {
         id: pattern.id,
         name: pattern.name,
         description: pattern.description,
+        cypherTemplate: pattern.cypherTemplate || '',
         successCount: pattern.successCount || 0,
         failureCount: pattern.failureCount || 0,
         totalUsage: (pattern.successCount || 0) + (pattern.failureCount || 0),

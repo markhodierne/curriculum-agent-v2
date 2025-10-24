@@ -15,7 +15,6 @@ export async function GET() {
 
     return NextResponse.json({
       totalInteractions: interactionCount,
-      avgConfidence: memoryStats?.avg_confidence ?? 0,
       totalMemories: memoryStats?.total_memories ?? 0,
       avgOverallScore: memoryStats?.avg_overall_score ?? 0,
       totalPatterns: memoryStats?.total_patterns ?? 0,
